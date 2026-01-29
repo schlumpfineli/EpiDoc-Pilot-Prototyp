@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build files
+frontend/.next/
+backend/bootstrap/cache/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Laravel
+backend/storage/*.key
+backend/.phpunit.result.cache
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+
+
+
+
+

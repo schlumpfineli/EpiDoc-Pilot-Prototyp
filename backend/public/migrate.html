@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrationen ausführen - EpiDoc</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Datenbank-Setup</h1>
+        <p>Diese Seite führt die Datenbank-Migrationen und Seeder aus, um die Tabellen und Test-User zu erstellen.</p>
+        
+        <button id="migrateBtn" onclick="runMigrations()">1. Migrationen ausführen</button>
+        <button id="seedBtn" onclick="runSeeder()" style="margin-left: 10px;">2. Test-User erstellen</button>
+        <button id="checkBtn" onclick="checkTestUsers()" style="margin-left: 10px;">3. Test-User prüfen</button>
+        <button id="resetBtn" onclick="resetPassword()" style="margin-left: 10px;">4. Passwort zurücksetzen</button>
+        
+        <div style="margin-top: 20px;">
+            <label for="resetEmail">Email für Passwort-Reset:</label>
+            <input type="email" id="resetEmail" placeholder="test@example.com" style="padding: 8px; width: 200px; margin-left: 10px;">
+        </div>
+        
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        async function runMigrations() {
+            const btn = document.getElementById('migrateBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            status.style.display = 'block';
+            status.className = 'status info';
+            status.innerHTML = '⏳ Migrationen werden ausgeführt...';
+
+            try {
+                const response = await fetch('/api/migrate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.innerHTML = `
+                        <strong>✅ Erfolgreich!</strong><br>
+                        ${data.message}<br>
+                        <strong>Anzahl Migrationen:</strong> ${data.migrations_count || 0}
+                        ${data.output ? `<pre>${data.output}</pre>` : ''}
+                    `;
+                } else {
+                    status.className = 'status error';
+                    status.innerHTML = `
+                        <strong>❌ Fehler!</strong><br>
+                        ${data.message || 'Unbekannter Fehler'}<br>
+                        ${data.error ? `<pre>${data.error}</pre>` : ''}
+                    `;
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = `
+                    <strong>❌ Fehler!</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function runSeeder() {
+            const btn = document.getElementById('seedBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            status.style.display = 'block';
+            status.className = 'status info';
+            status.innerHTML = '⏳ Test-User werden erstellt...';
+
+            try {
+                const response = await fetch('/api/seed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.innerHTML = `
+                        <strong>✅ Erfolgreich!</strong><br>
+                        ${data.message}<br>
+                        <strong>Test-User existiert:</strong> ${data.test_user_exists ? 'Ja ✅' : 'Nein ❌'}<br>
+                        <strong>Anzahl Benutzer:</strong> ${data.users_count || 0}
+                        ${data.output ? `<pre>${data.output}</pre>` : ''}
+                    `;
+                } else {
+                    status.className = 'status error';
+                    status.innerHTML = `
+                        <strong>❌ Fehler!</strong><br>
+                        ${data.message || 'Unbekannter Fehler'}<br>
+                        ${data.error ? `<pre>${data.error}</pre>` : ''}
+                    `;
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = `
+                    <strong>❌ Fehler!</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function checkTestUsers() {
+            const btn = document.getElementById('checkBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            status.style.display = 'block';
+            status.className = 'status info';
+            status.innerHTML = '⏳ Test-User werden geprüft...';
+
+            try {
+                const response = await fetch('/api/test-users', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    let usersHtml = '<strong>✅ Test-User Status:</strong><br><ul>';
+                    for (const [email, userInfo] of Object.entries(data.users)) {
+                        usersHtml += `<li><strong>${email}:</strong> ${userInfo.exists ? '✅ Existiert' : '❌ Existiert NICHT'}`;
+                        if (userInfo.exists) {
+                            usersHtml += ` (${userInfo.name}, ${userInfo.role})`;
+                        }
+                        usersHtml += '</li>';
+                    }
+                    usersHtml += '</ul>';
+                    usersHtml += `<strong>Gesamt Benutzer:</strong> ${data.total_users}`;
+                    if (data.all_users && data.all_users.length > 0) {
+                        usersHtml += '<br><br><strong>Alle vorhandenen User:</strong><ul>';
+                        data.all_users.forEach(user => {
+                            usersHtml += `<li><strong>${user.email}</strong> (${user.name}, ${user.role})</li>`;
+                        });
+                        usersHtml += '</ul>';
+                    }
+                    status.innerHTML = usersHtml;
+                } else {
+                    status.className = 'status error';
+                    status.innerHTML = `
+                        <strong>❌ Fehler!</strong><br>
+                        ${data.message || 'Unbekannter Fehler'}<br>
+                        ${data.error ? `<pre>${data.error}</pre>` : ''}
+                    `;
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = `
+                    <strong>❌ Fehler!</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function resetPassword() {
+            const btn = document.getElementById('resetBtn');
+            const status = document.getElementById('status');
+            const email = document.getElementById('resetEmail').value;
+            
+            if (!email) {
+                status.style.display = 'block';
+                status.className = 'status error';
+                status.innerHTML = '<strong>❌ Fehler!</strong><br>Bitte geben Sie eine Email-Adresse ein.';
+                return;
+            }
+            
+            btn.disabled = true;
+            status.style.display = 'block';
+            status.className = 'status info';
+            status.innerHTML = `⏳ Passwort wird für ${email} zurückgesetzt...`;
+
+            try {
+                const response = await fetch('/api/test-users/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: 'Password123'
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.innerHTML = `
+                        <strong>✅ Erfolgreich!</strong><br>
+                        ${data.message}<br>
+                        <strong>Email:</strong> ${data.email}<br>
+                        <strong>Name:</strong> ${data.name}<br>
+                        <strong>Neues Passwort:</strong> Password123
+                    `;
+                } else {
+                    status.className = 'status error';
+                    status.innerHTML = `
+                        <strong>❌ Fehler!</strong><br>
+                        ${data.message || 'Unbekannter Fehler'}<br>
+                        ${data.error ? `<pre>${data.error}</pre>` : ''}
+                    `;
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = `
+                    <strong>❌ Fehler!</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,568 @@
+/**
+* Import Tailwind CSS base styles, components, and utilities
+* This must be the first import to ensure proper CSS cascade
+*/
+
+@import "tailwindcss";
+
+/**
+ * Tailwind CSS v4 Theme Configuration
+ *
+ * Extends Tailwind's default theme with custom design tokens
+ * These variables become available as Tailwind utility classes
+ * (e.g., bg-neutral-60, text-headline-1, p-s, etc.)
+ */
+
+@theme {
+    /*
+     * Font mapping
+     * Maps the font added to the HTML body to tailwind variable
+     */
+    --font-general-sans: var(--font-general-sans);
+    --font-cabinet-grotesk: var(--font-cabinet-grotesk);
+
+    /*
+     * Semantic color mappings
+     * Maps generic names to specific color values for easier theming
+     */
+    /* FOREGROUND / TEXT - #1C1F26 (Sehr dunkles Grau) - Fließtext, Überschriften, Labels, Erklärtext */
+    --color-foreground-50: oklch(0.70 0.01 250);
+    --color-foreground-100: oklch(0.65 0.01 250);
+    --color-foreground-200: oklch(0.60 0.01 250);
+    --color-foreground-300: oklch(0.55 0.01 250);
+    --color-foreground-400: oklch(0.50 0.01 250);
+    --color-foreground-500: oklch(0.45 0.01 250);
+    --color-foreground-600: oklch(0.40 0.01 250);
+    --color-foreground-700: oklch(0.35 0.01 250);
+    --color-foreground-800: oklch(0.30 0.01 250);
+    --color-foreground-900: oklch(0.25 0.01 250); /* #1C1F26 base */
+    --color-foreground-950: oklch(0.20 0.01 250);
+
+    /* BACKGROUND - #F5F6F8 (Helles Grau) - Haupt-App-Hintergrund, Scroll-Bereiche, Formularseiten */
+    --color-background-10: oklch(0.99 0 0);
+    --color-background-25: oklch(0.98 0 0);
+    --color-background-50: oklch(0.96 0 0); /* #F5F6F8 base */
+    --color-background-100: oklch(0.94 0 0);
+    --color-background-200: oklch(0.92 0 0);
+    --color-background-300: oklch(0.90 0 0);
+    --color-background-400: oklch(0.88 0 0);
+    --color-background-500: oklch(0.86 0 0);
+    --color-background-600: oklch(0.84 0 0);
+    --color-background-700: oklch(0.82 0 0);
+    --color-background-800: oklch(0.80 0 0);
+    --color-background-900: oklch(0.78 0 0);
+    --color-background-950: oklch(0.76 0 0);
+
+   /* PRIMARY - #1F2A44 (Dunkles Blau/Grau) - App-Header, Hauptnavigation, Primäre Buttons, Aktive Tabs, Wichtige Icons */
+   --color-primary-50:  oklch(0.95 0.01 250);
+   --color-primary-100: oklch(0.90 0.02 250);
+   --color-primary-200: oklch(0.80 0.03 250);
+   --color-primary-300: oklch(0.70 0.04 250);
+   --color-primary-400: oklch(0.55 0.05 250);
+   --color-primary-500: oklch(0.30 0.04 250); /* #1F2A44 base */
+   --color-primary-600: oklch(0.35 0.04 250);
+   --color-primary-700: oklch(0.30 0.04 250);
+   --color-primary-800: oklch(0.25 0.03 250);
+   --color-primary-900: oklch(0.20 0.03 250);
+   --color-primary-950: oklch(0.15 0.02 250);
+   --color-primary: oklch(0.30 0.04 250); /* #1F2A44 */
+   --color-primary-light: oklch(0.60 0.05 250);
+
+   /* SECONDARY - Blaugrau - Sekundäre Buttons (Border + heller Hintergrund), Fortschrittsanzeigen, Bestätigungen */
+   --color-secondary-50:  oklch(0.97 0.01 250);
+   --color-secondary-100: oklch(0.94 0.015 250);
+   --color-secondary-200: oklch(0.88 0.02 250);
+   --color-secondary-300: oklch(0.75 0.025 250);
+   --color-secondary-400: oklch(0.60 0.03 250);
+   --color-secondary-500: oklch(0.50 0.02 250); /* Blaugrau base für Borders */
+   --color-secondary-600: oklch(0.45 0.025 250);
+   --color-secondary-700: oklch(0.40 0.03 250);
+   --color-secondary-800: oklch(0.35 0.025 250);
+   --color-secondary-900: oklch(0.30 0.02 250);
+   --color-secondary-950: oklch(0.25 0.015 250);
+   --color-secondary: oklch(0.50 0.02 250); /* Blaugrau */
+   --color-secondary-light: oklch(0.65 0.025 250);
+
+    /* ACCENT - #9ED2BE (Helles Grün/Mint) - Button-Hover, Card-Hintergründe, Info-Boxen, Grafische Akzente, Slider/Fortschrittsleisten */
+    --color-accent-50:  oklch(0.98 0.02 150);
+   --color-accent-100: oklch(0.95 0.03 150);
+   --color-accent-200: oklch(0.90 0.04 150);
+   --color-accent-300: oklch(0.85 0.05 150);
+   --color-accent-400: oklch(0.82 0.06 150);
+   --color-accent-500: oklch(0.78 0.07 150); /* #9ED2BE base */
+   --color-accent-600: oklch(0.70 0.06 150);
+   --color-accent-700: oklch(0.65 0.05 150);
+   --color-accent-800: oklch(0.60 0.05 150);
+   --color-accent-900: oklch(0.55 0.04 150);
+   --color-accent-950: oklch(0.50 0.03 150);
+   --color-accent: oklch(0.78 0.07 150); /* #9ED2BE */
+   --color-accent-light: oklch(0.85 0.06 150);
+
+    /* WARNING - #C44D4D (Rot) - Warnungen, Fehler, Negative Statuswerte */
+   --color-warning-50:  oklch(0.96 0.03 25);
+   --color-warning-100: oklch(0.90 0.05 25);
+   --color-warning-200: oklch(0.85 0.07 25);
+   --color-warning-300: oklch(0.75 0.09 25);
+   --color-warning-400: oklch(0.65 0.10 25);
+   --color-warning-500: oklch(0.55 0.11 25); /* #C44D4D base */
+   --color-warning-600: oklch(0.50 0.10 25);
+   --color-warning-700: oklch(0.45 0.09 25);
+   --color-warning-800: oklch(0.40 0.08 25);
+   --color-warning-900: oklch(0.35 0.07 25);
+   --color-warning-950: oklch(0.30 0.06 25);
+   --color-warning: oklch(0.55 0.11 25); /* #C44D4D */
+   --color-warning-light: oklch(0.70 0.10 25);
+
+   /* INFO / HINT - #E6C15A (Gelb) - Hinweise, Informationen, Wichtige Meldungen */
+   --color-info-50:  oklch(0.98 0.05 85);
+   --color-info-100: oklch(0.95 0.07 85);
+   --color-info-200: oklch(0.90 0.09 85);
+   --color-info-300: oklch(0.85 0.11 85);
+   --color-info-400: oklch(0.82 0.12 85);
+   --color-info-500: oklch(0.75 0.13 85); /* #E6C15A base */
+   --color-info-600: oklch(0.70 0.12 85);
+   --color-info-700: oklch(0.65 0.11 85);
+   --color-info-800: oklch(0.60 0.10 85);
+   --color-info-900: oklch(0.55 0.09 85);
+   --color-info-950: oklch(0.50 0.08 85);
+   --color-info: oklch(0.75 0.13 85); /* #E6C15A */
+   --color-info-light: oklch(0.85 0.12 85);
+
+    /*
+     * Responsive Spacing Scale
+     *
+     * Uses clamp() for fluid spacing that scales with viewport size
+     * Format: clamp(min-size, preferred-size, max-size)
+     * - min-size: minimum value at smallest screens
+     * - preferred-size: fluid calculation based on viewport width (vw)
+     * - max-size: maximum value at largest screens
+     *
+     * This creates a spacing system that feels natural across all device sizes
+     * 
+     * Usage: p-s, m-l, gap-m, space-y-s, etc.
+     */
+    --spacing-3xs: clamp(0.1875rem, 0.1658rem + 0.1087vw, 0.25rem); /* 3px - 4px */
+    --spacing-2xs: clamp(0.375rem, 0.3533rem + 0.1087vw, 0.4375rem); /* 6px - 7px */
+    --spacing-xs: clamp(0.5625rem, 0.519rem + 0.2174vw, 0.6875rem); /* 9px - 11px */
+    --spacing-s: clamp(0.75rem, 0.7065rem + 0.2174vw, 0.875rem); /* 12px - 14px */
+    --spacing-m: clamp(1.125rem, 1.0598rem + 0.3261vw, 1.3125rem); /* 18px - 21px */
+    --spacing-l: clamp(1.5rem, 1.413rem + 0.4348vw, 1.75rem); /* 24px - 28px */
+    --spacing-xl: clamp(2.25rem, 2.1196rem + 0.6522vw, 2.625rem); /* 36px - 42px */
+    --spacing-2xl: clamp(3rem, 2.8261rem + 0.8696vw, 3.5rem); /* 48px - 56px */
+    --spacing-3xl: clamp(4.5rem, 4.2391rem + 1.3043vw, 5.25rem); /* 72px - 84px */
+
+    /*
+     * Responsive Typography Scale
+     *
+     * Font sizes that scale fluidly with viewport size
+     * Creates a consistent typographic hierarchy across all devices
+     * Follows a modular scale for harmonious size relationships
+     * 
+     * In Tailwind v4, font-size variables need to be defined with the --font-size-* prefix
+     * to be available as text-* utilities. These will be available as:
+     * text-body-small, text-body, text-h5, text-h4, text-h3, text-h2, text-h1
+     */
+    --font-size-body-small: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px - 14px */
+    --font-size-body: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); /* 14px - 16px */
+    --font-size-h5: clamp(1rem, 0.9rem + 0.5vw, 1.25rem); /* 16px - 20px */
+    --font-size-h4: clamp(1.125rem, 1rem + 0.625vw, 1.5rem); /* 18px - 24px */
+    --font-size-h3: clamp(1.375rem, 1.2rem + 0.875vw, 1.875rem); /* 22px - 30px */
+    --font-size-h2: clamp(1.625rem, 1.4rem + 1.125vw, 2.25rem); /* 26px - 36px */
+    --font-size-h1: clamp(2rem, 1.7rem + 1.5vw, 2.75rem); /* 32px - 44px */
+    
+    /* Legacy support - keep old variable names for backward compatibility */
+    --text-body-small: var(--font-size-body-small);
+    --text-body: var(--font-size-body);
+    --text-headline-5: var(--font-size-h5);
+    --text-headline-4: var(--font-size-h4);
+    --text-headline-3: var(--font-size-h3);
+    --text-headline-2: var(--font-size-h2);
+    --text-headline-1: var(--font-size-h1);
+
+    /*
+     * Responsive Line Heights
+     *
+     * Line heights that scale proportionally with font sizes
+     * Ensures optimal readability across all viewport sizes
+     * Generally follows 1.5x font size for body text, tighter for headlines
+     */
+    --leading-body-small: clamp(
+        1.125rem,
+        1rem + 0.625vw,
+        1.375rem
+    ); /* 18px - 22px */
+    --leading-body: clamp(1.375rem, 1.25rem + 0.625vw, 1.625rem); /* 22px - 26px */
+    --leading-h5: clamp(
+        1.08rem,
+        0.9991rem +
+        0.4043vw,
+        1.3125rem
+    ); /* 17.28px - 21px */
+    --leading-h4: clamp(
+        1.29625rem,
+        1.1762rem +
+        0.6vw,
+        1.64125rem
+    ); /* 20.74px - 26.26px */
+    --leading-h3: clamp(
+        1.555625rem,
+        1.3835rem +
+        0.8609vw,
+        2.050625rem
+    ); /* 24.89px - 32.81px */
+    --leading-h2: clamp(
+        1.86625rem,
+        1.6236rem +
+        1.213vw,
+        2.56375rem
+    ); /* 29.86px - 41.02px */
+    --leading-h1: clamp(
+        2.239375rem,
+        1.9039rem +
+        1.6772vw,
+        3.20375rem
+    ); /* 35.83px - 51.26px */
+    
+    /* Legacy support */
+    --text-body-small--line-height: var(--leading-body-small);
+    --text-body--line-height: var(--leading-body);
+    --text-headline-5--line-height: var(--leading-h5);
+    --text-headline-4--line-height: var(--leading-h4);
+    --text-headline-3--line-height: var(--leading-h3);
+    --text-headline-2--line-height: var(--leading-h2);
+    --text-headline-1--line-height: var(--leading-h1);
+
+ /*
+ * Animation Easing Functions
+ *
+ * Custom cubic-bezier curves for smooth, natural animations
+ * Provides variety beyond Tailwind's default easing options
+ *
+ * Usage in Tailwind classes:
+ * - ease-[--ease-out-quart] → transition-timing-function: var(--ease-out-quart);
+ * - ease-[--ease-in-cubic] → transition-timing-function: var(--ease-in-cubic);
+ *
+ * Example: transition-all duration-300 ease-[--ease-out-quart]
+ */
+    /* Ease In - Slow start, fast finish */
+    --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* Gentle acceleration */
+    --ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19); /* Medium acceleration */
+    --ease-in-quart: cubic-bezier(0.895, 0.03, 0.685, 0.22); /* Strong acceleration */
+    --ease-in-quint: cubic-bezier(0.755, 0.05, 0.855, 0.06); /* Very strong acceleration */
+    --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035); /* Exponential acceleration */
+    --ease-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.335); /* Circular acceleration */
+
+    /* Ease Out - Fast start, slow finish */
+    --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Gentle deceleration */
+    --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1); /* Medium deceleration */
+    --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1); /* Strong deceleration (popular) */
+    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1); /* Very strong deceleration */
+    --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1); /* Exponential deceleration */
+    --ease-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1); /* Circular deceleration */
+
+    /* Ease In Out - Slow start and finish, fast middle */
+    --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955); /* Gentle S-curve */
+    --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1); /* Medium S-curve */
+    --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1); /* Strong S-curve */
+    --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1); /* Very strong S-curve */
+    --ease-in-out-expo: cubic-bezier(1, 0, 0, 1); /* Exponential S-curve */
+    --ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Circular S-curve */
+}
+
+/**
+ * Base Typography
+ * 
+ * Set default font size on body to prevent browser default 16px from overriding
+ */
+html {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-body);
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile devices */
+}
+
+/**
+ * Typography Utility Classes
+ * 
+ * These classes apply the responsive font sizes defined in the theme.
+ * Use these instead of inline styles for better maintainability.
+ */
+.text-body-small {
+    font-size: var(--font-size-body-small);
+    line-height: var(--leading-body-small);
+}
+
+.text-body {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-body);
+}
+
+.text-h5 {
+    font-size: var(--font-size-h5);
+    line-height: var(--leading-h5);
+}
+
+.text-h4 {
+    font-size: var(--font-size-h4);
+    line-height: var(--leading-h4);
+}
+
+.text-h3 {
+    font-size: var(--font-size-h3);
+    line-height: var(--leading-h3);
+}
+
+.text-h2 {
+    font-size: var(--font-size-h2);
+    line-height: var(--leading-h2);
+}
+
+.text-h1 {
+    font-size: var(--font-size-h1);
+    line-height: var(--leading-h1);
+}
+
+/**
+ * React DatePicker Custom Styles
+ * Anpassungen für bessere Integration ins Design-System
+ */
+.react-datepicker-wrapper {
+    width: 100%;
+}
+
+.react-datepicker__input-container input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid oklch(0.92 0 0);
+    padding: var(--spacing-2xs) var(--spacing-m);
+    font-size: var(--font-size-body);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.react-datepicker__input-container input:focus {
+    outline: none;
+    border-color: oklch(0.30 0.04 250);
+    box-shadow: 0 0 0 2px oklch(0.90 0.02 250);
+}
+
+.react-datepicker {
+    font-family: var(--font-general-sans);
+    border: 1px solid oklch(0.92 0 0);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    font-size: var(--font-size-body);
+}
+
+.react-datepicker-popper {
+    z-index: 9999 !important;
+}
+
+.react-datepicker-popper[data-placement^="bottom"] {
+    padding-top: 8px !important;
+    margin-top: 0 !important;
+}
+
+.react-datepicker-popper[data-placement^="top"] {
+    padding-bottom: 8px !important;
+    margin-bottom: 0 !important;
+}
+
+/* Stelle sicher, dass der Kalender eine angemessene Größe hat */
+.react-datepicker {
+    min-width: 280px;
+    font-size: var(--font-size-body) !important;
+}
+
+.react-datepicker__triangle {
+    display: none;
+}
+
+.react-datepicker__header {
+    background-color: oklch(0.96 0 0);
+    border-bottom: 1px solid oklch(0.92 0 0);
+    border-radius: 0.75rem 0.75rem 0 0;
+    padding-top: 0.75rem;
+}
+
+.react-datepicker__current-month {
+    color: oklch(0.30 0.04 250);
+    font-weight: 600;
+    font-size: var(--font-size-body);
+}
+
+.react-datepicker__day-name {
+    color: oklch(0.40 0.01 250);
+    font-weight: 500;
+    font-size: var(--font-size-body-small);
+}
+
+.react-datepicker__day {
+    color: oklch(0.30 0.01 250);
+    border-radius: 0.375rem;
+    margin: 0.125rem;
+}
+
+.react-datepicker__day:hover {
+    background-color: oklch(0.95 0.01 250);
+    border-radius: 0.375rem;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+    background-color: oklch(0.30 0.04 250) !important;
+    color: white !important;
+    border-radius: 0.375rem;
+}
+
+.react-datepicker__day--today {
+    font-weight: 600;
+    color: oklch(0.30 0.04 250);
+}
+
+.react-datepicker__navigation {
+    top: 0.75rem;
+}
+
+.react-datepicker__navigation-icon::before {
+    border-color: oklch(0.40 0.01 250);
+}
+
+.react-datepicker__navigation:hover *::before {
+    border-color: oklch(0.30 0.04 250);
+}
+
+.react-datepicker__month-dropdown,
+.react-datepicker__year-dropdown {
+    background-color: white;
+    border: 1px solid oklch(0.92 0 0);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Slider-Styling für Rating-Skalen (Befinden-Seite) */
+.rating-slider {
+  width: 100%;
+  height: 0.75rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  transition: all 150ms ease-out;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+.rating-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 0.75rem;
+  border-radius: 0.375rem;
+  background: linear-gradient(
+    to right,
+    var(--slider-fill-color, var(--color-accent-500)) 0%,
+    var(--slider-fill-color, var(--color-accent-500)) var(--slider-fill-percentage, 50%),
+    var(--color-background-200) var(--slider-fill-percentage, 50%),
+    var(--color-background-200) 100%
+  );
+}
+
+.rating-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--slider-thumb-color, var(--color-accent-500));
+  box-shadow: 0 0 0 2px var(--color-accent-300), 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  margin-top: -0.125rem;
+}
+
+.rating-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 3px var(--color-accent-300), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.rating-slider:disabled::-webkit-slider-thumb {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Firefox */
+.rating-slider::-moz-range-track {
+  width: 100%;
+  height: 0.75rem;
+  border-radius: 0.375rem;
+  background: linear-gradient(
+    to right,
+    var(--slider-fill-color, var(--color-accent-500)) 0%,
+    var(--slider-fill-color, var(--color-accent-500)) var(--slider-fill-percentage, 50%),
+    var(--color-background-200) var(--slider-fill-percentage, 50%),
+    var(--color-background-200) 100%
+  );
+  border: none;
+}
+
+.rating-slider::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--slider-thumb-color, var(--color-accent-500));
+  border: none;
+  box-shadow: 0 0 0 2px var(--color-accent-300), 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 150ms ease-out;
+}
+
+.rating-slider::-moz-range-thumb:hover {
+  box-shadow: 0 0 0 3px var(--color-accent-300), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.rating-slider:disabled::-moz-range-thumb {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Begrenze die Höhe der Jahresauswahl auf 3 sichtbare Jahre */
+.react-datepicker__year-dropdown,
+.react-datepicker__year-dropdown-container,
+.react-datepicker__year-dropdown-container--scrollable,
+div.react-datepicker__year-dropdown {
+    max-height: 7.5rem !important; /* ca. 3 Jahre * 2.5rem */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+}
+
+.react-datepicker__year-option,
+div.react-datepicker__year-option {
+    height: 2.5rem !important;
+    min-height: 2.5rem !important;
+    line-height: 2.5rem !important;
+    padding: 0 0.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Zusätzlicher Selektor für die Dropdown-Liste */
+.react-datepicker__year-dropdown > div,
+.react-datepicker__year-dropdown-container > div {
+    max-height: 7.5rem !important;
+    overflow-y: auto !important;
+}
+
+.react-datepicker__month-option:hover,
+.react-datepicker__year-option:hover {
+    background-color: oklch(0.95 0.01 250);
+}
+
+.react-datepicker__month-option--selected,
+.react-datepicker__year-option--selected {
+    background-color: oklch(0.30 0.04 250);
+    color: white;
+}
