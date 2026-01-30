@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO, subDays, subMonths, eachDayOfInterval, isSameDay, differenceInDays } from "date-fns";
 import { de } from "date-fns/locale";
-import { jsPDF } from "jspdf";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { seizureApi, befindenApi, Befinden, Seizure } from "@/lib/api";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
@@ -356,6 +355,25 @@ export default function VerlaufPage() {
       .filter((p) => p !== null) as Array<{ x: number; y: number }>;
   }, [visualizationData, signalMinMax]);
 
+  // Monats-Markierungen für X-Achse (nur 6m / 1y), schlicht
+  const monthTicks = useMemo(() => {
+    if (timeRange !== "6m" && timeRange !== "1y") return [];
+    const start = timeRangeData.start;
+    const end = timeRangeData.end;
+    const ticks: { label: string; position: number }[] = [];
+    const startT = start.getTime();
+    const endT = end.getTime();
+    let d = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (d.getTime() <= endT) {
+      if (d.getTime() >= startT) {
+        const position = ((d.getTime() - startT) / (endT - startT)) * 100;
+        ticks.push({ label: format(d, "MMM", { locale: de }), position });
+      }
+      d.setMonth(d.getMonth() + 1);
+    }
+    return ticks;
+  }, [timeRange, timeRangeData]);
+
   // Hilfsfunktion: Chart-Daten für ein einzelnes Symptom (für PDF-Export aller Symptome)
   const getChartDataForSignal = (symptomId: string) => {
     const signalData = befindenData
@@ -463,6 +481,7 @@ export default function VerlaufPage() {
     }
     setIsExportingPdf(true);
     try {
+      const { jsPDF } = await import("jspdf");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
@@ -496,12 +515,25 @@ export default function VerlaufPage() {
       lineY(y);
       y += 6;
 
+      const spaceAfterChart = 4;
+      const spaceAfterLine = 4;
+      // Monats-Ticks für PDF-X-Achse aus dem exportierten Zeitraum berechnen (immer, nicht nur 6m/1y)
+      const startT = timeRangeData.start.getTime();
+      const endT = timeRangeData.end.getTime();
+      const pdfMonthTicks: { label: string; position: number }[] = [];
+      let d = new Date(timeRangeData.start.getFullYear(), timeRangeData.start.getMonth(), 1);
+      while (d.getTime() <= endT) {
+        if (d.getTime() >= startT) {
+          const position = ((d.getTime() - startT) / (endT - startT)) * 100;
+          pdfMonthTicks.push({ label: format(d, "MMM", { locale: de }), position });
+        }
+        d.setMonth(d.getMonth() + 1);
+      }
+      const axisH = pdfMonthTicks.length > 0 ? 8 : spaceAfterChart;
       for (let i = 0; i < signalsToExport.length; i++) {
         const signal = signalsToExport[i];
         const labelH = 5;
-        const spaceAfterChart = 4;
-        const spaceAfterLine = 4;
-        const blockH = labelH + 2 + chartHeightMm + spaceAfterChart + 2 + spaceAfterLine;
+        const blockH = labelH + 2 + chartHeightMm + axisH + 2 + spaceAfterLine;
 
         if (y + blockH > pdfH - margin) {
           pdf.addPage();
@@ -517,7 +549,31 @@ export default function VerlaufPage() {
         const canvas = await svgToCanvas(svg);
         const imgData = canvas.toDataURL("image/png");
         pdf.addImage(imgData, "PNG", margin, y, imgW, chartHeightMm);
-        y += chartHeightMm + spaceAfterChart;
+        y += chartHeightMm;
+
+        // X-Achse mit Monaten im PDF (immer wenn der Zeitraum Monatsgrenzen enthält)
+        if (pdfMonthTicks.length > 0) {
+          const axisY = y + 2;
+          pdf.setDrawColor(100, 100, 100);
+          pdf.setLineWidth(0.2);
+          pdf.line(margin, axisY, margin + imgW, axisY);
+          pdfMonthTicks.forEach((t) => {
+            const tx = margin + (t.position / 100) * imgW;
+            pdf.line(tx, axisY, tx, axisY + 2);
+          });
+          pdf.setFontSize(8);
+          pdf.setTextColor(80, 80, 80);
+          pdfMonthTicks.forEach((t) => {
+            const tx = margin + (t.position / 100) * imgW;
+            const tw = pdf.getTextWidth(t.label);
+            pdf.text(t.label, tx - tw / 2, axisY + 5);
+          });
+          pdf.setTextColor(0, 0, 0);
+          pdf.setFontSize(10);
+          y += 8;
+        } else {
+          y += spaceAfterChart;
+        }
 
         if (i < signalsToExport.length - 1) {
           lineY(y);
@@ -635,7 +691,7 @@ export default function VerlaufPage() {
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
                 <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
                   <div className="overflow-x-auto">
-                    <div className="relative h-48 min-w-[600px]">
+                    <div className={`relative h-48 min-w-[600px] ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                       <svg
                         className="h-full w-full"
                         viewBox="0 0 1000 200"
@@ -677,15 +733,25 @@ export default function VerlaufPage() {
                         })}
                       </svg>
 
-                      {/* Zeitachse Labels */}
-                      <div className="absolute bottom-1 left-0 right-0 flex justify-between px-2 text-[9px] text-foreground-500">
-                        <span>
-                          {format(timeRangeData.start, "dd.MM.", { locale: de })}
-                        </span>
-                        <span>
-                          {format(timeRangeData.end, "dd.MM.", { locale: de })}
-                        </span>
-                      </div>
+                      {/* X-Achse: 7d/30d ohne Datum; 6m/1y dünne Linie + Monats-Markierungen */}
+                      {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
+                        <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
+                          <div className="h-px w-full bg-foreground-300" />
+                          {monthTicks.map((t) => (
+                            <div
+                              key={`${t.label}-${t.position}`}
+                              className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
+                              style={{ left: `${t.position}%` }}
+                            >
+                              <div className="w-px h-1 bg-foreground-400" />
+                              <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-400 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
+                                {t.label}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="absolute top-0 right-0 w-px h-1 bg-foreground-400" aria-hidden />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -727,7 +793,7 @@ export default function VerlaufPage() {
               {/* Vereinfachte Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
                 <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
-                  <div className="relative h-48 w-full overflow-hidden">
+                  <div className={`relative h-48 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                     <svg
                       className="h-full w-full"
                       viewBox="0 0 1000 200"
@@ -769,15 +835,25 @@ export default function VerlaufPage() {
                       })}
                     </svg>
 
-                    {/* Zeitachse Labels - minimal */}
-                    <div className="absolute bottom-1 left-0 right-0 flex justify-between px-2 text-[9px] text-foreground-500">
-                      <span>
-                        {format(timeRangeData.start, "dd.MM.", { locale: de })}
-                      </span>
-                      <span>
-                        {format(timeRangeData.end, "dd.MM.", { locale: de })}
-                      </span>
-                    </div>
+                    {/* X-Achse: 7d/30d ohne Datum; 6m/1y dünne Linie + Monats-Markierungen */}
+                    {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
+                      <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
+                        <div className="h-px w-full bg-foreground-300" />
+                        {monthTicks.map((t) => (
+                          <div
+                            key={`${t.label}-${t.position}`}
+                            className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
+                            style={{ left: `${t.position}%` }}
+                          >
+                            <div className="w-px h-1 bg-foreground-400" />
+                            <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-400 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
+                              {t.label}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="absolute top-0 right-0 w-px h-1 bg-foreground-400" aria-hidden />
+                      </div>
+                    )}
                   </div>
 
                   {/* Minimale Legende */}
@@ -818,7 +894,7 @@ export default function VerlaufPage() {
               {/* Vollständige Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
                 <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-6">
-                  <div className="relative h-80 w-full overflow-hidden">
+                  <div className={`relative h-80 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                     <svg
                       className="h-full w-full"
                       viewBox="0 0 1000 200"
@@ -862,15 +938,25 @@ export default function VerlaufPage() {
                       })}
                     </svg>
 
-                    {/* Zeitachse Labels */}
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-between px-2 text-[10px] text-foreground-500">
-                      <span>
-                        {format(timeRangeData.start, "dd.MM.yyyy", { locale: de })}
-                      </span>
-                      <span>
-                        {format(timeRangeData.end, "dd.MM.yyyy", { locale: de })}
-                      </span>
-                    </div>
+                    {/* X-Achse: 7d/30d ohne Datum; 6m/1y dünne Linie + Monats-Markierungen */}
+                    {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
+                      <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
+                        <div className="h-px w-full bg-foreground-300" />
+                        {monthTicks.map((t) => (
+                          <div
+                            key={`${t.label}-${t.position}`}
+                            className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
+                            style={{ left: `${t.position}%` }}
+                          >
+                            <div className="w-px h-1 bg-foreground-400" />
+                            <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-400 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
+                              {t.label}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="absolute top-0 right-0 w-px h-1 bg-foreground-400" aria-hidden />
+                      </div>
+                    )}
                   </div>
 
                   {/* Legende */}

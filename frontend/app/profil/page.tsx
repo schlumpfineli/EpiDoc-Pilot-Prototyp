@@ -8,9 +8,8 @@ import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 /**
- * Profilseite – auf das nötigste begrenzt (Sicherheit).
- * Zeigt nur Anzeigename und E-Mail (read-only).
- * Alle Bearbeitungen, Passwort, Konto löschen → Einstellungen.
+ * Profilseite – auf das Nötigste reduziert (Sicherheit).
+ * Zeigt nur die User-ID (read-only). Rest → Einstellungen.
  */
 export default function ProfilPage() {
   const { user } = useAuth();
@@ -55,48 +54,27 @@ export default function ProfilPage() {
   const displayName =
     (profileData as UserProfile & { display_name?: string })?.display_name ??
     (profileData ? `User-${profileData.id}` : "—");
-  const email = profileData?.email ?? "—";
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl flex-col gap-[var(--spacing-l)]">
-          <div className="space-y-[var(--spacing-2xs)]">
-            <p className="text-body-small font-medium text-primary-600">EpiDoc</p>
-            <h1 className="text-headline-3 font-semibold leading-tight tracking-tight">
-              Profil
-            </h1>
-          </div>
-
+      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] py-[var(--spacing-m)] md:py-[var(--spacing-l)] text-foreground-900">
+        <div className="mx-auto flex w-full max-w-sm flex-col gap-[var(--spacing-l)]">
+          <h1 className="text-headline-3 font-semibold leading-tight tracking-tight">
+            Profil
+          </h1>
           <div className="rounded-xl border border-background-200 bg-white p-[var(--spacing-m)] shadow-sm">
-            <p className="text-body-small text-foreground-500 mb-[var(--spacing-m)]">
-              Im Pilotprojekt werden Sie nur über Ihre User-ID geführt. Änderungen an Passwort oder Konto finden Sie unter Einstellungen.
+            <p className="text-body-small font-medium text-foreground-600 mb-[var(--spacing-2xs)]">
+              User-ID
             </p>
-            <div className="space-y-[var(--spacing-m)]">
-              <div>
-                <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                  Anzeigename (User-ID)
-                </label>
-                <p className="rounded-lg border border-background-200 bg-background-50 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body text-foreground-700">
-                  {displayName}
-                </p>
-              </div>
-              <div>
-                <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                  E-Mail
-                </label>
-                <p className="rounded-lg border border-background-200 bg-background-50 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body text-foreground-700">
-                  {email}
-                </p>
-              </div>
-            </div>
+            <p className="text-body text-foreground-900">
+              {displayName}
+            </p>
           </div>
-
           <Link
             href="/einstellungen"
             className="rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-center text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
           >
-            Zu den Einstellungen
+            Einstellungen
           </Link>
         </div>
       </div>
