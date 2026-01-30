@@ -985,10 +985,10 @@ export default function BefindenPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-background-50 pb-20">
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="mb-2 text-h3 font-semibold text-foreground-900">
+          <h1 className="mb-2 text-center text-h3 font-semibold text-foreground-900">
             Wie geht es dir?
           </h1>
-          <p className="mb-6 text-body-small text-foreground-500">
+          <p className="mb-6 text-center text-body-small text-foreground-500">
             Erfasse dein Befinden täglich. Detaillierte Werte und Muster findest du in der Analyse.
           </p>
 
