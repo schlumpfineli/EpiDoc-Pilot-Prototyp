@@ -196,21 +196,10 @@ export default function BefindenPage() {
     }
   };
 
-  // Lade alle Daten der letzten 30 Tage für Übersicht
+  // Lade alle Einträge für Übersicht (keine zeitliche Begrenzung)
   const loadAllHistory = async () => {
     try {
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
-      
-      const startDateStr = format(startDate, 'yyyy-MM-dd');
-      const endDateStr = format(endDate, 'yyyy-MM-dd');
-      console.log('[Befinden] Lade Gesamthistorie:', startDateStr, 'bis', endDateStr);
-      
-      const response = await befindenApi.getAll({
-        start_date: startDateStr,
-        end_date: endDateStr,
-      });
+      const response = await befindenApi.getAll({});
       console.log('[Befinden] Gesamthistorie geladen:', response.data?.length || 0, 'Einträge');
       setAllHistory(response.data || []);
     } catch (error: any) {

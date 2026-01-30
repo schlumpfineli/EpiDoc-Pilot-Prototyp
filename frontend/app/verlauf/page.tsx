@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO, subDays, subMonths, eachDayOfInterval, isSameDay, differenceInDays } from "date-fns";
 import { de } from "date-fns/locale";
+import { jsPDF } from "jspdf";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { seizureApi, befindenApi, Befinden, Seizure } from "@/lib/api";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { toastService } from "@/components/ui";
 
 // Verfügbare Signale aus der Befinden-Seite
 const availableSignals = [
@@ -32,6 +34,8 @@ export default function VerlaufPage() {
   const [seizures, setSeizures] = useState<Seizure[]>([]);
   const [befindenData, setBefindenData] = useState<Befinden[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
   const breakpoint = useBreakpoint();
 
   // Setze Zeitraum zurück, wenn auf Mobile ein nicht verfügbarer Zeitraum ausgewählt ist
@@ -92,24 +96,12 @@ export default function VerlaufPage() {
     });
   }, [seizures, timeRangeData]);
 
-  // Finde verfügbare Signale mit Daten im aktuellen Zeitbereich
+  // Finde alle Signale mit mindestens einem Eintrag (alle Einträge sichtbar, unabhängig vom gewählten Zeitraum)
   const availableSignalsInRange = useMemo(() => {
     const signalsWithData = new Set<string>();
-    
-    befindenData.forEach((item) => {
-      const itemDate = parseISO(item.date);
-      if (
-        itemDate >= timeRangeData.start &&
-        itemDate <= timeRangeData.end
-      ) {
-        signalsWithData.add(item.symptom_id);
-      }
-    });
-
-    return availableSignals.filter((signal) =>
-      signalsWithData.has(signal.id)
-    );
-  }, [befindenData, timeRangeData]);
+    befindenData.forEach((item) => signalsWithData.add(item.symptom_id));
+    return availableSignals.filter((signal) => signalsWithData.has(signal.id));
+  }, [befindenData]);
 
   // Setze ausgewähltes Signal zurück, wenn es nicht mehr verfügbar ist
   useEffect(() => {
@@ -364,6 +356,186 @@ export default function VerlaufPage() {
       .filter((p) => p !== null) as Array<{ x: number; y: number }>;
   }, [visualizationData, signalMinMax]);
 
+  // Hilfsfunktion: Chart-Daten für ein einzelnes Symptom (für PDF-Export aller Symptome)
+  const getChartDataForSignal = (symptomId: string) => {
+    const signalData = befindenData
+      .filter((item) => {
+        const itemDate = parseISO(item.date);
+        return (
+          itemDate >= timeRangeData.start &&
+          itemDate <= timeRangeData.end &&
+          item.symptom_id === symptomId
+        );
+      })
+      .map((item) => ({
+        date: item.date,
+        rating: item.rating ?? null,
+      }));
+    const dayMap: Record<string, number[]> = {};
+    signalData.forEach((item) => {
+      const dateStr = format(parseISO(item.date), "yyyy-MM-dd");
+      if (item.rating !== null && item.rating !== undefined) {
+        if (!dayMap[dateStr]) dayMap[dateStr] = [];
+        dayMap[dateStr].push(item.rating);
+      }
+    });
+    const signalByDay: Record<string, number> = {};
+    Object.entries(dayMap).forEach(([date, ratings]) => {
+      signalByDay[date] = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
+    });
+    const values = Object.values(signalByDay);
+    const signalMinMax = values.length === 0 ? { min: 0, max: 10 } : { min: Math.min(...values), max: Math.max(...values) };
+    const visData = timeRangeData.days.map((day) => {
+      const dayStr = format(day, "yyyy-MM-dd");
+      const hasSeizure = seizuresInRange.some((s) => isSameDay(parseISO(s.date), day));
+      return { dateStr: dayStr, hasSeizure, signalValue: signalByDay[dayStr] };
+    });
+    const points = visData
+      .map((d, i) => {
+        if (d.signalValue === undefined) return null;
+        const x = (i / Math.max(visData.length - 1, 1)) * 1000;
+        const normalized =
+          signalMinMax.max > signalMinMax.min
+            ? ((d.signalValue - signalMinMax.min) / (signalMinMax.max - signalMinMax.min)) * 160 + 20
+            : 100;
+        return { x, y: 200 - normalized };
+      })
+      .filter((p) => p !== null) as Array<{ x: number; y: number }>;
+    return { signalByDay, visualizationData: visData, signalPoints: points, signalMinMax };
+  };
+
+  // SVG aus Chart-Daten bauen (Hex-Farben für PDF)
+  const buildChartSvg = (
+    signalPoints: Array<{ x: number; y: number }>,
+    visualizationData: Array<{ dateStr: string; hasSeizure: boolean; signalValue?: number }>
+  ) => {
+    const accentHex = "#9ed2be";
+    const primaryHex = "#1f2a44";
+    const polylinePoints = signalPoints.length > 1 ? signalPoints.map((p) => `${p.x},${p.y}`).join(" ") : "";
+    const seizureLines = visualizationData
+      .map((d, i) => {
+        if (!d.hasSeizure) return "";
+        const x = visualizationData.length > 1 ? (i / (visualizationData.length - 1)) * 1000 : 500;
+        return `<line x1="${x}" y1="200" x2="${x}" y2="0" stroke="${primaryHex}" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>`;
+      })
+      .join("");
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" width="1000" height="200">
+  ${polylinePoints ? `<polyline points="${polylinePoints}" fill="none" stroke="${accentHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>` : ""}
+  ${seizureLines}
+</svg>`;
+  };
+
+  // Canvas aus SVG-Data-URL erzeugen
+  const svgToCanvas = async (svg: string): Promise<HTMLCanvasElement> => {
+    const svgDataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    const img = new Image();
+    const canvas = document.createElement("canvas");
+    const scale = 2;
+    canvas.width = 1000 * scale;
+    canvas.height = 200 * scale;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas 2D nicht verfügbar");
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => {
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0, 1000, 200);
+        resolve();
+      };
+      img.onerror = () => reject(new Error("SVG konnte nicht geladen werden"));
+      img.src = svgDataUrl;
+    });
+    return canvas;
+  };
+
+  // PDF-Export: Alle im Zeitraum erfassten Symptome – kompakt, getrennt durch Linie und Weißraum (ab 1 Monat)
+  const handleExportPdf = async () => {
+    if (timeRange === "7d") {
+      toastService.show("PDF-Export ist ab einem Zeitraum von 30 Tagen verfügbar.", "warning");
+      return;
+    }
+    const signalsToExport = availableSignalsInRange;
+    if (signalsToExport.length === 0) {
+      toastService.show("Keine Symptom-Daten im gewählten Zeitraum.", "warning");
+      return;
+    }
+    setIsExportingPdf(true);
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      const margin = 12;
+      const imgW = pdfW - 2 * margin;
+      const chartHeightMm = 48; // kompakte Grafikhöhe
+      const lineY = (y: number) => {
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(0.2);
+        pdf.line(margin, y, pdfW - margin, y);
+      };
+
+      let y = margin;
+
+      // Titel + Zeitraum (kompakt)
+      pdf.setFontSize(14);
+      pdf.text("EpiDoc – Analyse", margin, y);
+      y += 5;
+      pdf.setFontSize(10);
+      pdf.text(
+        `Zeitraum: ${format(timeRangeData.start, "dd.MM.yyyy", { locale: de })} – ${format(timeRangeData.end, "dd.MM.yyyy", { locale: de })} · ${signalsToExport.length} Symptom${signalsToExport.length === 1 ? "" : "e"}`,
+        margin,
+        y
+      );
+      y += 5;
+      pdf.setFontSize(9);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("Grüne Linie = Symptomverlauf · Gestrichelte Linie = Anfallsereignis", margin, y);
+      pdf.setTextColor(0, 0, 0);
+      y += 5;
+      lineY(y);
+      y += 6;
+
+      for (let i = 0; i < signalsToExport.length; i++) {
+        const signal = signalsToExport[i];
+        const labelH = 5;
+        const spaceAfterChart = 4;
+        const spaceAfterLine = 4;
+        const blockH = labelH + 2 + chartHeightMm + spaceAfterChart + 2 + spaceAfterLine;
+
+        if (y + blockH > pdfH - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+
+        pdf.setFontSize(10);
+        pdf.text(signal.label, margin, y);
+        y += labelH + 2;
+
+        const { signalPoints: points, visualizationData: visData } = getChartDataForSignal(signal.id);
+        const svg = buildChartSvg(points, visData);
+        const canvas = await svgToCanvas(svg);
+        const imgData = canvas.toDataURL("image/png");
+        pdf.addImage(imgData, "PNG", margin, y, imgW, chartHeightMm);
+        y += chartHeightMm + spaceAfterChart;
+
+        if (i < signalsToExport.length - 1) {
+          lineY(y);
+          y += 2 + spaceAfterLine;
+        }
+      }
+
+      const filename = `epidoc-analyse-${format(timeRangeData.start, "yyyy-MM-dd")}-bis-${format(timeRangeData.end, "yyyy-MM-dd")}.pdf`;
+      pdf.save(filename);
+      toastService.show(`${signalsToExport.length} Symptom${signalsToExport.length === 1 ? "" : "e"} als PDF exportiert.`, "success");
+    } catch (err) {
+      console.error("PDF-Export fehlgeschlagen:", err);
+      toastService.show("PDF-Export ist fehlgeschlagen.", "error");
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -420,28 +592,45 @@ export default function VerlaufPage() {
             </div>
           </div>
 
-          {/* Signal-Auswahl */}
+          {/* Signal-Auswahl + PDF-Export */}
           <div className="mb-6">
             <label className="mb-2 block text-body-small font-medium text-foreground-700">
               Vergleiche Anfälle mit:
             </label>
-            <select
-              value={selectedSignal}
-              onChange={(e) => setSelectedSignal(e.target.value)}
-              className="w-full rounded-lg border border-background-200 bg-background-10 px-4 py-2 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Bitte wählen...</option>
-              {availableSignalsInRange.map((signal) => (
-                <option key={signal.id} value={signal.id}>
-                  {signal.label}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <select
+                value={selectedSignal}
+                onChange={(e) => setSelectedSignal(e.target.value)}
+                className="w-full rounded-lg border border-background-200 bg-background-10 px-4 py-2 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:max-w-xs"
+              >
+                <option value="">Bitte wählen...</option>
+                {availableSignalsInRange.map((signal) => (
+                  <option key={signal.id} value={signal.id}>
+                    {signal.label}
+                  </option>
+                ))}
+              </select>
+              {availableSignalsInRange.length > 0 && timeRange !== "7d" && (
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={isExportingPdf}
+                  className="shrink-0 rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
+                >
+                  {isExportingPdf ? "Exportiere PDF…" : "Alle Symptome als PDF exportieren"}
+                </button>
+              )}
+              {availableSignalsInRange.length > 0 && timeRange === "7d" && (
+                <span className="text-body-small text-foreground-500 shrink-0">
+                  PDF-Export ab Zeitraum 30 Tage
+                </span>
+              )}
+            </div>
           </div>
 
           {/* MOBILE VIEW: Grafik mit horizontalem Scroll + Erkenntnisse */}
           {isMobile && selectedSignal && (
-            <>
+            <div ref={chartContainerRef}>
               {/* Horizontal scrollbare Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
                 <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
@@ -529,12 +718,12 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* TABLET VIEW: Vereinfachte Visualisierung */}
           {isTablet && selectedSignal && (
-            <>
+            <div ref={chartContainerRef}>
               {/* Vereinfachte Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
                 <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
@@ -620,12 +809,12 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* DESKTOP VIEW: Vollständige Visualisierung */}
           {isDesktop && selectedSignal && (
-            <>
+            <div ref={chartContainerRef}>
               {/* Vollständige Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
                 <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-6">
@@ -713,7 +902,7 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {!selectedSignal && (

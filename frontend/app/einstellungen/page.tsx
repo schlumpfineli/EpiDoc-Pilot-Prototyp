@@ -1,21 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { profileApi, authApi, UserProfile, feedbackApi, FeedbackData } from "@/lib/api";
 import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { 
-  subscribeToPushNotifications, 
-  unsubscribeFromPushNotifications, 
-  isPushSubscribed,
-  registerServiceWorker 
-} from "@/lib/pushNotifications";
-
-interface PushNotificationSettings {
-  befinden_reminders: boolean;
-}
 
 export default function EinstellungenPage() {
   const { user, logout } = useAuth();
@@ -30,77 +20,21 @@ export default function EinstellungenPage() {
     message: '',
   });
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
-  const [pushNotificationSettings, setPushNotificationSettings] = useState<PushNotificationSettings>({
-    befinden_reminders: false,
-  });
-  const [pushSupported, setPushSupported] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     current_password: "",
     new_password: "",
     new_password_confirmation: "",
   });
-  
-  // Debounce für Auto-Save
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadSettings();
   }, [user]);
-
-  // Auto-Save Funktion mit Debouncing
-  const autoSave = useCallback((settings: PushNotificationSettings) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        setIsSaving(true);
-        // Speichere Push-Benachrichtigungen-Einstellungen
-        // TODO: API-Endpoint für Push-Benachrichtigungen-Einstellungen erstellen
-        // Für jetzt speichern wir es lokal
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('push_notification_settings', JSON.stringify(settings));
-        }
-        // Wenn mindestens eine Benachrichtigung aktiviert ist, stelle sicher dass Push aktiviert ist
-        const isSubscribed = await isPushSubscribed();
-        if (settings.befinden_reminders && !isSubscribed) {
-          await registerServiceWorker();
-          await subscribeToPushNotifications();
-        }
-        if (!settings.befinden_reminders && isSubscribed) {
-          await unsubscribeFromPushNotifications();
-        }
-      } catch (error: any) {
-        console.error("Fehler beim automatischen Speichern:", error);
-        toastService.show(
-          error.message || "Fehler beim Speichern",
-          "error"
-        );
-      } finally {
-        setIsSaving(false);
-      }
-    }, 500); // 500ms Debounce
-  }, []);
 
   const loadSettings = async () => {
     try {
       setIsLoading(true);
       const response = await authApi.getUser();
       setProfileData(response.user as UserProfile);
-      
-      // Lade Push-Benachrichtigungen-Einstellungen
-      if (typeof window !== 'undefined') {
-        const savedSettings = localStorage.getItem('push_notification_settings');
-        if (savedSettings) {
-          setPushNotificationSettings(JSON.parse(savedSettings));
-        }
-      }
-      
-      // Prüfe Push-Benachrichtigungen Support
-      if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
-        setPushSupported(true);
-      }
     } catch (error: any) {
       console.error("Fehler beim Laden der Einstellungen:", error);
       toastService.show(
@@ -110,15 +44,6 @@ export default function EinstellungenPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePushNotificationChange = (type: 'befinden_reminders', enabled: boolean) => {
-    const newSettings = {
-      ...pushNotificationSettings,
-      [type]: enabled,
-    };
-    setPushNotificationSettings(newSettings);
-    autoSave(newSettings);
   };
 
   const handleDeleteAccount = async () => {
@@ -277,7 +202,7 @@ export default function EinstellungenPage() {
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           <div className="space-y-[var(--spacing-2xs)]">
             <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
-              Einstellungen
+              Einstellungen und Support
             </h1>
           </div>
 
@@ -320,49 +245,6 @@ export default function EinstellungenPage() {
                     {profileData.role === 'patient' ? 'Patient' : 'Angehöriger'}
                   </span>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Push-Benachrichtigungen - Deaktiviert für Pilotprojekt */}
-          {pushSupported && (
-            <div className="rounded-xl border border-background-200 bg-white p-[var(--spacing-m)] shadow-sm opacity-70">
-              <h2 className="text-h5 font-semibold text-foreground-500 mb-[var(--spacing-m)]">
-                Push-Benachrichtigungen
-                <span className="ml-[var(--spacing-2xs)] text-body-small font-normal text-foreground-400">
-                  (Nicht verfügbar im Pilotprojekt)
-                </span>
-              </h2>
-              <div className="space-y-[var(--spacing-m)]">
-                <p className="text-body-small text-foreground-500">
-                  Wählen Sie aus, für welche Benachrichtigungen Sie Push-Nachrichten erhalten möchten:
-                </p>
-                <div className="space-y-[var(--spacing-s)]">
-                  <div className="flex items-center justify-between rounded-lg border border-background-200 p-[var(--spacing-s)] cursor-not-allowed">
-                    <div className="flex-1">
-                      <label className="text-body-small font-medium text-foreground-500 cursor-not-allowed">
-                        Befinden-Erinnerungen
-                      </label>
-                      <p className="text-body-small text-foreground-400">
-                        Erinnerungen für Befindensdokumentation
-                      </p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-not-allowed">
-                      <input
-                        type="checkbox"
-                        checked={false}
-                        disabled
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-background-200 rounded-full peer-checked:bg-primary-600 disabled:opacity-50 cursor-not-allowed"></div>
-                    </label>
-                  </div>
-                </div>
-                {isSaving && (
-                  <p className="text-body-small text-primary-600">
-                    Speichert...
-                  </p>
-                )}
               </div>
             </div>
           )}

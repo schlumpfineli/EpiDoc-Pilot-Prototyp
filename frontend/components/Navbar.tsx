@@ -25,7 +25,7 @@ export function Navbar() {
     { href: '/diary', label: 'Tagebuch' },
     { href: '/verlauf', label: 'Analyse' },
     { href: '/profil', label: 'Profil' },
-    { href: '/kontakt', label: 'Kontakt' },
+    { href: '/einstellungen', label: 'Einstellungen und Support' },
   ] : [];
 
   // Öffentliche Routen (keine Navbar)
