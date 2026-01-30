@@ -61,11 +61,33 @@ const seizureTriggerLabelDe: Record<string, string> = {
   infection: "Infektion",
 };
 
+// Englische Werte → Deutsch für PDF-Nachwirkungen (Symptome nach Anfall)
+const seizureAfterEffectLabelDe: Record<string, string> = {
+  confusion: "Verwirrtheit",
+  tiredness: "Müdigkeit",
+  headache: "Kopfschmerzen",
+  "muscle ache": "Lähmungserscheinungen",
+  muscle_ache: "Lähmungserscheinungen",
+  dizziness: "Schwindel",
+  nausea: "Übelkeit",
+  "speech disorder": "Sprachstörungen",
+  speech_disorder: "Sprachstörungen",
+  "low mood": "Niedergeschlagenheit",
+  low_mood: "Niedergeschlagenheit",
+  irritability: "Reizbarkeit",
+  "recovery half day": "Erholungszeit: halber Tag",
+  "recovery full day": "Erholungszeit: ganzer Tag",
+  "recovery more than day": "Erholungszeit: mehr als ein Tag",
+};
+
 function toGermanType(value: string): string {
   return seizureTypeLabelDe[value] ?? value;
 }
 function toGermanTrigger(value: string): string {
   return seizureTriggerLabelDe[value] ?? value;
+}
+function toGermanAfterEffect(value: string): string {
+  return seizureAfterEffectLabelDe[value] ?? value;
 }
 
 type TimeRange = "7d" | "30d" | "6m" | "1y";
@@ -636,7 +658,19 @@ export default function VerlaufPage() {
     }
   };
 
-  // PDF-Export: Zusammenfassung der Anfälle (Anzahl pro Monat, Anfallsarten, Auslöser)
+  // Hilfsfunktion: Datum-String sicher als dd.MM.yyyy formatieren (API kann YYYY-MM-DD oder ISO-String liefern)
+  const formatSeizureDate = (dateStr: string | undefined): string => {
+    if (!dateStr || typeof dateStr !== "string") return "";
+    const iso = dateStr.slice(0, 10);
+    if (iso.length < 10) return dateStr;
+    try {
+      return format(parseISO(iso), "dd.MM.yyyy", { locale: de });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // PDF-Export: Zusammenfassung der Anfälle (Anzahl pro Monat, genaue Daten, Notfallmedikament, Nachwirkungen)
   const handleExportSeizureSummaryPdf = async () => {
     setIsExportingSeizurePdf(true);
     try {
@@ -662,13 +696,21 @@ export default function VerlaufPage() {
         margin,
         y
       );
+      y += 4;
+      pdf.setFontSize(8);
+      pdf.text("Enthält: genaue Daten, Notfallmedikament, Nachwirkungen", margin, y);
       y += 8;
 
       // Anfälle pro Monat (chronologisch: alle Monate im Zeitraum)
       const byMonthKey: Record<string, number> = {};
       seizuresInRange.forEach((s) => {
-        const key = format(parseISO(s.date), "yyyy-MM");
-        byMonthKey[key] = (byMonthKey[key] ?? 0) + (s.seizure_count ?? 1);
+        if (!s.date) return;
+        try {
+          const key = format(parseISO(String(s.date).slice(0, 10)), "yyyy-MM");
+          byMonthKey[key] = (byMonthKey[key] ?? 0) + (s.seizure_count ?? 1);
+        } catch {
+          // Datum überspringen wenn ungültig
+        }
       });
       const monthsInRange: { key: string; label: string }[] = [];
       let d = new Date(timeRangeData.start.getFullYear(), timeRangeData.start.getMonth(), 1);
@@ -676,7 +718,7 @@ export default function VerlaufPage() {
       while (d.getTime() <= endT) {
         monthsInRange.push({
           key: format(d, "yyyy-MM"),
-          label: format(d, "MMM yyyy", { locale: de }),
+          label: format(d, "MMMM yyyy", { locale: de }),
         });
         d.setMonth(d.getMonth() + 1);
       }
@@ -693,6 +735,54 @@ export default function VerlaufPage() {
         monthsInRange.forEach(({ key, label }) => {
           const count = byMonthKey[key] ?? 0;
           pdf.text(`${label}: ${count}`, margin, y);
+          y += 5;
+        });
+        y += 3;
+      }
+
+      // Anfälle mit genauen Daten (Datum dd.MM.yyyy, Anzahl)
+      const byDateKey: Record<string, number> = {};
+      seizuresInRange.forEach((s) => {
+        const key = typeof s.date === "string" ? s.date.slice(0, 10) : "";
+        if (!key) return;
+        byDateKey[key] = (byDateKey[key] ?? 0) + (s.seizure_count ?? 1);
+      });
+      const sortedDates = Object.keys(byDateKey).sort();
+      maybeNewPage();
+      pdf.setFontSize(11);
+      pdf.text("Anfälle mit genauen Daten", margin, y);
+      y += 5;
+      pdf.setFontSize(9);
+      if (sortedDates.length === 0) {
+        pdf.text("Keine Anfälle im gewählten Zeitraum.", margin, y);
+        y += 6;
+      } else {
+        sortedDates.forEach((dateStr) => {
+          const count = byDateKey[dateStr];
+          const label = formatSeizureDate(dateStr);
+          if (!label) return;
+          pdf.text(`• ${label}: ${count} Anfall${count !== 1 ? "fälle" : ""}`, margin, y);
+          y += 5;
+        });
+        y += 3;
+      }
+
+      // Notfallmedikament eingenommen an (Datum + Medikamentenname) – API kann true, 1 oder "1" liefern
+      const emergencyEntries = seizuresInRange.filter((s) => Boolean(s.emergency_med) === true);
+      maybeNewPage();
+      pdf.setFontSize(11);
+      pdf.text("Notfallmedikament eingenommen an", margin, y);
+      y += 5;
+      pdf.setFontSize(9);
+      if (emergencyEntries.length === 0) {
+        pdf.text("Keine Einnahme im gewählten Zeitraum.", margin, y);
+        y += 6;
+      } else {
+        emergencyEntries.forEach((s) => {
+          const dateLabel = formatSeizureDate(s.date);
+          if (!dateLabel) return;
+          const med = s.emergency_med_name?.trim();
+          pdf.text(`• ${dateLabel}${med ? ` (${med})` : ""}`, margin, y);
           y += 5;
         });
         y += 3;
@@ -755,6 +845,36 @@ export default function VerlaufPage() {
           pdf.text(`• ${name}: ${count}`, margin, y);
           y += 5;
         });
+        y += 3;
+      }
+
+      // Häufigste Nachwirkungen (Symptome nach Anfall: after_effects[] + custom_after_effects)
+      const afterEffectCount: Record<string, number> = {};
+      seizuresInRange.forEach((s) => {
+        const effects = Array.isArray(s.after_effects) ? s.after_effects : s.after_effects != null && s.after_effects !== "" ? [String(s.after_effects)] : [];
+        effects.forEach((e) => {
+          const label = toGermanAfterEffect(String(e).trim());
+          afterEffectCount[label] = (afterEffectCount[label] ?? 0) + (s.seizure_count ?? 1);
+        });
+        if (s.custom_after_effects?.trim()) {
+          const c = s.custom_after_effects.trim();
+          afterEffectCount[c] = (afterEffectCount[c] ?? 0) + (s.seizure_count ?? 1);
+        }
+      });
+      const topAfterEffects = Object.entries(afterEffectCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      maybeNewPage();
+      pdf.setFontSize(11);
+      pdf.text("Häufigste Nachwirkungen (Symptome nach Anfall)", margin, y);
+      y += 5;
+      pdf.setFontSize(9);
+      if (topAfterEffects.length === 0) {
+        pdf.text("Keine Angaben.", margin, y);
+        y += 6;
+      } else {
+        topAfterEffects.forEach(([name, count]) => {
+          pdf.text(`• ${name}: ${count}`, margin, y);
+          y += 5;
+        });
       }
 
       const filename = `epidoc-anfaelle-${format(timeRangeData.start, "yyyy-MM-dd")}-bis-${format(timeRangeData.end, "yyyy-MM-dd")}.pdf`;
@@ -785,6 +905,7 @@ export default function VerlaufPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background-50 pb-20">
+        {/* Titel, Filter und Grafik (Mobile/Tablet) – zentriert */}
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
           <h1 className="mb-2 text-h3 font-semibold text-foreground-900">
             Analyse
@@ -1047,19 +1168,27 @@ export default function VerlaufPage() {
             </div>
           )}
 
-          {/* DESKTOP VIEW: Vollständige Visualisierung */}
-          {isDesktop && selectedSignal && (
+          {!selectedSignal && (
+            <div className="rounded-lg border border-background-200 bg-background-10 p-4 text-center">
+              <p className="text-body text-foreground-600">
+                Wähle ein Signal aus, um mögliche Zusammenhänge zu erkennen.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop: Grafik über gesamte Bildschirmbreite */}
+        {isDesktop && selectedSignal && (
+          <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <div ref={chartContainerRef}>
-              {/* Vollständige Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
-                <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-6">
+                <div className="rounded-none border-y border-background-200 bg-background-10 p-6 lg:px-8">
                   <div className={`relative h-80 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                     <svg
                       className="h-full w-full"
                       viewBox="0 0 1000 200"
                       preserveAspectRatio="none"
                     >
-                      {/* Signal-Linie */}
                       {signalPoints.length > 1 && (
                         <polyline
                           points={signalPoints.map((p) => `${p.x},${p.y}`).join(" ")}
@@ -1072,8 +1201,6 @@ export default function VerlaufPage() {
                           className="transition-all duration-300"
                         />
                       )}
-
-                      {/* Anfall-Marker - gestrichelte vertikale Linien */}
                       {visualizationData.map((d, i) => {
                         if (!d.hasSeizure) return null;
                         const x =
@@ -1096,8 +1223,6 @@ export default function VerlaufPage() {
                         );
                       })}
                     </svg>
-
-                    {/* X-Achse: 7d/30d ohne Datum; 6m/1y dünne Linie + Monats-Markierungen */}
                     {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
                       <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
                         <div className="h-px w-full bg-foreground-300" />
@@ -1117,15 +1242,11 @@ export default function VerlaufPage() {
                       </div>
                     )}
                   </div>
-
-                  {/* Legende */}
                   <div className="mt-4 flex items-center justify-center gap-6 text-body-small text-foreground-600">
                     {signalPoints.length > 0 && (
                       <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-8 rounded bg-accent-500 opacity-80"></div>
-                        <span>
-                          {availableSignals.find((s) => s.id === selectedSignal)?.label}
-                        </span>
+                        <div className="h-1.5 w-8 rounded bg-accent-500 opacity-80" />
+                        <span>{availableSignals.find((s) => s.id === selectedSignal)?.label}</span>
                       </div>
                     )}
                     {seizuresInRange.length > 0 && (
@@ -1139,7 +1260,7 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               ) : (
-                <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-6">
+                <div className="rounded-none border-y border-background-200 bg-background-10 p-6">
                   <div className="h-80 flex items-center justify-center">
                     <p className="text-body text-foreground-500">
                       Für den ausgewählten Zeitraum sind keine Daten verfügbar.
@@ -1148,18 +1269,12 @@ export default function VerlaufPage() {
                 </div>
               )}
             </div>
-          )}
+          </div>
+        )}
 
-          {!selectedSignal && (
-            <div className="rounded-lg border border-background-200 bg-background-10 p-4 text-center">
-              <p className="text-body text-foreground-600">
-                Wähle ein Signal aus, um mögliche Zusammenhänge zu erkennen.
-              </p>
-            </div>
-          )}
-
-          {/* PDF-Exporte – ganz unten */}
-          <div className="mt-6 mb-6 rounded-xl border border-background-200 bg-white p-4 shadow-sm">
+        {/* PDF-Exporte und Rest – zentriert, geringer Abstand zur Grafik */}
+        <div className="mx-auto max-w-4xl px-4 pt-1 pb-6 sm:px-6 lg:px-8">
+          <div className="mt-2 mb-6 rounded-xl border border-background-200 bg-white p-4 shadow-sm">
             <h2 className="mb-3 text-h5 font-semibold text-foreground-900">
               PDF-Exporte
             </h2>
@@ -1173,7 +1288,7 @@ export default function VerlaufPage() {
                 disabled={isExportingSeizurePdf}
                 className="rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
               >
-                {isExportingSeizurePdf ? "Exportiere…" : "Anfälle-Zusammenfassung als PDF"}
+                {isExportingSeizurePdf ? "Exportiere…" : "Anfälle als Bericht (PDF)"}
               </button>
               {availableSignalsInRange.length > 0 && timeRange !== "7d" && (
                 <button
@@ -1182,7 +1297,7 @@ export default function VerlaufPage() {
                   disabled={isExportingPdf}
                   className="rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
                 >
-                  {isExportingPdf ? "Exportiere…" : "Analyse-Grafik (Symptome) als PDF"}
+                  {isExportingPdf ? "Exportiere…" : "Verlaufskurven als PDF"}
                 </button>
               )}
               {availableSignalsInRange.length > 0 && timeRange === "7d" && (
