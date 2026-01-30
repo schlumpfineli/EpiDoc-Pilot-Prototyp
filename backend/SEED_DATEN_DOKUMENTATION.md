@@ -13,67 +13,55 @@ Die Seed-Daten wurden speziell für Demo- und UX-Testzwecke entwickelt. Sie zeig
 
 ## Zeitraum
 
-- **30 Tage** rückwirkend vom aktuellen Datum
-- **Tägliche Befinden-Einträge**
-- **3-5 Anfälle** im gesamten Zeitraum
+- **6 Monate (180 Tage)** rückwirkend vom aktuellen Datum
+- **Tägliche Befinden-Einträge** für alle drei Symptome
+- **4–6 Anfälle pro Monat** (24–36 über den gesamten Zeitraum)
 
 ## Befinden-Symptome
 
-### Pflicht-Symptom
-1. **Innere Unruhe** (`restlessness`)
-   - Kategorie: `mental`
-   - Skala: 1-10
+Alle drei Symptome werden **täglich** erfasst:
 
-### Optionale Symptome (max. 2)
-2. **Schlaf-Wach-Rhythmus** (`sleep-rhythm`)
+1. **Schlaf-Wach-Rhythmus** (`sleep-rhythm`)
    - Kategorie: `lifestyle`
-   - Skala: 1-10
-   - Wird zufällig aktiviert (50% Chance)
+   - Skala: 1-10 (höher = schlechter)
 
-3. **Stress** (`stress`)
+2. **Stress** (`stress`)
    - Kategorie: `mental`
    - Skala: 1-10
-   - Wird zufällig aktiviert (50% Chance)
+
+3. **Innere Unruhe** (`restlessness`)
+   - Kategorie: `mental`
+   - Skala: 1-10
 
 ## Muster
 
-### Innere Unruhe (Hauptmuster)
+### Schlaf-Wach-Rhythmus
 
-**Grundniveau:**
-- Meist niedrige bis mittlere Werte (2-4)
-- Natürliche Schwankungen (±1)
+- **1–2 Tage NACH einem Anfall**: Schlechter (Rating 6–8)
+- **Am Anfallstag**: Leicht schlechter (4–6)
+- **Ansonsten**: Grundniveau (2–4)
 
-**Vor einem Anfall:**
-- **2-4 Tage vor Anfall**: Deutlicher Anstieg (6-8)
-- **1 Tag vor Anfall**: Kann hoch bleiben oder leicht fallen (5-7)
+### Stress
 
-**Nach einem Anfall:**
-- **Am Tag des Anfalls**: Kann noch erhöht sein (5-7)
-- **1-2 Tage nach Anfall**: Fällt wieder ab (3-5)
+- **Direkt VOR dem Anfall** (1 Tag davor): Erhöht (6–8)
+- **Am Anfallstag**: Noch erhöht (5–7)
+- **Ansonsten**: Grundniveau (2–4)
 
-### Schlaf-Wach-Rhythmus (Begleitmuster)
+### Innere Unruhe
 
-- **In Phasen erhöhter Unruhe** (2-4 Tage vor Anfall): Leicht erhöht (4-6)
-- **Nach Anfall** (0-1 Tage): Kann leicht erhöht sein (3-5)
-- **Ansonsten**: Grundniveau (2-4)
-
-### Stress (Begleitmuster)
-
-- **In Phasen erhöhter Unruhe** (2-4 Tage vor Anfall): 50% Chance auf erhöhten Stress (5-7)
-- **Ansonsten**: Grundniveau (2-4)
+- **2–3 Tage VOR dem Anfall**: Erhöht (6–8)
+- **1 Tag vor Anfall**: Erhöht (5–7)
+- **1–2 Tage nach Anfall**: Fällt wieder ab (3–5)
+- **Ansonsten**: Grundniveau (2–4)
 
 ## Anfälle
 
-- **Anzahl**: 3-5 Anfälle über 30 Tage
-- **Abstand**: Mindestens 5 Tage zwischen Anfällen
-- **Verteilung**: Gleichmäßig über den Zeitraum verteilt
-- **Typ**: Focal oder Generalized (zufällig)
-- **Dauer**: 1-8 Minuten
-- **Notfallmedikation**: 25% Chance
-
-### Optional: 1 Anfall ohne klares Muster
-
-Für zusätzlichen Realismus kann ein Anfall ohne klares Befinden-Muster auftreten.
+- **Anzahl**: 4–6 pro Monat (24–36 über 6 Monate)
+- **Abstand**: Mindestens 3 Tage zwischen Anfällen
+- **Typ**: Fokal oder Absence (zufällig)
+- **Mehrheit einzelne Anfälle** (seizure_count = 1), **ab und zu Serien** (2–3 Anfälle an einem Tag)
+- **Dauer**: 1–8 Minuten
+- **Notfallmedikation**: ca. 20 % Chance
 
 ## Verwendung
 
@@ -146,7 +134,9 @@ Die JSON-Datei enthält:
 Die Daten sollen:
 
 ✅ **In der Analyse-Ansicht erkennbare Muster zeigen**
-- Innere Unruhe steigt vor Anfällen deutlich an
+- Schlaf-Wach-Rhythmus ist 1–2 Tage nach einem Anfall schlechter
+- Stress ist direkt vor einem Anfall erhöht
+- Innere Unruhe ist 2–3 Tage vor einem Anfall erhöht
 - Nach Anfällen normalisiert sich das Befinden
 
 ✅ **Verständlich sein für Laien**
@@ -165,10 +155,9 @@ Die Daten sollen:
 
 Die Seed-Daten können in `backend/database/seeders/DatabaseSeeder.php` angepasst werden:
 
-- **Anzahl der Anfälle**: Ändere `$seizureCount = rand(3, 5);`
-- **Zeitraum**: Ändere die Schleife `for ($day = 0; $day < 30; $day++)`
-- **Symptome**: Passe das Array `$symptoms` an
-- **Muster**: Passe die Funktion `calculateRating()` an
+- **Anzahl der Anfälle**: `$seizureCount = rand(24, 36);` (4–6 pro Monat)
+- **Zeitraum**: `$totalDays = 180;` (6 Monate)
+- **Muster**: Funktion `calculateRating()` (Schlaf 1–2 Tage nach Anfall, Stress vor Anfall, Unruhe 2–3 Tage vor Anfall)
 
 ## Wichtige Hinweise
 

@@ -25,6 +25,49 @@ const availableSignals = [
   { id: "menstrual", label: "Zyklusbezogene Beschwerden" },
 ];
 
+// Englische Werte (z. B. aus Seed/API) → Deutsch für PDF-Anfallsarten
+const seizureTypeLabelDe: Record<string, string> = {
+  absence: "Absencen",
+  absences: "Absencen",
+  myoclonic: "Myoklonische Anfälle",
+  focal: "Fokale Anfälle",
+  "focal aware": "Fokale Anfälle mit erhaltenem Bewusstsein",
+  "focal with preserved awareness": "Fokale Anfälle mit erhaltenem Bewusstsein",
+  "focal impaired": "Fokale Anfälle mit beeinträchtigtem Bewusstsein",
+  "focal to bilateral": "Fokal-zu-bilateral tonisch-klonische Anfälle",
+  "tonic-clonic": "Tonisch-klonische Anfälle",
+  generalized: "Generalisierte Anfälle",
+  "status epilepticus": "Status epilepticus",
+  spasms: "Spasmen",
+  unknown: "Anfälle unbekannten Ursprungs",
+};
+
+// Englische Werte → Deutsch für PDF-Auslöser
+const seizureTriggerLabelDe: Record<string, string> = {
+  stress: "Stress",
+  "lack of sleep": "Schlafmangel",
+  lack_of_sleep: "Schlafmangel",
+  "sleep deprivation": "Schlafmangel",
+  sleep_deprivation: "Schlafmangel",
+  alcohol: "Alkohol",
+  drugs: "Drogen",
+  "flashing lights": "Flackerndes Licht",
+  flashing_lights: "Flackerndes Licht",
+  "unknown medication": "Unbekannte Medikamente",
+  unknown_medication: "Unbekannte Medikamente",
+  dehydration: "Dehydrierung",
+  "brain injury": "Gehirnschädigungen",
+  brain_injury: "Gehirnschädigungen",
+  infection: "Infektion",
+};
+
+function toGermanType(value: string): string {
+  return seizureTypeLabelDe[value] ?? value;
+}
+function toGermanTrigger(value: string): string {
+  return seizureTriggerLabelDe[value] ?? value;
+}
+
 type TimeRange = "7d" | "30d" | "6m" | "1y";
 
 export default function VerlaufPage() {
@@ -34,6 +77,7 @@ export default function VerlaufPage() {
   const [befindenData, setBefindenData] = useState<Befinden[]>([]);
   const [loading, setLoading] = useState(true);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingSeizurePdf, setIsExportingSeizurePdf] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const breakpoint = useBreakpoint();
 
@@ -592,6 +636,138 @@ export default function VerlaufPage() {
     }
   };
 
+  // PDF-Export: Zusammenfassung der Anfälle (Anzahl pro Monat, Anfallsarten, Auslöser)
+  const handleExportSeizureSummaryPdf = async () => {
+    setIsExportingSeizurePdf(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      const margin = 12;
+      let y = margin;
+      const maybeNewPage = () => {
+        if (y > pdfH - margin - 25) {
+          pdf.addPage();
+          y = margin;
+        }
+      };
+
+      pdf.setFontSize(14);
+      pdf.text("EpiDoc – Zusammenfassung Anfälle", margin, y);
+      y += 6;
+      pdf.setFontSize(10);
+      pdf.text(
+        `Zeitraum: ${format(timeRangeData.start, "dd.MM.yyyy", { locale: de })} – ${format(timeRangeData.end, "dd.MM.yyyy", { locale: de })}`,
+        margin,
+        y
+      );
+      y += 8;
+
+      // Anfälle pro Monat (chronologisch: alle Monate im Zeitraum)
+      const byMonthKey: Record<string, number> = {};
+      seizuresInRange.forEach((s) => {
+        const key = format(parseISO(s.date), "yyyy-MM");
+        byMonthKey[key] = (byMonthKey[key] ?? 0) + (s.seizure_count ?? 1);
+      });
+      const monthsInRange: { key: string; label: string }[] = [];
+      let d = new Date(timeRangeData.start.getFullYear(), timeRangeData.start.getMonth(), 1);
+      const endT = timeRangeData.end.getTime();
+      while (d.getTime() <= endT) {
+        monthsInRange.push({
+          key: format(d, "yyyy-MM"),
+          label: format(d, "MMM yyyy", { locale: de }),
+        });
+        d.setMonth(d.getMonth() + 1);
+      }
+
+      maybeNewPage();
+      pdf.setFontSize(11);
+      pdf.text("Anfälle pro Monat", margin, y);
+      y += 5;
+      pdf.setFontSize(9);
+      if (monthsInRange.length === 0) {
+        pdf.text("Keine Anfälle im gewählten Zeitraum.", margin, y);
+        y += 6;
+      } else {
+        monthsInRange.forEach(({ key, label }) => {
+          const count = byMonthKey[key] ?? 0;
+          pdf.text(`${label}: ${count}`, margin, y);
+          y += 5;
+        });
+        y += 3;
+      }
+
+      // Häufigste Anfallsarten (type[] + custom_type) – Ausgabe auf Deutsch
+      const typeCount: Record<string, number> = {};
+      seizuresInRange.forEach((s) => {
+        const types = Array.isArray(s.type) ? s.type : s.type != null && s.type !== "" ? [String(s.type)] : [];
+        types.forEach((t) => {
+          const label = toGermanType(String(t).trim());
+          typeCount[label] = (typeCount[label] ?? 0) + (s.seizure_count ?? 1);
+        });
+        if (s.custom_type?.trim()) {
+          const c = s.custom_type.trim();
+          typeCount[c] = (typeCount[c] ?? 0) + (s.seizure_count ?? 1);
+        }
+      });
+      const topTypes = Object.entries(typeCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      maybeNewPage();
+      pdf.setFontSize(11);
+      pdf.text("Häufigste Anfallsarten", margin, y);
+      y += 5;
+      pdf.setFontSize(9);
+      if (topTypes.length === 0) {
+        pdf.text("Keine Angaben.", margin, y);
+        y += 6;
+      } else {
+        topTypes.forEach(([name, count]) => {
+          pdf.text(`• ${name}: ${count}`, margin, y);
+          y += 5;
+        });
+        y += 3;
+      }
+
+      // Häufigste Auslöser (triggers[] + custom_triggers) – Ausgabe auf Deutsch
+      const triggerCount: Record<string, number> = {};
+      seizuresInRange.forEach((s) => {
+        const triggers = Array.isArray(s.triggers) ? s.triggers : s.triggers != null && s.triggers !== "" ? [String(s.triggers)] : [];
+        triggers.forEach((t) => {
+          const label = toGermanTrigger(String(t).trim());
+          triggerCount[label] = (triggerCount[label] ?? 0) + (s.seizure_count ?? 1);
+        });
+        if (s.custom_triggers?.trim()) {
+          const c = s.custom_triggers.trim();
+          triggerCount[c] = (triggerCount[c] ?? 0) + (s.seizure_count ?? 1);
+        }
+      });
+      const topTriggers = Object.entries(triggerCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      maybeNewPage();
+      pdf.setFontSize(11);
+      pdf.text("Häufigste Auslöser", margin, y);
+      y += 5;
+      pdf.setFontSize(9);
+      if (topTriggers.length === 0) {
+        pdf.text("Keine Angaben.", margin, y);
+        y += 6;
+      } else {
+        topTriggers.forEach(([name, count]) => {
+          pdf.text(`• ${name}: ${count}`, margin, y);
+          y += 5;
+        });
+      }
+
+      const filename = `epidoc-anfaelle-${format(timeRangeData.start, "yyyy-MM-dd")}-bis-${format(timeRangeData.end, "yyyy-MM-dd")}.pdf`;
+      pdf.save(filename);
+      toastService.show("Anfälle-Zusammenfassung als PDF exportiert.", "success");
+    } catch (err) {
+      console.error("PDF-Export Anfälle fehlgeschlagen:", err);
+      toastService.show("PDF-Export ist fehlgeschlagen.", "error");
+    } finally {
+      setIsExportingSeizurePdf(false);
+    }
+  };
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -648,40 +824,23 @@ export default function VerlaufPage() {
             </div>
           </div>
 
-          {/* Signal-Auswahl + PDF-Export */}
-          <div className="mb-6">
+          {/* Signal-Auswahl – relative z-10 damit Dropdown nicht von Grafik überdeckt wird */}
+          <div className="relative z-10 mb-8">
             <label className="mb-2 block text-body-small font-medium text-foreground-700">
               Vergleiche Anfälle mit:
             </label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-              <select
-                value={selectedSignal}
-                onChange={(e) => setSelectedSignal(e.target.value)}
-                className="w-full rounded-lg border border-background-200 bg-background-10 px-4 py-2 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:max-w-xs"
-              >
-                <option value="">Bitte wählen...</option>
-                {availableSignalsInRange.map((signal) => (
-                  <option key={signal.id} value={signal.id}>
-                    {signal.label}
-                  </option>
-                ))}
-              </select>
-              {availableSignalsInRange.length > 0 && timeRange !== "7d" && (
-                <button
-                  type="button"
-                  onClick={handleExportPdf}
-                  disabled={isExportingPdf}
-                  className="shrink-0 rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
-                >
-                  {isExportingPdf ? "Exportiere PDF…" : "Alle Symptome als PDF exportieren"}
-                </button>
-              )}
-              {availableSignalsInRange.length > 0 && timeRange === "7d" && (
-                <span className="text-body-small text-foreground-500 shrink-0">
-                  PDF-Export ab Zeitraum 30 Tage
-                </span>
-              )}
-            </div>
+            <select
+              value={selectedSignal}
+              onChange={(e) => setSelectedSignal(e.target.value)}
+              className="w-full rounded-lg border border-background-200 bg-white px-4 py-2.5 text-body text-foreground-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">Bitte wählen...</option>
+              {availableSignalsInRange.map((signal) => (
+                <option key={signal.id} value={signal.id}>
+                  {signal.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* MOBILE VIEW: Grafik mit horizontalem Scroll + Erkenntnisse */}
@@ -998,6 +1157,41 @@ export default function VerlaufPage() {
               </p>
             </div>
           )}
+
+          {/* PDF-Exporte – ganz unten */}
+          <div className="mt-6 mb-6 rounded-xl border border-background-200 bg-white p-4 shadow-sm">
+            <h2 className="mb-3 text-h5 font-semibold text-foreground-900">
+              PDF-Exporte
+            </h2>
+            <p className="mb-4 text-body-small text-foreground-600">
+              Analysen und Zusammenfassungen für den gewählten Zeitraum herunterladen.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <button
+                type="button"
+                onClick={handleExportSeizureSummaryPdf}
+                disabled={isExportingSeizurePdf}
+                className="rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
+              >
+                {isExportingSeizurePdf ? "Exportiere…" : "Anfälle-Zusammenfassung als PDF"}
+              </button>
+              {availableSignalsInRange.length > 0 && timeRange !== "7d" && (
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={isExportingPdf}
+                  className="rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
+                >
+                  {isExportingPdf ? "Exportiere…" : "Analyse-Grafik (Symptome) als PDF"}
+                </button>
+              )}
+              {availableSignalsInRange.length > 0 && timeRange === "7d" && (
+                <span className="text-body-small text-foreground-500">
+                  Analyse-Grafik ab Zeitraum 30 Tage
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

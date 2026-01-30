@@ -156,36 +156,6 @@ export default function EinstellungenPage() {
     }
   };
 
-  // Datenexport
-  const handleExportData = async () => {
-    try {
-      setIsSaving(true);
-      const data = await profileApi.exportData();
-      
-      // Erstelle JSON-Datei
-      const jsonStr = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `epidoc-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      toastService.show("Daten erfolgreich exportiert", "success");
-    } catch (error: any) {
-      console.error("Fehler beim Exportieren:", error);
-      toastService.show(
-        error.message || "Fehler beim Exportieren der Daten",
-        "error"
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <ProtectedRoute>
@@ -267,14 +237,6 @@ export default function EinstellungenPage() {
                 className="w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 shadow-sm transition hover:bg-background-50 text-left"
               >
                 Passwort ändern
-              </button>
-              <button
-                type="button"
-                onClick={handleExportData}
-                disabled={isSaving}
-                className="w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 shadow-sm transition hover:bg-background-50 text-left disabled:opacity-50"
-              >
-                Daten exportieren
               </button>
               <button
                 type="button"

@@ -57,37 +57,37 @@ class DatabaseSeeder extends Seeder
     /**
      * Generiert realistische Demo-Daten für einen Benutzer
      * WICHTIG: Nur für Test-User! Normale Registrierungen erhalten KEINE Demo-Daten.
-     * 
-     * Generiert 30 Tage Daten mit erkennbaren Mustern:
-     * - Innere Unruhe steigt 2-4 Tage vor einem Anfall deutlich an
-     * - 3-5 Anfälle im gesamten Zeitraum
-     * - Tägliche Befinden-Einträge mit realistischen Schwankungen
+     *
+     * Generiert 6 Monate (180 Tage) Daten mit erkennbaren Mustern:
+     * - Befinden: Schlaf-Wach-Rhythmus, Stress, Innere Unruhe (täglich)
+     * - Anfälle: 4–6 pro Monat, fokal oder Absence, mehrheitlich einzeln, ab und zu Serien
+     * - Schlaf-Wach-Rhythmus: 1–2 Tage NACH Anfall schlechter
+     * - Stress: höher direkt VOR dem Anfall
+     * - Innere Unruhe: 2–3 Tage VOR dem Anfall erhöht
      */
     private function generateDemoData(User $user): void
     {
         // Sicherheitsprüfung: Nur für Test-User Demo-Daten generieren
         $testUserEmails = ['test@example.com', 'patient@test.de', 'angehoeriger@test.de'];
         if (!in_array($user->email, $testUserEmails)) {
-            // Keine Demo-Daten für normale Benutzer
             return;
         }
 
-        // Prüfe, ob bereits Daten vorhanden sind
         $hasBefinden = \App\Models\Befinden::where('user_id', $user->id)->exists();
         $hasSeizures = \App\Models\Seizure::where('user_id', $user->id)->exists();
 
-        // Generiere nur, wenn keine Daten vorhanden sind
         if (!$hasBefinden && !$hasSeizures) {
-            // Schritt 1: Plane genau 4 Anfälle über 30 Tage verteilt
-            $seizureCount = 4;
+            $totalDays = 180; // 6 Monate
+            $daysAgo = $totalDays - 1; // Tag 0 = vor 179 Tagen, Tag 179 = heute
+
+            // Schritt 1: Anfälle – 4–6 pro Monat = 24–36 über 6 Monate
+            $seizureCount = rand(24, 36);
             $seizureDates = [];
-            $days = range(0, 29);
+            $days = range(0, $totalDays - 1);
             shuffle($days);
-            
-            // Verteile Anfälle gleichmäßig über den Zeitraum (mindestens 5 Tage Abstand)
             $selectedDays = [];
-            $minDistance = 5;
-            
+            $minDistance = 3; // mind. 3 Tage Abstand für 4–6/Monat
+
             foreach ($days as $day) {
                 $canAdd = true;
                 foreach ($selectedDays as $selectedDay) {
@@ -100,217 +100,126 @@ class DatabaseSeeder extends Seeder
                     $selectedDays[] = $day;
                 }
             }
-            
-            // Sortiere die Tage und erstelle Seizure-Einträge
             sort($selectedDays);
+
             foreach ($selectedDays as $day) {
-                $date = now()->subDays(29 - $day);
+                $date = now()->subDays($daysAgo - $day);
                 $seizureDates[] = $day;
-                
+                // Mehrheit einzelne Anfälle (75%), ab und zu Serien (25%)
+                $seizureCountThisDay = rand(1, 10) <= 8 ? 1 : rand(2, 3);
                 \App\Models\Seizure::factory()->create([
                     'user_id' => $user->id,
                     'date' => $date->format('Y-m-d'),
-                    'seizure_count' => rand(1, 2),
+                    'seizure_count' => $seizureCountThisDay,
                     'duration_minutes' => rand(1, 8),
                     'duration_seconds' => rand(0, 59),
-                    'emergency_med' => rand(0, 3) === 0, // 25% Chance
-                    'type' => ['focal', 'generalized'][rand(0, 1)],
+                    'emergency_med' => rand(0, 4) === 0,
+                    'type' => [['focal', 'absence'][rand(0, 1)]],
                 ]);
             }
 
-            // Schritt 2: Generiere Befinden-Einträge mit exakten Anzahlen
+            // Schritt 2: Befinden – täglich alle drei Symptome (1x pro Tag)
             $timesOfDay = ['morning', 'noon', 'evening'];
-            
-            // Ziel: 
-            // - Innere Unruhe: 30 Einträge (täglich, 1x pro Tag)
-            // - Schlaf-Wach-Rhythmus: 45 Einträge (mehr als täglich, manchmal 2x pro Tag)
-            // - Stress: 20 Einträge (nicht täglich)
-            
-            // Innere Unruhe: täglich, 1x pro Tag = 30 Einträge
-            $restlessnessEntries = 0;
-            $restlessnessTarget = 30;
-            
-            // Schlaf-Wach-Rhythmus: 45 Einträge (15 Tage mit 2 Einträgen, 15 Tage mit 1 Eintrag)
-            $sleepRhythmEntries = 0;
-            $sleepRhythmTarget = 45;
-            $sleepRhythmDoubleDays = []; // Tage mit 2 Einträgen
-            
-            // Stress: 20 Einträge (nicht täglich)
-            $stressEntries = 0;
-            $stressTarget = 20;
-            $stressDays = []; // Tage mit Stress-Einträgen
-            
-            // Plane Stress-Tage (20 von 30 Tagen)
-            $allDays = range(0, 29);
-            shuffle($allDays);
-            $stressDays = array_slice($allDays, 0, 20);
-            sort($stressDays);
-            
-            // Plane Schlaf-Wach-Rhythmus Doppel-Tage (15 Tage mit 2 Einträgen)
-            $sleepDays = range(0, 29);
-            shuffle($sleepDays);
-            $sleepRhythmDoubleDays = array_slice($sleepDays, 0, 15);
-            
-            for ($day = 0; $day < 30; $day++) {
-                $date = now()->subDays(29 - $day);
-                
-                // Bestimme, ob wir vor oder nach einem Anfall sind
+
+            for ($day = 0; $day < $totalDays; $day++) {
+                $date = now()->subDays($daysAgo - $day);
+
                 $daysBeforeSeizure = null;
                 $daysAfterSeizure = null;
                 foreach ($seizureDates as $seizureDay) {
                     if ($day < $seizureDay && ($daysBeforeSeizure === null || $seizureDay - $day < $daysBeforeSeizure)) {
                         $daysBeforeSeizure = $seizureDay - $day;
                     }
-                    if ($day > $seizureDay && ($daysAfterSeizure === null || $day - $seizureDay < $daysAfterSeizure)) {
+                    if ($day >= $seizureDay && ($daysAfterSeizure === null || $day - $seizureDay < $daysAfterSeizure)) {
                         $daysAfterSeizure = $day - $seizureDay;
                     }
                 }
-                
-                // Innere Unruhe: täglich, 1x pro Tag
-                if ($restlessnessEntries < $restlessnessTarget) {
-                    $timeOfDay = $timesOfDay[array_rand($timesOfDay)];
-                    $baseRating = $this->calculateRating(
-                        'restlessness',
-                        $daysBeforeSeizure,
-                        $daysAfterSeizure,
-                        0,
-                        $day
-                    );
-                    
-                    \App\Models\Befinden::create([
-                        'user_id' => $user->id,
-                        'date' => $date->format('Y-m-d'),
-                        'category_id' => 'mental',
-                        'symptom_id' => 'restlessness',
-                        'time_of_day' => $timeOfDay,
-                        'rating' => $baseRating,
-                    ]);
-                    $restlessnessEntries++;
-                }
-                
-                // Schlaf-Wach-Rhythmus: 45 Einträge
-                if ($sleepRhythmEntries < $sleepRhythmTarget) {
-                    $isDoubleDay = in_array($day, $sleepRhythmDoubleDays);
-                    $timeCount = $isDoubleDay ? 2 : 1;
-                    
-                    $availableTimes = $timesOfDay;
-                    shuffle($availableTimes);
-                    $selectedTimes = array_slice($availableTimes, 0, $timeCount);
-                    
-                    foreach ($selectedTimes as $timeOfDay) {
-                        if ($sleepRhythmEntries >= $sleepRhythmTarget) {
-                            break;
-                        }
-                        
-                        $baseRating = $this->calculateRating(
-                            'sleep-rhythm',
-                            $daysBeforeSeizure,
-                            $daysAfterSeizure,
-                            0,
-                            $day
-                        );
-                        
-                        \App\Models\Befinden::create([
-                            'user_id' => $user->id,
-                            'date' => $date->format('Y-m-d'),
-                            'category_id' => 'lifestyle',
-                            'symptom_id' => 'sleep-rhythm',
-                            'time_of_day' => $timeOfDay,
-                            'rating' => $baseRating,
-                        ]);
-                        $sleepRhythmEntries++;
-                    }
-                }
-                
-                // Stress: 20 Einträge (nur an bestimmten Tagen)
-                if ($stressEntries < $stressTarget && in_array($day, $stressDays)) {
-                    $timeOfDay = $timesOfDay[array_rand($timesOfDay)];
-                    $baseRating = $this->calculateRating(
-                        'stress',
-                        $daysBeforeSeizure,
-                        $daysAfterSeizure,
-                        0,
-                        $day
-                    );
-                    
-                    \App\Models\Befinden::create([
-                        'user_id' => $user->id,
-                        'date' => $date->format('Y-m-d'),
-                        'category_id' => 'mental',
-                        'symptom_id' => 'stress',
-                        'time_of_day' => $timeOfDay,
-                        'rating' => $baseRating,
-                    ]);
-                    $stressEntries++;
-                }
+
+                // Innere Unruhe: täglich
+                $ratingRestlessness = $this->calculateRating('restlessness', $daysBeforeSeizure, $daysAfterSeizure, $day);
+                \App\Models\Befinden::create([
+                    'user_id' => $user->id,
+                    'date' => $date->format('Y-m-d'),
+                    'category_id' => 'mental',
+                    'symptom_id' => 'restlessness',
+                    'time_of_day' => $timesOfDay[array_rand($timesOfDay)],
+                    'rating' => $ratingRestlessness,
+                ]);
+
+                // Schlaf-Wach-Rhythmus: täglich
+                $ratingSleep = $this->calculateRating('sleep-rhythm', $daysBeforeSeizure, $daysAfterSeizure, $day);
+                \App\Models\Befinden::create([
+                    'user_id' => $user->id,
+                    'date' => $date->format('Y-m-d'),
+                    'category_id' => 'lifestyle',
+                    'symptom_id' => 'sleep-rhythm',
+                    'time_of_day' => $timesOfDay[array_rand($timesOfDay)],
+                    'rating' => $ratingSleep,
+                ]);
+
+                // Stress: täglich
+                $ratingStress = $this->calculateRating('stress', $daysBeforeSeizure, $daysAfterSeizure, $day);
+                \App\Models\Befinden::create([
+                    'user_id' => $user->id,
+                    'date' => $date->format('Y-m-d'),
+                    'category_id' => 'mental',
+                    'symptom_id' => 'stress',
+                    'time_of_day' => $timesOfDay[array_rand($timesOfDay)],
+                    'rating' => $ratingStress,
+                ]);
             }
         }
     }
 
     /**
      * Berechnet den Rating-Wert (1-10) basierend auf Symptom und Anfall-Nähe
-     * 
+     *
      * Muster:
-     * - Innere Unruhe: steigt ein paar Tage VOR dem Anfall an
-     * - Schlaf-Wach-Rhythmus: ist schlechter NACH dem Anfall
-     * - Stress: hat Schwankungen (kein klares Muster)
+     * - Schlaf-Wach-Rhythmus: 1–2 Tage NACH Anfall schlechter (höherer Wert)
+     * - Stress: höher direkt VOR dem Anfall (1 Tag davor)
+     * - Innere Unruhe: 2–3 Tage VOR dem Anfall erhöht
      */
     private function calculateRating(
         string $symptomId,
         ?int $daysBeforeSeizure,
         ?int $daysAfterSeizure,
-        int $minDistanceToSeizure,
         int $currentDay
     ): int {
-        // Grundniveau (niedrig bis mittel: 2-4)
         $baseRating = rand(2, 4);
-        
-        // Zufällige natürliche Schwankung (±1)
         $variation = rand(-1, 1);
-        
-        if ($symptomId === 'restlessness') {
-            // Innere Unruhe: Steigt ein paar Tage VOR dem Anfall an
-            if ($daysBeforeSeizure !== null && $daysBeforeSeizure <= 4 && $daysBeforeSeizure >= 2) {
-                // 2-4 Tage vor Anfall: deutlicher Anstieg
-                $baseRating = rand(6, 8);
-            } elseif ($daysBeforeSeizure === 1) {
-                // 1 Tag vor Anfall: kann hoch bleiben
+
+        if ($symptomId === 'sleep-rhythm') {
+            // Schlaf-Wach-Rhythmus: 1–2 Tage NACH Anfall schlechter (höherer Wert = schlechter)
+            if ($daysAfterSeizure !== null && $daysAfterSeizure >= 1 && $daysAfterSeizure <= 2) {
                 $baseRating = rand(6, 8);
             } elseif ($daysAfterSeizure === 0) {
-                // Am Tag des Anfalls: kann noch erhöht sein
-                $baseRating = rand(5, 7);
-            } elseif ($daysAfterSeizure !== null && $daysAfterSeizure <= 2) {
-                // 1-2 Tage nach Anfall: fällt wieder ab
+                // Am Anfallstag kann es schon leicht schlechter sein
+                $baseRating = rand(4, 6);
+            } elseif ($daysAfterSeizure !== null && $daysAfterSeizure <= 4) {
                 $baseRating = rand(3, 5);
             }
-        } elseif ($symptomId === 'sleep-rhythm') {
-            // Schlaf-Wach-Rhythmus: ist schlechter NACH dem Anfall
-            if ($daysAfterSeizure !== null && $daysAfterSeizure <= 3) {
-                // 0-3 Tage nach Anfall: schlechter
-                $baseRating = rand(5, 7);
-            } elseif ($daysAfterSeizure !== null && $daysAfterSeizure <= 5) {
-                // 4-5 Tage nach Anfall: noch leicht erhöht
-                $baseRating = rand(4, 6);
-            }
-            // Vor dem Anfall: normales Niveau (keine Änderung)
         } elseif ($symptomId === 'stress') {
-            // Stress: hat Schwankungen (kein klares Muster zu Anfällen)
-            // Zufällige Schwankungen, unabhängig von Anfällen
-            $randomFactor = rand(0, 10);
-            if ($randomFactor <= 2) {
-                // 20% Chance auf erhöhten Stress
+            // Stress: höher direkt VOR dem Anfall (Tag vor dem Anfall)
+            if ($daysBeforeSeizure === 1) {
+                $baseRating = rand(6, 8);
+            } elseif ($daysBeforeSeizure === 0) {
+                // Am Anfallstag kann Stress noch erhöht sein
                 $baseRating = rand(5, 7);
-            } elseif ($randomFactor <= 4) {
-                // 20% Chance auf niedrigen Stress
-                $baseRating = rand(1, 3);
+            } else {
+                $baseRating = rand(2, 4);
             }
-            // Ansonsten: Grundniveau (2-4)
+        } elseif ($symptomId === 'restlessness') {
+            // Innere Unruhe: 2–3 Tage VOR dem Anfall erhöht
+            if ($daysBeforeSeizure !== null && ($daysBeforeSeizure === 2 || $daysBeforeSeizure === 3)) {
+                $baseRating = rand(6, 8);
+            } elseif ($daysBeforeSeizure === 1) {
+                $baseRating = rand(5, 7);
+            } elseif ($daysAfterSeizure !== null && $daysAfterSeizure <= 2) {
+                $baseRating = rand(3, 5);
+            }
         }
-        
-        // Füge natürliche Variation hinzu
+
         $rating = $baseRating + $variation;
-        
-        // Begrenze auf 1-10
         return max(1, min(10, $rating));
     }
 }

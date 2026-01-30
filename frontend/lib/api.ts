@@ -106,15 +106,18 @@ export class ApiClient {
               .join('; ');
             error.message = error.message ? `${error.message} - ${errorMessages}` : errorMessages;
           }
+          if (!error.message) {
+            error.message = `HTTP ${response.status}: ${response.statusText || 'Ein Fehler ist aufgetreten'}`;
+          }
         } catch {
           error = {
             message: `HTTP ${response.status}: ${response.statusText || 'Ein Fehler ist aufgetreten'}`,
           };
         }
         
-        // Debug-Logging für Fehler
+        // Debug-Logging für Fehler (warn statt error, damit Next.js-Overlay nicht bei jedem API-Fehler erscheint)
         if (typeof window !== 'undefined') {
-          console.error(`[API] Error for ${url}:`, error);
+          console.warn(`[API] Error for ${url}:`, error.message, error);
         }
         
         throw error;
@@ -400,7 +403,6 @@ export const profileApi = {
     };
 
     const userResp = await safe(() => authApi.getUser());
-    const profileResp = await safe(() => apiClient.get<{ user: UserProfile }>('/user/profile'));
 
     const befindenResp = await safe(() => befindenApi.getAll());
     const seizuresResp = await safe(() => seizureApi.getAll());
@@ -409,7 +411,7 @@ export const profileApi = {
       exported_at,
       app: 'EpiDoc',
       user: userResp?.user,
-      profile: profileResp?.user,
+      profile: userResp?.user,
       befinden: befindenResp?.data ?? [],
       seizures: seizuresResp?.data ?? [],
     };
