@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EpiDoc - Epilepsie Tagebuch",
-  description: "Digitales Tagebuch für Epilepsie-Patienten",
+  title: "EpiDoc Pilot - Epilepsie Tagebuch",
+  description: "Digitales Tagebuch für Epilepsie-Patienten (Pilotprojekt)",
 };
 
 export default function RootLayout({

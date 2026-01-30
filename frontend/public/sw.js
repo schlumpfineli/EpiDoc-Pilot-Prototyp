@@ -6,7 +6,7 @@ const urlsToCache = [
   '/diary',
   '/befinden',
   '/verlauf',
-  '/profil',
+  '/einstellungen',
   '/kontakt',
 ];
 
@@ -32,54 +32,5 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push Notification Event
-self.addEventListener('push', (event) => {
-  if (event.data) {
-    const data = event.data.json();
-    
-    const options = {
-      body: data.body || data.message,
-      icon: '/logo.png',
-      badge: '/logo.png',
-      vibrate: [200, 100, 200],
-      data: data.data || {},
-      tag: data.tag || 'epidoc-notification',
-      requireInteraction: data.requireInteraction || false,
-      actions: data.actions || [],
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(data.title || 'EpiDoc', options)
-    );
-  }
-});
-
-// Notification Click Event
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  const urlToOpen = event.notification.data?.url || '/diary';
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
-        // Prüfe ob bereits ein Fenster/Tab offen ist
-        for (const client of clientList) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        // Öffne neues Fenster/Tab
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
-      })
-  );
-});
-
-// Notification Close Event
-self.addEventListener('notificationclose', (event) => {
-  // Optional: Tracking für geschlossene Benachrichtigungen
-  console.log('Notification closed:', event.notification.tag);
-});
+// Push-Benachrichtigungen im Pilotprojekt deaktiviert
 

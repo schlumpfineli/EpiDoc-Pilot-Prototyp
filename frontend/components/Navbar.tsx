@@ -19,12 +19,11 @@ export function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
-  // Navigation-Links nur für eingeloggte Benutzer
+  // Navigation-Links nur für eingeloggte Benutzer (Profil/Einstellungen zusammengeführt → nur Einstellungen und Support)
   const navLinks = user ? [
     { href: '/befinden', label: 'Wie geht es dir?' },
     { href: '/diary', label: 'Tagebuch' },
     { href: '/verlauf', label: 'Analyse' },
-    { href: '/profil', label: 'Profil' },
     { href: '/einstellungen', label: 'Einstellungen und Support' },
   ] : [];
 

@@ -214,6 +214,12 @@ export default function EinstellungenPage() {
               </h2>
               <div className="space-y-[var(--spacing-2xs)]">
                 <div className="flex justify-between">
+                  <span className="text-body-small text-foreground-600">User-ID:</span>
+                  <span className="text-body-small font-medium text-foreground-900">
+                    {profileData.display_name || `User-${profileData.id}`}
+                  </span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-body-small text-foreground-600">E-Mail:</span>
                   <span className="text-body-small font-medium text-foreground-900">
                     {profileData.email || "—"}
@@ -273,7 +279,7 @@ export default function EinstellungenPage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(true)}
-                className="w-full rounded-lg border border-[#64748B]/30 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-[#64748B] shadow-sm transition hover:bg-[#64748B]/10 text-left"
+                className="w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-600 shadow-sm transition hover:bg-background-50 text-left"
               >
                 Konto löschen
               </button>
@@ -292,24 +298,16 @@ export default function EinstellungenPage() {
               <button
                 type="button"
                 onClick={openFeedbackModal}
-                className="w-full rounded-lg border border-primary-500 bg-primary-50 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-primary-700 shadow-sm transition hover:bg-primary-100 text-left"
+                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white shadow-sm transition hover:bg-primary-700 text-left"
               >
                 Feedback senden
               </button>
-              <div className="flex items-center gap-[var(--spacing-s)] pt-[var(--spacing-xs)]">
-                <svg className="h-5 w-5 text-foreground-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <a href="mailto:contact@epidoc.ch" className="text-body-small text-primary-600 hover:text-primary-700">
-                  contact@epidoc.ch
-                </a>
-              </div>
             </div>
           </div>
 
           {/* Lösch-Modal */}
           {showDeleteModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-[var(--spacing-s)]">
               <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-[var(--spacing-m)]">
                 <div className="flex items-center justify-between mb-[var(--spacing-m)]">
                   <h2 className="text-body font-semibold text-foreground-900">
@@ -356,7 +354,7 @@ export default function EinstellungenPage() {
                       type="button"
                       onClick={handleDeleteAccount}
                       disabled={isSaving}
-                      className="flex-1 rounded-lg bg-red-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                      className="flex-1 rounded-lg bg-warning-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-warning-600 disabled:opacity-50"
                     >
                       {isSaving ? "Löscht..." : "Konto löschen"}
                     </button>
@@ -368,7 +366,7 @@ export default function EinstellungenPage() {
 
           {/* Feedback Modal */}
           {showFeedbackModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-[var(--spacing-s)]">
               <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-[var(--spacing-m)] max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-[var(--spacing-m)]">
                   <h2 className="text-body font-semibold text-foreground-900">
@@ -387,7 +385,7 @@ export default function EinstellungenPage() {
                 <div className="space-y-[var(--spacing-m)]">
                   <div>
                     <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                      Feedback-Typ <span className="text-red-500">*</span>
+                      Feedback-Typ <span className="text-foreground-800">*</span>
                     </label>
                     <select
                       value={feedbackForm.type}
@@ -401,7 +399,7 @@ export default function EinstellungenPage() {
                   </div>
                   <div>
                     <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                      Nachricht <span className="text-red-500">*</span>
+                      Nachricht <span className="text-foreground-800">*</span>
                     </label>
                     <textarea
                       value={feedbackForm.message}
@@ -440,7 +438,7 @@ export default function EinstellungenPage() {
 
           {/* Passwort ändern Modal */}
           {showPasswordModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-[var(--spacing-s)]">
               <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-[var(--spacing-m)] max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-[var(--spacing-m)]">
                   <h2 className="text-body font-semibold text-foreground-900">
@@ -459,7 +457,7 @@ export default function EinstellungenPage() {
                 <div className="space-y-[var(--spacing-m)]">
                   <div>
                     <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                      Aktuelles Passwort <span className="text-red-500">*</span>
+                      Aktuelles Passwort <span className="text-foreground-800">*</span>
                     </label>
                     <input
                       type="password"
@@ -471,7 +469,7 @@ export default function EinstellungenPage() {
                   </div>
                   <div>
                     <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                      Neues Passwort <span className="text-red-500">*</span>
+                      Neues Passwort <span className="text-foreground-800">*</span>
                     </label>
                     <input
                       type="password"
@@ -487,7 +485,7 @@ export default function EinstellungenPage() {
                   </div>
                   <div>
                     <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                      Neues Passwort bestätigen <span className="text-red-500">*</span>
+                      Neues Passwort bestätigen <span className="text-foreground-800">*</span>
                     </label>
                     <input
                       type="password"

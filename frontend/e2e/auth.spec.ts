@@ -32,7 +32,7 @@ test.describe('Authentifizierung', () => {
 
     // Prüfe, ob erfolgreich registriert wurde
     // (Nach erfolgreicher Registrierung sollte der Benutzer eingeloggt sein)
-    await page.waitForURL(/.*(befinden|diary|verlauf|profil|kontakt)/, { timeout: 10000 });
+    await page.waitForURL(/.*(befinden|diary|verlauf|einstellungen|kontakt)/, { timeout: 10000 });
     await expect(page.locator('nav')).toBeVisible({ timeout: 5000 });
   });
 
@@ -41,7 +41,7 @@ test.describe('Authentifizierung', () => {
     await login(page, 'test@example.com', 'Password123');
 
     // Prüfe, ob erfolgreich eingeloggt wurde
-    await expect(page).toHaveURL(/.*(befinden|diary|verlauf|profil|kontakt)/);
+    await expect(page).toHaveURL(/.*(befinden|diary|verlauf|einstellungen|kontakt)/);
     
     // Prüfe, ob Navbar sichtbar ist (zeigt an, dass Benutzer eingeloggt ist)
     await expect(page.locator('nav')).toBeVisible();

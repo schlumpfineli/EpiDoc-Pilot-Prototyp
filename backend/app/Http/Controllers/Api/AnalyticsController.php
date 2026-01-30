@@ -7,6 +7,7 @@ use App\Models\Befinden;
 use App\Models\CustomSymptomLabel;
 use App\Models\PageView;
 use App\Models\UsageLog;
+use App\Models\User;
 use App\Models\UserSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -350,6 +351,17 @@ class AnalyticsController extends Controller
         $userSessionsTotal = 0;
         $pageViewsTableExists = false;
         $userSessionsTableExists = false;
+        $usersPatient = 0;
+        $usersRelative = 0;
+
+        // Registrierungen nach Rolle (Patient / Angehöriger) – anonym, nur Anzahlen
+        try {
+            if (Schema::hasTable('users')) {
+                $usersPatient = User::where('role', 'patient')->count();
+                $usersRelative = User::where('role', 'relative')->count();
+            }
+        } catch (\Exception $e) {
+        }
 
         // Nur abfragen, wenn Tabelle existiert
         if ($tableExists) {
@@ -481,7 +493,9 @@ class AnalyticsController extends Controller
             'avgSessionsPerWeek',
             'userSessionsTotal',
             'userSessionsTableExists',
-            'customSymptomsList'
+            'customSymptomsList',
+            'usersPatient',
+            'usersRelative'
         ));
     }
 }

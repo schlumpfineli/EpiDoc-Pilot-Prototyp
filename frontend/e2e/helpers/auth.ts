@@ -44,7 +44,7 @@ export async function login(page: Page, credentials: LoginCredentials = TEST_CRE
   
   // Warte auf Weiterleitung oder Navbar
   await Promise.race([
-    page.waitForURL(/.*(diary|befinden|verlauf|profil|kontakt)/, { timeout: 30000 }),
+    page.waitForURL(/.*(diary|befinden|verlauf|einstellungen|kontakt)/, { timeout: 30000 }),
     page.waitForSelector('nav', { timeout: 30000 }),
   ]);
 }
@@ -122,7 +122,7 @@ export async function register(page: Page, userData: {
   
   // Warte, bis Registrierung erfolgreich war
   await Promise.race([
-    page.waitForURL(/.*(diary|befinden|verlauf|profil|kontakt)/, { timeout: 10000 }),
+    page.waitForURL(/.*(diary|befinden|verlauf|einstellungen|kontakt)/, { timeout: 10000 }),
     page.waitForSelector('nav', { timeout: 10000 }),
   ]);
 }

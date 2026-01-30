@@ -226,6 +226,26 @@
             </form>
         </div>
 
+        {{-- Registrierungen nach Rolle (anonym) --}}
+        <div class="section">
+            <h2>👥 Registrierungen nach Rolle</h2>
+            <p style="color: #666; margin-bottom: 15px;">Anzahl angemeldeter Nutzer – nur Anzahlen, keine personenbezogenen Daten.</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <strong>{{ number_format($usersPatient ?? 0, 0, ',', '.') }}</strong>
+                    <span>Patienten</span>
+                </div>
+                <div class="stat-card">
+                    <strong>{{ number_format($usersRelative ?? 0, 0, ',', '.') }}</strong>
+                    <span>Angehörige</span>
+                </div>
+                <div class="stat-card success">
+                    <strong>{{ number_format(($usersPatient ?? 0) + ($usersRelative ?? 0), 0, ',', '.') }}</strong>
+                    <span>Gesamt registriert</span>
+                </div>
+            </div>
+        </div>
+
         <div class="stats">
             <div class="stat-card">
                 <strong>{{ number_format($total, 0, ',', '.') }}</strong>

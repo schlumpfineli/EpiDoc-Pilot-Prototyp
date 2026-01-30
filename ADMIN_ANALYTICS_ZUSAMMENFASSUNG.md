@@ -43,29 +43,35 @@
 
 Unter **„Nutzungsstatistiken“** (`/admin/analytics`) gibt es einen **Datumsfilter** (Von / Bis). Alle folgenden Auswertungen beziehen sich auf diesen Zeitraum.
 
-### 2.1 API & Funktionen (bereits vorher vorhanden)
+### 2.1 Registrierungen nach Rolle
+
+- **Patienten:** Anzahl der als „Patient“ registrierten Nutzer.
+- **Angehörige:** Anzahl der als „Angehöriger“ registrierten Nutzer.
+- **Gesamt registriert:** Summe (nur Anzahlen, anonym).
+
+### 2.2 API & Funktionen (bereits vorher vorhanden)
 
 - **Gesamt Anfragen / Fehler / Erfolgsrate**
 - **Meist genutzte Funktionen** (z.B. Befinden, Tagebuch, Medikamente)
 - **Wenig genutzte Funktionen**
 
-### 2.2 Beschwerden / Symptome (Befinden)
+### 2.3 Beschwerden / Symptome (Befinden)
 
 - **Am häufigsten genutzt:** Welche vordefinierten Symptome (z.B. Stress, Müdigkeit, Kopfschmerz) wie oft eingetragen wurden.
 - **Im Zeitraum nie genutzt:** Vordefinierte Symptome, die in dem Zeitraum gar nicht verwendet wurden.
 
-### 2.3 Eigene Symptome (anonym)
+### 2.4 Eigene Symptome (anonym)
 
 - **Von Benutzern selbst eingetragene Symptome** (z.B. „Kopfschmerzen morgens“).
 - Es werden **nur der Anzeigename und die Nutzungshäufigkeit** im Zeitraum angezeigt – **keine Benutzerzuordnung** (anonym).
 - Erscheint, sobald Nutzer eigene Symptome angelegt und damit Befinden-Einträge gespeichert haben.
 
-### 2.4 Seitenaufrufe
+### 2.5 Seitenaufrufe
 
 - **Welche App-Seiten** (z.B. `/befinden`, `/profil`, `/diary`) **wie oft** aufgerufen wurden.
 - Gesamtanzahl der Seitenaufrufe im Zeitraum.
 
-### 2.5 Nutzungszeit in der App
+### 2.6 Nutzungszeit in der App
 
 - **Ø Minuten pro Tag** (nur Tage, an denen die App genutzt wurde).
 - **Ø App-Öffnungen pro Woche** (wie oft die App geöffnet wurde).
