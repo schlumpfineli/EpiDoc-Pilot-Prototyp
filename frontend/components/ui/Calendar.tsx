@@ -77,7 +77,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       >
         <span>{format(selectedDateObj, 'dd.MM.yyyy', { locale: de })}</span>
         <svg
-          className="h-4 w-4 text-foreground-500 ml-[var(--spacing-2xs)]"
+          className="h-4 w-4 text-foreground-500 ml-2"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

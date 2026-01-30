@@ -94,14 +94,6 @@ export default function RegisterPage() {
           />
 
           <Input
-            label="Name"
-            type="text"
-            placeholder="Vor- und Nachname"
-            {...register("name")}
-            error={errors.name?.message}
-          />
-
-          <Input
             label="E-Mail"
             type="email"
             placeholder="deine@email.de"

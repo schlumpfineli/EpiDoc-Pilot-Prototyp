@@ -301,7 +301,89 @@
             </div>
         @endif
 
-        @if($total == 0)
+        {{-- Beschwerden/Symptome (Befinden) --}}
+        @if(isset($symptomMostUsed) && ($symptomMostUsed->count() > 0 || $symptomNeverUsed->count() > 0))
+            <div class="section">
+                <h2>📋 Beschwerden / Symptome (Befinden)</h2>
+                @if($symptomMostUsed->count() > 0)
+                    <h3 style="font-size: 16px; color: #333; margin-bottom: 12px;">Am häufigsten genutzt</h3>
+                    <div class="function-list">
+                        @foreach($symptomMostUsed as $row)
+                            <div class="function-item">
+                                <div class="function-name">{{ $row->label }}</div>
+                                <span class="function-count">{{ number_format($row->count, 0, ',', '.') }} Einträge</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+                @if($symptomNeverUsed->count() > 0)
+                    <h3 style="font-size: 16px; color: #333; margin: 20px 0 12px;">Im Zeitraum nie genutzt</h3>
+                    <div class="function-list">
+                        @foreach($symptomNeverUsed as $row)
+                            <div class="function-item least-used">
+                                <div class="function-name">{{ $row->label }}</div>
+                                <span class="function-percentage">0</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        {{-- Eigene Symptome (anonym) --}}
+        @if(isset($customSymptomsList) && $customSymptomsList->count() > 0)
+            <div class="section">
+                <h2>✏️ Eigene Symptome (anonym)</h2>
+                <p style="color: #666; margin-bottom: 15px;">Von Benutzern eingetragene Symptome – nur Anzeigename und Nutzungshäufigkeit im Zeitraum, keine Benutzerzuordnung.</p>
+                <div class="function-list">
+                    @foreach($customSymptomsList as $row)
+                        <div class="function-item">
+                            <div class="function-name">{{ $row->label }}</div>
+                            <span class="function-count">{{ number_format($row->count, 0, ',', '.') }} Einträge</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Seitenaufrufe --}}
+        @if(isset($pageViewsTableExists) && $pageViewsTableExists && ($pageViewsByPath->count() > 0 || $pageViewsTotal > 0))
+            <div class="section">
+                <h2>📄 Seitenaufrufe</h2>
+                <p style="color: #666; margin-bottom: 15px;">Welche Seiten wurden wie oft aufgerufen (Gesamt: {{ number_format($pageViewsTotal, 0, ',', '.') }})</p>
+                <div class="function-list">
+                    @foreach($pageViewsByPath as $row)
+                        <div class="function-item">
+                            <div class="function-name">{{ $row->path }}</div>
+                            <span class="function-count">{{ number_format($row->count, 0, ',', '.') }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Zeit in der App (User-Sessions) --}}
+        @if(isset($userSessionsTableExists) && $userSessionsTableExists && $userSessionsTotal >= 0)
+            <div class="section">
+                <h2>⏱️ Nutzungszeit in der App</h2>
+                <div class="stats" style="margin-top: 15px;">
+                    <div class="stat-card">
+                        <strong>{{ number_format($avgMinutesPerDay ?? 0, 1, ',', '.') }}</strong>
+                        <span>Ø Minuten pro Tag (nur Tage mit Nutzung)</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>{{ number_format($avgSessionsPerWeek ?? 0, 1, ',', '.') }}</strong>
+                        <span>Ø App-Öffnungen pro Woche</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>{{ number_format($userSessionsTotal ?? 0, 0, ',', '.') }}</strong>
+                        <span>Session-Starts im Zeitraum</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($total == 0 && (!isset($pageViewsTotal) || $pageViewsTotal == 0) && (!isset($userSessionsTotal) || $userSessionsTotal == 0) && (!isset($symptomMostUsed) || $symptomMostUsed->count() == 0))
             <div class="empty">
                 <p style="font-size: 18px; margin-bottom: 10px;">📭 Keine Daten verfügbar</p>
                 <p style="color: #999;">Für den ausgewählten Zeitraum wurden noch keine Nutzungsdaten erfasst.</p>

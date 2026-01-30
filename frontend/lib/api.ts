@@ -44,6 +44,13 @@ export class ApiClient {
     }
   }
 
+  getToken(): string | null {
+    if (typeof window !== 'undefined' && !this.token) {
+      this.token = localStorage.getItem('auth_token');
+    }
+    return this.token;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -179,9 +186,10 @@ export class ApiClient {
 export const apiClient = new ApiClient();
 
 // API Types
+// Pilot: Kein Klartext-Name, Anzeige nur als User-ID (display_name)
 export interface User {
   id: number;
-  name: string;
+  display_name: string;
   email: string;
   role: 'patient' | 'relative';
   created_at: string;
@@ -236,7 +244,7 @@ export interface Seizure {
 
 export interface UserProfile {
   id: number;
-  name: string;
+  display_name: string;
   email: string;
   role: 'patient' | 'relative';
   disease?: string;
@@ -277,7 +285,6 @@ export interface ExportData {
 // API Functions
 export const authApi = {
   register: async (data: {
-    name: string;
     email: string;
     role: 'patient' | 'relative';
     password: string;
@@ -453,6 +460,38 @@ export const feedbackApi = {
       ...data,
       page_url: data.page_url || (typeof window !== 'undefined' ? window.location.href : undefined),
     });
+  },
+};
+
+// Session & Analytics Tracking (Nutzungsstatistik für Admin)
+export const sessionApi = {
+  start: async (): Promise<{ message: string; session_id: number }> => {
+    return apiClient.post<{ message: string; session_id: number }>('/session/start');
+  },
+
+  end: async (payload?: { session_id?: number; duration_seconds?: number }): Promise<{ message: string }> => {
+    return apiClient.post<{ message: string }>('/session/end', payload ?? {});
+  },
+
+  /** Beim Schließen/Tab-Wechsel: sendet Session-Ende mit Dauer (fetch keepalive, damit Request beim Unload noch rausgeht). */
+  endWithKeepalive: (durationSeconds: number, sessionId?: number) => {
+    if (typeof window === 'undefined') return;
+    const token = apiClient.getToken?.() ?? localStorage.getItem('auth_token');
+    if (!token) return;
+    const url = `${API_BASE_URL}/session/end`;
+    const body = JSON.stringify(
+      sessionId != null ? { duration_seconds: durationSeconds, session_id: sessionId } : { duration_seconds: durationSeconds }
+    );
+    fetch(url, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Bearer ${token}` },
+      keepalive: true,
+    }).catch(() => {});
+  },
+
+  pageView: async (path: string): Promise<{ message: string }> => {
+    return apiClient.post<{ message: string }>('/session/page-view', { path });
   },
 };
 

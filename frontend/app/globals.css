@@ -162,8 +162,9 @@
      * to be available as text-* utilities. These will be available as:
      * text-body-small, text-body, text-h5, text-h4, text-h3, text-h2, text-h1
      */
-    --font-size-body-small: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px - 14px */
-    --font-size-body: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); /* 14px - 16px */
+    /* Basis: Lesbare Mindestgrößen für alle Geräte */
+    --font-size-body-small: clamp(0.875rem, 0.8rem + 0.25vw, 1rem); /* 14px - 16px */
+    --font-size-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px - 18px */
     --font-size-h5: clamp(1rem, 0.9rem + 0.5vw, 1.25rem); /* 16px - 20px */
     --font-size-h4: clamp(1.125rem, 1rem + 0.625vw, 1.5rem); /* 18px - 24px */
     --font-size-h3: clamp(1.375rem, 1.2rem + 0.875vw, 1.875rem); /* 22px - 30px */
@@ -267,6 +268,19 @@
     --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1); /* Very strong S-curve */
     --ease-in-out-expo: cubic-bezier(1, 0, 0, 1); /* Exponential S-curve */
     --ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Circular S-curve */
+}
+
+/*
+ * Tablet & Desktop: Größere Fließtext-Mindestgrößen (ab 768px)
+ * Viele UI-Elemente nutzen text-body-small; hier wirkt sich das sofort aus.
+ */
+@media (min-width: 768px) {
+    :root {
+        --font-size-body-small: clamp(1rem, 1rem + 0.2vw, 1.125rem); /* 16px - 18px */
+        --font-size-body: clamp(1.125rem, 1.125rem + 0.2vw, 1.25rem); /* 18px - 20px */
+        --leading-body-small: clamp(1.5rem, 1.5rem + 0.3vw, 1.75rem);
+        --leading-body: clamp(1.75rem, 1.75rem + 0.3vw, 2rem);
+    }
 }
 
 /**

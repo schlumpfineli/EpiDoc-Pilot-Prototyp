@@ -23,6 +23,8 @@ class User extends Authenticatable
         'email',
         'role',
         'password',
+        'phone',
+        'address',
         'disease',
         'doctors',
         'clinics',
@@ -73,4 +75,35 @@ class User extends Authenticatable
         return $this->hasMany(Seizure::class);
     }
 
+    /**
+     * Get the page views for the user.
+     */
+    public function pageViews()
+    {
+        return $this->hasMany(PageView::class);
+    }
+
+    /**
+     * Get the user sessions for the user.
+     */
+    public function userSessions()
+    {
+        return $this->hasMany(UserSession::class);
+    }
+
+    /**
+     * Pilot: Anzeigename nur als User-ID (kein Klartext-Name).
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return 'User-' . $this->id;
+    }
+
+    /**
+     * Pilot: Reset-Link auf Frontend-URL senden.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
 }

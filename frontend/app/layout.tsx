@@ -6,6 +6,8 @@ import { ToastContainer } from "@/components/ui";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { ErrorBoundaryWrapper } from "@/components/ErrorBoundaryWrapper";
 import { AppInitializer } from "@/components/AppInitializer";
+import { SessionTracker } from "@/components/SessionTracker";
+import { PageViewTracker } from "@/components/PageViewTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +35,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppInitializer />
+        <SessionTracker />
+        <PageViewTracker />
         <ServiceWorkerRegistration />
         <Navbar />
         <ErrorBoundaryWrapper>

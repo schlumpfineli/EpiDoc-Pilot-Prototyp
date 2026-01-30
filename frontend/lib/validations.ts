@@ -12,8 +12,8 @@ const passwordSchema = z.string()
   .regex(/[a-z]/, 'Passwort muss mindestens einen Kleinbuchstaben enthalten')
   .regex(/[0-9]/, 'Passwort muss mindestens eine Zahl enthalten');
 
+// Pilot: Kein Klartext-Name, Benutzer nur über User-ID erkennbar
 export const registerSchema = z.object({
-  name: z.string().min(2, 'Name muss mindestens 2 Zeichen lang sein'),
   email: z.string().email('Ungültige E-Mail-Adresse'),
   role: z.enum(['patient', 'relative'], {
     errorMap: () => ({ message: 'Bitte wähle eine Rolle' }),

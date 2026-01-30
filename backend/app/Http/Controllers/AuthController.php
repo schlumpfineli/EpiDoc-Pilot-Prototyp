@@ -3,43 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\StrongPassword;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
     /**
-     * Registrierung: Validierung, Hash und Rückgabe der Userdaten (ohne Passwort).
+     * Pilot: User-Objekt für API ohne Klartext-Name, nur display_name (User-ID).
+     */
+    private function userToApiResponse(User $user): array
+    {
+        $only = ['id', 'email', 'role', 'created_at', 'updated_at'];
+        $base = $user->only($only);
+        $base['display_name'] = $user->display_name;
+        return $base;
+    }
+
+    /**
+     * Registrierung: E-Mail Pflicht, kein Klartext-Name. Anzeige nur als User-ID.
      */
     public function register(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(['patient', 'relative'])],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', 'min:8', new StrongPassword()],
         ]);
 
         $user = User::create([
-            'name' => $data['name'],
+            'name' => 'User',
             'email' => $data['email'],
             'role' => $data['role'],
             'password' => Hash::make($data['password']),
         ]);
+        $user->update(['name' => 'User-' . $user->id]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
+            'user' => $this->userToApiResponse($user),
             'token' => $token,
         ], 201);
     }
 
     /**
-     * Login: prüft Credentials und gibt Userdaten zurück.
+     * Login: prüft Credentials und gibt Userdaten zurück (ohne Klartext-Name).
      */
     public function login(Request $request): JsonResponse
     {
@@ -59,7 +73,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
+            'user' => $this->userToApiResponse($user),
             'token' => $token,
         ]);
     }
@@ -72,8 +86,9 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validator = Validator::make($request->all(), [
-            'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:500'],
             'disease' => ['nullable', 'string', 'max:255'],
             'doctors' => ['nullable', 'array'],
             'doctors.*.name' => ['required_with:doctors', 'string', 'max:255'],
@@ -102,13 +117,16 @@ class AuthController extends Controller
 
         $user->update($validator->validated());
 
+        $response = $user->only([
+            'id', 'email', 'role', 'disease',
+            'doctors', 'clinics', 'pharmacies', 'emergency_contact',
+            'created_at', 'updated_at'
+        ]);
+        $response['display_name'] = $user->display_name;
+
         return response()->json([
             'message' => 'Profil aktualisiert',
-            'user' => $user->only([
-                'id', 'name', 'email', 'role', 'disease', 
-                'doctors', 'clinics', 'pharmacies', 'emergency_contact',
-                'created_at', 'updated_at'
-            ]),
+            'user' => $response,
         ]);
     }
 
@@ -164,6 +182,65 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Konto erfolgreich gelöscht',
+        ]);
+    }
+
+    /**
+     * Passwort vergessen: E-Mail mit Reset-Link (Pilot: Link auf Frontend).
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $status = Password::sendResetLink(['email' => $data['email']]);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.',
+        ]);
+    }
+
+    /**
+     * Passwort zurücksetzen mit Token aus E-Mail.
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+            'token' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', new StrongPassword()],
+        ], [
+            'password.confirmed' => 'Die Passwort-Bestätigung stimmt nicht überein.',
+        ]);
+
+        $status = Password::reset(
+            [
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'password_confirmation' => $data['password'],
+                'token' => $data['token'],
+            ],
+            function (User $user, string $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Der Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen Link an.',
+                'errors' => ['token' => ['Der Link ist ungültig oder abgelaufen.']],
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Passwort wurde erfolgreich zurückgesetzt.',
         ]);
     }
 }

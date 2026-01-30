@@ -23,7 +23,7 @@ export default function ProfilPage() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
 
   const [formData, setFormData] = useState({
-    name: "",
+    display_name: "",
     email: "",
     disease: "",
     doctors: [] as Contact[],
@@ -46,7 +46,7 @@ export default function ProfilPage() {
       const response = await authApi.getUser();
       setProfileData(response.user as UserProfile);
       setFormData({
-        name: response.user.name,
+        display_name: (response.user as UserProfile).display_name ?? `User-${response.user.id}`,
         email: response.user.email,
         disease: (response.user as any).disease || "",
         doctors: (response.user as any).doctors || [],
@@ -169,17 +169,14 @@ export default function ProfilPage() {
               <div className="space-y-[var(--spacing-m)]">
                 <div>
                   <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                    Name
+                    Anzeigename (User-ID)
                   </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                  />
+                  <p className="rounded-lg border border-background-200 bg-background-50 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body text-foreground-700">
+                    {formData.display_name}
+                  </p>
+                  <p className="mt-1 text-body-small text-foreground-500">
+                    Im Pilotprojekt werden Sie nur über Ihre User-ID geführt. E-Mail dient für Passwort-Änderungen und Benachrichtigungen.
+                  </p>
                 </div>
                 <div>
                   <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">

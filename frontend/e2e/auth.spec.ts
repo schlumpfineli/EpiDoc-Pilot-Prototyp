@@ -13,13 +13,10 @@ test.describe('Authentifizierung', () => {
     await expect(page).toHaveURL(/.*register/);
     await page.waitForLoadState('networkidle');
 
-    // Fülle Registrierungsformular aus
-    // Suche nach Input-Feldern mit verschiedenen Selektoren
-    const nameInput = page.locator('input[name="name"], input[placeholder*="Name" i]').first();
+    // Fülle Registrierungsformular aus (Pilot: kein Namensfeld, nur E-Mail/Passwort/Rolle)
     const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="E-Mail" i]').first();
     const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
     
-    await nameInput.fill('Test User');
     await emailInput.fill(`test-${Date.now()}@example.com`);
     await passwordInput.fill('Password123');
     
@@ -121,12 +118,10 @@ test.describe('Authentifizierung', () => {
     await page.goto('/register');
     await page.waitForLoadState('networkidle');
 
-    // Versuche mit schwachem Passwort zu registrieren
-    const nameInput = page.locator('input[name="name"], input[placeholder*="Name" i]').first();
+    // Versuche mit schwachem Passwort zu registrieren (Pilot: kein Namensfeld)
     const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="E-Mail" i]').first();
     const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
     
-    await nameInput.fill('Test User');
     await emailInput.fill(`test-${Date.now()}@example.com`);
     await passwordInput.fill('weak'); // Zu schwach
     

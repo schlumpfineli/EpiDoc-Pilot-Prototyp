@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient, authApi, type User } from "@/lib/api";
+import { apiClient, authApi, sessionApi, type User } from "@/lib/api";
 import { getToken, clearToken, refreshTokenIfNeeded } from "@/lib/tokenRefresh";
 
 export function useAuth() {
@@ -78,11 +78,15 @@ export function useAuth() {
   }, []);
 
   const logout = async () => {
+    try {
+      await sessionApi.end();
+    } catch {
+      // Session-Ende nur für Statistik; Fehler ignorieren
+    }
     clearToken();
     setUser(null);
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
-      // Event dispatchen, damit andere Komponenten den Auth-Status aktualisieren
       window.dispatchEvent(new Event("auth-changed"));
     }
     router.push("/login");

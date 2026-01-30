@@ -91,7 +91,7 @@ export async function isLoggedIn(page: Page): Promise<boolean> {
  * Registriert einen neuen Benutzer
  */
 export async function register(page: Page, userData: {
-  name: string;
+  name?: string;
   email: string;
   password: string;
   role?: 'patient' | 'relative';
@@ -101,10 +101,7 @@ export async function register(page: Page, userData: {
   // Warte, bis die Seite geladen ist
   await expect(page.locator('h1, form')).toBeVisible();
   
-  // Fülle Registrierungsformular aus
-  const nameInput = page.locator('input[name="name"], input[placeholder*="Name" i]').first();
-  await nameInput.fill(userData.name);
-  
+  // Fülle Registrierungsformular aus (Pilot: kein Namensfeld)
   const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="E-Mail" i]').first();
   await emailInput.fill(userData.email);
   

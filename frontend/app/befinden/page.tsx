@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO, subDays } from "date-fns";
 import { de } from "date-fns/locale";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -80,7 +80,7 @@ export default function BefindenPage() {
   const [customSymptoms, setCustomSymptoms] = useState<CustomSymptom[]>([]);
   const [showAddCustomSymptom, setShowAddCustomSymptom] = useState(false);
   const [newCustomSymptomName, setNewCustomSymptomName] = useState("");
-  
+  const newSymptomInputRef = useRef<HTMLInputElement>(null);
   // Beobachtungs-Items (werden zu Kern-Items hinzugefügt)
   const [observationItems, setObservationItems] = useState<CustomSymptom[]>([]);
   
@@ -165,6 +165,13 @@ export default function BefindenPage() {
     loadHistory();
     loadAllHistory(); // Lade auch alle Daten für Übersicht
   }, [selectedDate]);
+
+  // Fokus auf Eingabefeld, wenn „Hinzufügen“ geöffnet wird
+  useEffect(() => {
+    if (showAddCustomSymptom) {
+      newSymptomInputRef.current?.focus();
+    }
+  }, [showAddCustomSymptom]);
 
   const loadHistory = async () => {
     setLoading(true);
@@ -295,10 +302,12 @@ export default function BefindenPage() {
           reason: medicationReason[medicationKey] || '',
         } : undefined;
 
+        const item = allItems.find((i) => i.id === symptomId);
         const payload = {
           date: dateStr,
           category_id: null,
           symptom_id: symptomId,
+          ...(item?.type === 'custom' && item?.label ? { symptom_label: item.label } : {}),
           time_of_day: slot,
           rating: rating,
           questions: medicationData ? { medicationName: medicationData.medicationName, reason: medicationData.reason } : undefined,
@@ -993,16 +1002,6 @@ export default function BefindenPage() {
           <p className="mb-6 text-body-small text-foreground-500">
             Erfasse dein Befinden täglich. Detaillierte Werte und Muster findest du in der Analyse.
           </p>
-          
-          {/* Debug-Info (nur in Development oder wenn Fehler auftreten) */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mb-4 rounded-lg border border-warning-200 bg-warning-50 p-3 text-xs">
-              <p className="font-medium text-foreground-900">Debug Info:</p>
-              <p className="text-foreground-700">API URL: {process.env.NEXT_PUBLIC_API_URL || 'Nicht gesetzt (verwendet localhost)'}</p>
-              <p className="text-foreground-700">Loading: {loading ? 'Ja' : 'Nein'}</p>
-              <p className="text-foreground-700">History Einträge: {history.length}</p>
-            </div>
-          )}
 
           {/* Datumsauswahl */}
           <div className="mb-6">
@@ -1018,7 +1017,7 @@ export default function BefindenPage() {
             />
           </div>
 
-          {/* Favoriten (häufig verwendete Items) */}
+          {/* Favoriten (häufig verwendete Items) – Bewertung öffnet direkt darunter */}
           {favoriteItems.length > 0 && (
             <div className="mb-6">
               <h2 className="mb-4 mt-2 text-h4 font-semibold text-foreground-900">
@@ -1034,28 +1033,109 @@ export default function BefindenPage() {
                     (h) => h.date === dateStr && h.symptom_id === itemId
                   );
                   const hasEntry = entries.length > 0;
-                  // Zähle alle Einträge für dieses Symptom in allHistory
-                  const totalCount = allHistory.filter((h) => h.symptom_id === itemId).length;
+                  const avgRating = entries.length === 0
+                    ? null
+                    : Math.round(entries.reduce((acc, e) => acc + (e.rating || 0), 0) / entries.length);
+                  const isExpanded = expandedItems[itemId];
+                  const selectedTimeSlot = expandedTimeSlots[itemId];
 
-                    return (
-                        <button
-                      key={itemId}
-                          type="button"
-                      onClick={(e) => toggleItem(itemId, e)}
-                      className="flex items-center justify-between rounded-lg border border-background-200 bg-background-10 px-4 py-3 text-left transition-colors hover:bg-background-25"
-                    >
-                      <span className="text-body font-medium text-foreground-900">{item.label}</span>
-                      <div className="flex items-center gap-2">
-                        {hasEntry && (
-                          <span className="rounded-full bg-primary-200 px-2 py-0.5 text-[10px] font-medium text-foreground-700">
-                            Heute
-                          </span>
-                        )}
-                        <svg className="h-4 w-4 text-foreground-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </button>
+                  return (
+                    <div key={itemId} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={(e) => toggleItem(itemId, e)}
+                        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-background-25"
+                      >
+                        <span className="text-body font-medium text-foreground-900">{item.label}</span>
+                        <div className="flex items-center gap-2">
+                          {hasEntry && (
+                            <span className="rounded-full bg-primary-200 px-2 py-0.5 text-[10px] font-medium text-foreground-700">
+                              Heute
+                            </span>
+                          )}
+                          {avgRating !== null && (
+                            <span className="rounded-full bg-secondary-200 px-2 py-0.5 text-[10px] font-medium text-foreground-700">
+                              Ø {avgRating}
+                            </span>
+                          )}
+                          {(entries.length > 0 || Object.keys(tempRatings[itemId] || {}).length > 0) && (
+                            <svg className="h-5 w-5 text-foreground-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                          <svg className="h-4 w-4 text-foreground-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="border-t border-background-200 p-4">
+                          {(() => {
+                            const timeSlots: Array<{ id: TimeOfDay | 'allDay' }> = [
+                              { id: 'allDay' },
+                              { id: 'morning' },
+                              { id: 'noon' },
+                              { id: 'evening' },
+                            ];
+                            return (
+                              <>
+                                <div className="mb-3">
+                                  <p className="text-[11px] text-foreground-500 mb-2">Optional</p>
+                                </div>
+                                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                  {timeSlots.map((slot) => {
+                                    const isSelected = selectedTimeSlot === slot.id;
+                                    const isAllDay = slot.id === 'allDay';
+                                    let displayRating: number | null = null;
+                                    if (isAllDay) {
+                                      const dayEntries = history.filter(
+                                        (h) => h.date === dateStr && h.symptom_id === itemId
+                                      );
+                                      if (dayEntries.length > 0) {
+                                        const sum = dayEntries.reduce((acc, e) => acc + (e.rating || 0), 0);
+                                        displayRating = Math.round(sum / dayEntries.length);
+                                      }
+                                    } else {
+                                      displayRating = getRatingForTimeSlot(selectedDate, itemId, slot.id as TimeOfDay);
+                                    }
+                                    const slotTempRating = isAllDay
+                                      ? (tempRatings[itemId]?.allDay ?? displayRating ?? null)
+                                      : (tempRatings[itemId]?.[slot.id as TimeOfDay] ?? displayRating ?? null);
+                                    const hasExistingEntry = isAllDay
+                                      ? (history.some((h) => h.date === dateStr && h.symptom_id === itemId) || (tempRatings[itemId]?.allDay !== undefined && tempRatings[itemId]?.allDay !== null))
+                                      : (history.some((h) => h.date === dateStr && h.symptom_id === itemId && h.time_of_day === slot.id) || (tempRatings[itemId]?.[slot.id as TimeOfDay] !== undefined && tempRatings[itemId]?.[slot.id as TimeOfDay] !== null));
+                                    return (
+                                      <div key={slot.id} className="relative">
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleTimeSlot(itemId, slot.id)}
+                                          className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out relative ${
+                                            isSelected
+                                              ? 'border-primary-500 bg-primary-50 text-foreground-900'
+                                              : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
+                                          }`}
+                                          title={getTimeSlotLabel(slot.id)}
+                                        >
+                                          {hasExistingEntry && (
+                                            <svg className="absolute top-2 right-2 h-4 w-4 text-foreground-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                          )}
+                                          {getTimeSlotIcon(slot.id)}
+                                          <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                {selectedTimeSlot && renderRatingScale(itemId, selectedTimeSlot)}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -1384,28 +1464,43 @@ export default function BefindenPage() {
                                         </button>
                         </div>
             {showAddCustomSymptom && (
-              <div className="mb-3 flex gap-2">
-                                  <input
-                                            type="text"
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <input
+                  ref={newSymptomInputRef}
+                  type="text"
                   value={newCustomSymptomName}
                   onChange={(e) => setNewCustomSymptomName(e.target.value)}
                   placeholder="Name des Symptoms"
-                  className="flex-1 rounded-lg border border-background-200 bg-background-10 px-4 py-2 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                            onKeyDown={(e) => {
+                  autoComplete="off"
+                  className="min-w-[12rem] max-w-xs flex-1 rounded-lg border border-background-200 bg-background-10 px-4 py-2 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleAddCustomSymptom();
                     }
                   }}
                 />
-                                            <button
-                                              type="button"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewCustomSymptomName('');
+                    setShowAddCustomSymptom(false);
+                  }}
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-foreground-400 transition-colors hover:bg-background-200 hover:text-foreground-600"
+                  aria-label="Eingabe verwerfen"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
                   onClick={handleAddCustomSymptom}
                   className="rounded-lg border border-primary-500 bg-primary-500 px-4 py-2 text-body-small font-medium text-white hover:bg-primary-600"
-                                          >
+                >
                   Speichern
-                                            </button>
-                                        </div>
-                                      )}
+                </button>
+              </div>
+            )}
             {customSymptoms.length > 0 && (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {customSymptoms.map((item) => {
@@ -1420,40 +1515,42 @@ export default function BefindenPage() {
 
                       return (
                     <div key={item.id} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
-                      <div className="flex items-center gap-4">
-                        {!isExpanded && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveCustomSymptom(item.id)}
-                            className="ml-4 text-foreground-400 hover:text-foreground-600 flex-shrink-0"
-                            title="Entfernen"
-                          >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                        )}
+                      <div className="flex min-h-[48px] w-full items-stretch">
                         <button
                           type="button"
                           onClick={(e) => toggleItem(item.id, e)}
-                          className="flex flex-1 w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-background-25"
+                          className="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 px-4 py-3 pr-2 text-left transition-colors hover:bg-background-25 active:bg-background-200 sm:max-w-[calc(100%-3rem)]"
                         >
-                          <span className="text-body font-medium text-foreground-900">{item.label}</span>
-                          <div className="flex items-center gap-3">
+                          <span className="text-body font-medium text-foreground-900 truncate">{item.label}</span>
+                          <div className="flex items-center gap-4 flex-shrink-0">
                             {avgRating !== null && (
                               <span className="rounded-full bg-secondary-200 px-2 py-0.5 text-[10px] font-medium text-foreground-700">
                                 Ø {avgRating}
-                                  </span>
-                                )}
-                            {entries.length > 0 && (
-                              <svg className="h-5 w-5 text-foreground-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              </span>
+                            )}
+                            {(entries.length > 0 || Object.keys(tempRatings[item.id] || {}).length > 0) && (
+                              <svg className="h-5 w-5 text-foreground-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             )}
-                            <svg className="h-4 w-4 text-foreground-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-4 w-4 text-foreground-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
-                              </div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleRemoveCustomSymptom(item.id);
+                          }}
+                          className="flex h-10 w-12 min-w-[48px] flex-shrink-0 items-center justify-center self-center text-foreground-400 transition-colors hover:bg-background-200 hover:text-foreground-600"
+                          aria-label="Symptom aus Liste entfernen"
+                        >
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       </div>
 
@@ -1507,18 +1604,20 @@ export default function BefindenPage() {
                                         <button
                                           type="button"
                                           onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                          className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out ${
+                                          className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out relative ${
                                             isSelected
                                               ? 'border-primary-500 bg-primary-50 text-foreground-900'
                                               : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
                                           }`}
                                           title={getTimeSlotLabel(slot.id)}
                                         >
+                                          {hasExistingEntry && (
+                                            <svg className="absolute top-2 right-2 h-4 w-4 text-foreground-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                          )}
                                           {getTimeSlotIcon(slot.id)}
                                           <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
-                                          {hasExistingEntry && (
-                                            <span className="text-[10px] text-foreground-500 mt-1 font-normal">Erfasst</span>
-                                          )}
                                         </button>
                                       </div>
                       );

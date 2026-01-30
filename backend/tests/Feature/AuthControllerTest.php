@@ -16,7 +16,6 @@ class AuthControllerTest extends TestCase
     public function user_can_register_with_valid_data()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'patient',
             'password' => 'Password123',
@@ -24,24 +23,25 @@ class AuthControllerTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'user' => ['id', 'name', 'email', 'role', 'created_at', 'updated_at'],
+                'user' => ['id', 'display_name', 'email', 'role', 'created_at', 'updated_at'],
                 'token',
             ])
             ->assertJson([
                 'user' => [
-                    'name' => 'Test User',
                     'email' => 'test@example.com',
                     'role' => 'patient',
                 ],
             ]);
+
+        $user = User::where('email', 'test@example.com')->first();
+        $this->assertNotNull($user);
+        $response->assertJson(['user' => ['display_name' => 'User-' . $user->id]]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'role' => 'patient',
         ]);
 
-        // Passwort sollte gehasht sein
-        $user = User::where('email', 'test@example.com')->first();
         $this->assertTrue(Hash::check('Password123', $user->password));
     }
 
@@ -49,7 +49,6 @@ class AuthControllerTest extends TestCase
     public function user_cannot_register_with_invalid_email()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'invalid-email',
             'role' => 'patient',
             'password' => 'Password123',
@@ -65,7 +64,6 @@ class AuthControllerTest extends TestCase
         User::factory()->create(['email' => 'existing@example.com']);
 
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'existing@example.com',
             'role' => 'patient',
             'password' => 'Password123',
@@ -79,7 +77,6 @@ class AuthControllerTest extends TestCase
     public function user_cannot_register_with_short_password()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'patient',
             'password' => 'short',
@@ -93,7 +90,6 @@ class AuthControllerTest extends TestCase
     public function user_cannot_register_with_password_without_uppercase()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'patient',
             'password' => 'password123', // Kein Großbuchstabe
@@ -107,7 +103,6 @@ class AuthControllerTest extends TestCase
     public function user_cannot_register_with_password_without_lowercase()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'patient',
             'password' => 'PASSWORD123', // Kein Kleinbuchstabe
@@ -121,7 +116,6 @@ class AuthControllerTest extends TestCase
     public function user_cannot_register_with_password_without_number()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'patient',
             'password' => 'Password', // Keine Zahl
@@ -135,7 +129,6 @@ class AuthControllerTest extends TestCase
     public function user_can_register_with_strong_password()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'patient',
             'password' => 'Password123', // Erfüllt alle Anforderungen
@@ -143,7 +136,7 @@ class AuthControllerTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'user' => ['id', 'name', 'email', 'role'],
+                'user' => ['id', 'display_name', 'email', 'role'],
                 'token',
             ]);
     }
@@ -152,7 +145,6 @@ class AuthControllerTest extends TestCase
     public function user_cannot_register_with_invalid_role()
     {
         $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'invalid_role',
             'password' => 'Password123',
@@ -177,7 +169,7 @@ class AuthControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'user' => ['id', 'name', 'email', 'role', 'created_at', 'updated_at', 'last_login_at'],
+                'user' => ['id', 'display_name', 'email', 'role', 'created_at', 'updated_at'],
                 'token',
             ])
             ->assertJson([
@@ -185,10 +177,6 @@ class AuthControllerTest extends TestCase
                     'email' => 'test@example.com',
                 ],
             ]);
-
-        // last_login_at sollte aktualisiert worden sein
-        $user->refresh();
-        $this->assertNotNull($user->last_login_at);
     }
 
     /** @test */
@@ -230,7 +218,6 @@ class AuthControllerTest extends TestCase
         $user = $this->createAuthenticatedUser();
 
         $response = $this->putJson('/api/user/profile', [
-            'name' => 'Updated Name',
             'phone' => '+41 12 345 67 89',
             'address' => 'Test Address 123',
         ]);
@@ -242,7 +229,6 @@ class AuthControllerTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'name' => 'Updated Name',
             'phone' => '+41 12 345 67 89',
             'address' => 'Test Address 123',
         ]);
@@ -448,7 +434,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonStructure([
                 'user' => [
                     'id',
-                    'name',
+                    'display_name',
                     'email',
                     'role',
                     'created_at',

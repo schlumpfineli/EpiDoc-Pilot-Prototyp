@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Befinden;
+use App\Models\CustomSymptomLabel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -60,12 +61,13 @@ class BefindenController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'date' => ['required', 'date'],
-                'category_id' => ['nullable', 'string'], // Jetzt optional, kann 'core', 'optional', 'custom' sein
+                'category_id' => ['nullable', 'string'],
                 'symptom_id' => ['required', 'string', 'max:255'],
+                'symptom_label' => ['nullable', 'string', 'max:500'], // Anzeigename für eigene Symptome (Admin-Liste, anonym)
                 'time_of_day' => ['required', 'string', 'in:morning,noon,evening'],
-                'rating' => ['nullable', 'integer', 'min:0', 'max:10'], // Optional für Beobachtungen
+                'rating' => ['nullable', 'integer', 'min:0', 'max:10'],
                 'questions' => ['nullable', 'array'],
-                'observation' => ['nullable', 'string'], // Für Beobachtungen ohne Skala
+                'observation' => ['nullable', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -95,10 +97,11 @@ class BefindenController extends Controller
             
             $existing = $query->first();
 
+            $this->saveCustomSymptomLabelIfNeeded($request->symptom_id, $request->input('symptom_label'));
+
             if ($existing) {
-                // Aktualisiere bestehenden Eintrag
                 $validated = $validator->validated();
-                // Stelle sicher, dass null-Werte korrekt behandelt werden
+                unset($validated['symptom_label']);
                 foreach ($validated as $key => $value) {
                     if ($value === null && $key !== 'rating' && $key !== 'observation' && $key !== 'questions') {
                         unset($validated[$key]);
@@ -112,6 +115,7 @@ class BefindenController extends Controller
             }
 
             $validated = $validator->validated();
+            unset($validated['symptom_label']);
             $befinden = Befinden::create([
                 'user_id' => $user->id,
                 ...$validated,
@@ -197,6 +201,7 @@ class BefindenController extends Controller
             'date' => ['sometimes', 'date'],
             'category_id' => ['sometimes', 'nullable', 'string'],
             'symptom_id' => ['sometimes', 'string', 'max:255'],
+            'symptom_label' => ['nullable', 'string', 'max:500'],
             'time_of_day' => ['sometimes', 'string', 'in:morning,noon,evening'],
             'rating' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:10'],
             'questions' => ['nullable', 'array'],
@@ -210,7 +215,11 @@ class BefindenController extends Controller
             ], 422);
         }
 
-        $befinden->update($validator->validated());
+        $this->saveCustomSymptomLabelIfNeeded($request->input('symptom_id', $befinden->symptom_id), $request->input('symptom_label'));
+
+        $validated = $validator->validated();
+        unset($validated['symptom_label']);
+        $befinden->update($validated);
 
         return response()->json([
             'message' => 'Befinden-Eintrag aktualisiert',
@@ -237,5 +246,23 @@ class BefindenController extends Controller
         return response()->json([
             'message' => 'Befinden-Eintrag gelöscht',
         ]);
+    }
+
+    /**
+     * Speichert Anzeigename für eigene Symptome (anonym für Admin-Liste).
+     */
+    private function saveCustomSymptomLabelIfNeeded(?string $symptomId, ?string $label): void
+    {
+        if (!$symptomId || !$label || !\Illuminate\Support\Facades\Schema::hasTable('custom_symptom_labels')) {
+            return;
+        }
+        $known = config('befinden.known_symptom_ids', []);
+        if (in_array($symptomId, $known, true)) {
+            return;
+        }
+        CustomSymptomLabel::updateOrCreate(
+            ['symptom_id' => $symptomId],
+            ['label' => \Illuminate\Support\Str::limit($label, 500)]
+        );
     }
 }

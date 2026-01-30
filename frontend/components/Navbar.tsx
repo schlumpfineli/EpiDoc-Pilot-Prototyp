@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { EpiDocLogo } from '@/components/EpiDocLogo';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -43,20 +43,12 @@ export function Navbar() {
             href={user ? '/diary' : '/'} 
             className="flex items-center gap-2"
           >
-            <Image
-              src="/logo.png"
-              alt="EpiDoc Logo"
-              width={120}
-              height={32}
-              className="h-8"
-              style={{ width: 'auto' }}
-              priority
-            />
+            <EpiDocLogo size={32} className="h-8 w-8 shrink-0" />
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation (ab lg; Tablet nutzt Menü-Button) */}
           {user && navLinks.length > 0 && (
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -80,9 +72,9 @@ export function Navbar() {
             ) : user ? (
               <>
                 {/* Desktop User Menu */}
-                <div className="hidden md:flex items-center gap-m">
+                <div className="hidden lg:flex items-center gap-m">
                   <span className="text-body text-foreground-600">
-                    {user.name}
+                    {user.display_name}
                   </span>
                   <Button
                     variant="secondary"
@@ -93,10 +85,10 @@ export function Navbar() {
                   </Button>
                 </div>
 
-                {/* Mobile Menu Button */}
+                {/* Menü-Button (Mobile + Tablet) */}
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="md:hidden p-2 rounded-xl text-foreground-700 hover:bg-background-100"
+                  className="lg:hidden p-2 rounded-xl text-foreground-700 hover:bg-background-100"
                   aria-label="Menü öffnen"
                 >
                   <svg
@@ -140,9 +132,9 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Ausklapp-Menü (Mobile + Tablet) */}
         {isMobileMenuOpen && user && (
-          <div className="border-t border-background-200 py-s md:hidden">
+          <div className="border-t border-background-200 py-s lg:hidden">
             <div className="space-y-2xs">
               {navLinks.map((link) => (
                 <Link
@@ -160,7 +152,7 @@ export function Navbar() {
               ))}
               <div className="border-t border-background-200 pt-2xs mt-2xs">
                 <div className="px-m py-s text-body text-foreground-600">
-                  {user.name}
+                  {user.display_name}
                 </div>
                 <button
                   onClick={handleLogout}

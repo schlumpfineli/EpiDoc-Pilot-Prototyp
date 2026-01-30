@@ -2,7 +2,8 @@ import { Button } from './Button';
 import './header.css';
 
 type User = {
-  name: string;
+  id?: number;
+  display_name?: string;
 };
 
 export interface HeaderProps {
@@ -38,7 +39,7 @@ export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps
         {user ? (
           <>
             <span className="welcome">
-              Welcome, <b>{user.name}</b>!
+              Welcome, <b>{user.display_name ?? `User-${user.id}`}</b>!
             </span>
             <Button size="small" onClick={onLogout} label="Log out" />
           </>

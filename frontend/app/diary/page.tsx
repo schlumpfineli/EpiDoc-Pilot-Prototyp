@@ -88,6 +88,135 @@ const triggerOptions = [
   "Infektion",
 ];
 
+// Optionen für Zeitauswahl (Stunde 00–23, Minute alle 5 Min: 00, 05, 10, … 55)
+const hourOptions = Array.from({ length: 24 }, (_, i) =>
+  String(i).padStart(2, "0")
+);
+const minuteOptions = Array.from({ length: 12 }, (_, i) =>
+  String(i * 5).padStart(2, "0")
+);
+
+/** Minute (00–59) auf nächsten 5-Minuten-Schritt runden für Anzeige */
+function roundMinuteToFive(min: string): string {
+  const num = parseInt(min, 10) || 0;
+  const rounded = Math.round(num / 5) * 5;
+  const clamped = Math.min(55, Math.max(0, rounded));
+  return String(clamped).padStart(2, "0");
+}
+
+const SCROLL_ITEM_HEIGHT = 2; // rem, feste Höhe pro Eintrag für Scroll-Berechnung
+
+/** Scroll-Dropdown: zeigt nur 3 Einträge, Rest beim Scrollen sichtbar. Mittlere Zeile volle Deckkraft, Nachbarn heller. */
+function ScrollTimeSelect({
+  options,
+  value,
+  onChange,
+  "aria-label": ariaLabel,
+  className = "",
+}: {
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+  "aria-label": string;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [centerIndex, setCenterIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  const selectedIndex = options.indexOf(value);
+
+  // Klick außerhalb schließt
+  useEffect(() => {
+    if (!isOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [isOpen]);
+
+  // Beim Öffnen: gewählten Eintrag zentrieren und centerIndex setzen
+  useEffect(() => {
+    if (!isOpen || selectedIndex < 0 || !listRef.current) return;
+    setCenterIndex(selectedIndex);
+    const el = listRef.current.children[selectedIndex] as HTMLElement;
+    if (el) el.scrollIntoView({ block: "center", behavior: "auto" });
+  }, [isOpen, selectedIndex]);
+
+  // Beim Scrollen: mittlere sichtbare Zeile ermitteln (für Opacity)
+  const handleScroll = () => {
+    const list = listRef.current;
+    if (!list || options.length === 0) return;
+    const scrollTop = list.scrollTop;
+    const height = list.clientHeight;
+    const itemHeightRem = SCROLL_ITEM_HEIGHT;
+    const itemHeightPx = itemHeightRem * 16;
+    const centerY = scrollTop + height / 2;
+    const index = Math.min(
+      options.length - 1,
+      Math.max(0, Math.round((centerY - itemHeightPx / 2) / itemHeightPx))
+    );
+    setCenterIndex(index);
+  };
+
+  return (
+    <div ref={containerRef} className={`relative flex-1 min-w-0 ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((o) => !o)}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={ariaLabel}
+        className={`w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body text-left shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer flex items-center justify-between ${isOpen ? "border-primary-500 ring-2 ring-primary-200" : ""}`}
+      >
+        <span>{value}</span>
+        <svg className={`h-4 w-4 text-foreground-500 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <ul
+          ref={listRef}
+          role="listbox"
+          aria-label={ariaLabel}
+          onScroll={handleScroll}
+          className="absolute left-0 right-0 top-full z-10 mt-1 overflow-y-auto rounded-lg border border-background-200 bg-white shadow-lg [scrollbar-width:thin]"
+          style={{ maxHeight: "4.5rem" }}
+        >
+          {options.map((opt, i) => {
+            const distanceFromCenter = Math.abs(i - centerIndex);
+            const opacity = distanceFromCenter === 0 ? 1 : distanceFromCenter === 1 ? 0.7 : 0.45;
+            return (
+              <li
+                key={opt}
+                role="option"
+                aria-selected={opt === value}
+                className="h-8 flex items-center"
+                style={{ opacity }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(opt);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full h-full px-[var(--spacing-s)] text-body text-left hover:bg-primary-50 focus:bg-primary-50 focus:outline-none transition-opacity ${opt === value ? "bg-primary-100 font-medium text-primary-800" : "text-foreground-800"}`}
+                >
+                  {opt}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function DiaryPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [entries, setEntries] = useState<Record<string, DiaryEntry>>({});
@@ -331,6 +460,18 @@ export default function DiaryPage() {
 
   const handleNextMonth = () => {
     setCurrentDate(addMonths(currentDate, 1));
+  };
+
+  const monthNavRef = useRef<HTMLButtonElement>(null);
+  const handleMonthNavClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const btn = monthNavRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const third = rect.width / 3;
+    if (x < third) handlePreviousMonth();
+    else if (x > rect.width - third) handleNextMonth();
+    else setCurrentDate(new Date());
   };
 
   const handleDayClick = (day: Date) => {
@@ -820,13 +961,18 @@ export default function DiaryPage() {
           </h1>
         </div>
 
-        <div className="mx-auto w-full max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl">
-          {/* Month Navigation */}
-          <div className="mb-[var(--spacing-s)] flex items-center justify-between rounded-xl bg-primary-500 px-[var(--spacing-m)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] shadow-sm">
-            <button
-              onClick={handlePreviousMonth}
-              className="flex h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 flex-shrink-0 items-center justify-center rounded-lg text-white transition hover:bg-primary-600 hover:text-white"
-              aria-label="Vorheriger Monat"
+        <div className="relative z-10 w-full">
+          {/* Month Navigation – ein Button für die ganze Leiste (Klickposition: links=zurück, Mitte=heute, rechts=vor) */}
+          <button
+            ref={monthNavRef}
+            type="button"
+            onClick={handleMonthNavClick}
+            className="mb-[var(--spacing-s)] flex w-full items-center justify-between rounded-xl bg-primary-500 px-[var(--spacing-m)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] text-white shadow-sm transition-colors hover:bg-primary-400 active:bg-primary-300 focus-visible:outline focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-500"
+            aria-label="Monat wechseln: links vorheriger, Mitte aktueller Monat, rechts nächster"
+          >
+            <span
+              aria-hidden
+              className="flex h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 flex-shrink-0 items-center justify-center rounded-lg"
             >
               <svg
                 className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7"
@@ -834,30 +980,18 @@ export default function DiaryPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-            </button>
-
-            <button
-              onClick={() => {
-                // Optional: Öffne einen Datepicker oder ändere direkt den Monat
-                // Für jetzt nur visuell als Button
-              }}
-              className="flex-1 min-w-0 flex items-center justify-center px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] text-body-small sm:text-body md:text-h5 font-semibold text-white transition hover:bg-primary-600 hover:text-white rounded-lg"
-              aria-label="Monat auswählen"
+            </span>
+            <span
+              className="min-w-0 flex-1 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] text-center text-h4 sm:text-h3 font-semibold"
+              aria-hidden
             >
               {format(currentDate, "MMMM yyyy", { locale: de })}
-            </button>
-
-            <button
-              onClick={handleNextMonth}
-              className="flex h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 flex-shrink-0 items-center justify-center rounded-lg text-white transition hover:bg-primary-600 hover:text-white"
-              aria-label="Nächster Monat"
+            </span>
+            <span
+              className="flex h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 flex-shrink-0 items-center justify-center rounded-lg"
+              aria-hidden
             >
               <svg
                 className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7"
@@ -865,15 +999,10 @@ export default function DiaryPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </button>
-          </div>
+            </span>
+          </button>
         </div>
 
         {/* Calendar Grid */}
@@ -934,7 +1063,7 @@ export default function DiaryPage() {
           </div>
         </div>
 
-        <p className="text-body-small text-foreground-600 text-center px-[var(--spacing-m)] mt-[var(--spacing-s)]">
+        <p className="text-body text-foreground-600 text-center px-[var(--spacing-m)] mt-[var(--spacing-s)]">
           Wähle einen Tag aus dem Kalender aus, um Anfälle einzutragen oder bereits erfasste Anfälle anzuzeigen.
         </p>
 
@@ -961,7 +1090,7 @@ export default function DiaryPage() {
                     <div className="flex items-center gap-[var(--spacing-s)]">
                       <button
                         onClick={() => handleAddNewSeizure(viewingDate)}
-                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
                       >
                         + Neuer Anfall
                       </button>
@@ -1001,31 +1130,31 @@ export default function DiaryPage() {
                           <div className="flex items-start justify-between mb-[var(--spacing-s)]">
                             <div className="flex-1">
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body-small font-medium text-foreground-700">Zeit: </span>
-                                <span className="text-body-small text-foreground-900">{seizure.time || "Nicht angegeben"}</span>
+                                <span className="text-body font-medium text-foreground-700">Zeit: </span>
+                                <span className="text-body text-foreground-900">{seizure.time || "Nicht angegeben"}</span>
                               </div>
                               
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body-small font-medium text-foreground-700">Anfallstyp: </span>
+                                <span className="text-body font-medium text-foreground-700">Anfallstyp: </span>
                                 <div className="flex flex-wrap gap-[var(--spacing-2xs)] mt-[var(--spacing-2xs)]">
                                   {allTypes.length > 0 ? (
                                     allTypes.map((type, idx) => (
                                       <span
                                         key={idx}
-                                        className="inline-block text-body-small text-foreground-700 bg-white rounded-md px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] border border-background-200"
+                                        className="inline-block text-body text-foreground-700 bg-white rounded-md px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] border border-background-200"
                                       >
                                         {type}
                                       </span>
                                     ))
                                   ) : (
-                                    <span className="text-body-small text-foreground-500">Nicht angegeben</span>
+                                    <span className="text-body text-foreground-500">Nicht angegeben</span>
                                   )}
                                 </div>
                               </div>
                               
                               <div>
-                                <span className="text-body-small font-medium text-foreground-700">Notfallmedikament: </span>
-                                <span className={`text-body-small font-medium ${
+                                <span className="text-body font-medium text-foreground-700">Notfallmedikament: </span>
+                                <span className={`text-body font-medium ${
                                   seizure.emergencyMed === "yes" || seizure.emergencyMed === "ja"
                                     ? "text-secondary-600"
                                     : "text-foreground-600"
@@ -1033,7 +1162,7 @@ export default function DiaryPage() {
                                   {seizure.emergencyMed === "yes" || seizure.emergencyMed === "ja" ? "Ja" : "Nein"}
                                 </span>
                                 {seizure.emergencyMedName && (
-                                  <span className="text-body-small text-foreground-600 ml-[var(--spacing-2xs)]">
+                                  <span className="text-body text-foreground-600 ml-[var(--spacing-2xs)]">
                                     ({seizure.emergencyMedName})
                                   </span>
                                 )}
@@ -1043,14 +1172,14 @@ export default function DiaryPage() {
                             <div className="flex items-center gap-[var(--spacing-2xs)] ml-[var(--spacing-s)]">
                               <button
                                 onClick={() => handleEditSeizure(viewingDate, index)}
-                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
+                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
                                 aria-label="Bearbeiten"
                               >
                                 Bearbeiten
                               </button>
                               <button
                                 onClick={() => handleDeleteSeizure(seizure.id, viewingDate)}
-                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-secondary-600 hover:text-secondary-700 border border-secondary-300 hover:border-secondary-400 rounded-lg transition"
+                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-secondary-600 hover:text-secondary-700 border border-secondary-300 hover:border-secondary-400 rounded-lg transition"
                                 aria-label="Löschen"
                               >
                                 Löschen
@@ -1074,13 +1203,13 @@ export default function DiaryPage() {
                     <div className="flex items-center gap-[var(--spacing-s)]">
                       <button
                         onClick={() => handleAddNewSeizure(viewingDate)}
-                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
                       >
                         + Neuer Anfall
                       </button>
                       <button
                         onClick={() => handleDeleteDay(viewingDate)}
-                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium border border-secondary-500 bg-white text-secondary-700 hover:border-secondary-600 hover:bg-secondary-50 rounded-lg transition"
+                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium border border-secondary-500 bg-white text-secondary-700 hover:border-secondary-600 hover:bg-secondary-50 rounded-lg transition"
                         aria-label="Tag löschen"
                       >
                         Tag löschen
@@ -1119,36 +1248,36 @@ export default function DiaryPage() {
                           <div className="flex items-start justify-between mb-[var(--spacing-s)]">
                             <div className="flex-1">
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body-small font-medium text-foreground-700">Zeitblock: </span>
-                                <span className="text-body-small text-foreground-900">{block.label}</span>
+                                <span className="text-body font-medium text-foreground-700">Zeitblock: </span>
+                                <span className="text-body text-foreground-900">{block.label}</span>
                               </div>
                               
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body-small font-medium text-foreground-700">Anzahl: </span>
-                                <span className="text-body-small text-foreground-900">{block.count}</span>
+                                <span className="text-body font-medium text-foreground-700">Anzahl: </span>
+                                <span className="text-body text-foreground-900">{block.count}</span>
                               </div>
                               
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body-small font-medium text-foreground-700">Anfallstypen: </span>
+                                <span className="text-body font-medium text-foreground-700">Anfallstypen: </span>
                                 <div className="flex flex-wrap gap-[var(--spacing-2xs)] mt-[var(--spacing-2xs)]">
                                   {block.types.length > 0 ? (
                                     block.types.map((type, idx) => (
                                       <span
                                         key={idx}
-                                        className="inline-block text-body-small text-foreground-700 bg-white rounded-md px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] border border-background-200"
+                                        className="inline-block text-body text-foreground-700 bg-white rounded-md px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] border border-background-200"
                                       >
                                         {type}
                                       </span>
                                     ))
                                   ) : (
-                                    <span className="text-body-small text-foreground-500">Nicht angegeben</span>
+                                    <span className="text-body text-foreground-500">Nicht angegeben</span>
                                   )}
                                 </div>
                               </div>
                               
                               <div>
-                                <span className="text-body-small font-medium text-foreground-700">Notfallmedikament: </span>
-                                <span className={`text-body-small font-medium ${
+                                <span className="text-body font-medium text-foreground-700">Notfallmedikament: </span>
+                                <span className={`text-body font-medium ${
                                   block.hasEmergencyMed
                                     ? "text-secondary-600"
                                     : "text-foreground-600"
@@ -1170,13 +1299,13 @@ export default function DiaryPage() {
                                     }
                                   }
                                 }}
-                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
+                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
                                 aria-label="Zeitblock bearbeiten"
                               >
                                 Bearbeiten
                               </button>
                               {block.seizures.length > 1 && (
-                                <span className="text-body-small text-foreground-500">
+                                <span className="text-body text-foreground-500">
                                   ({block.seizures.length} Einträge)
                                 </span>
                               )}
@@ -1194,10 +1323,10 @@ export default function DiaryPage() {
 
         {/* Monthly Summary */}
         <div className="mt-[var(--spacing-l)] rounded-xl bg-white shadow-sm ring-1 ring-background-200 p-[var(--spacing-s)]">
-          <h3 className="text-body-small font-semibold text-foreground-900 mb-[var(--spacing-m)]">
+          <h3 className="text-body font-semibold text-foreground-900 mb-[var(--spacing-m)]">
             Monatszusammenfassung - {format(currentDate, "MMMM yyyy", { locale: de })}
           </h3>
-          <div className="text-body-small text-foreground-700">
+          <div className="text-body text-foreground-700">
             <div className="flex justify-between pb-2">
               <span>Anfälle (gesamt):</span>
               <span className="font-medium text-foreground-900">{monthlyStats.totalSeizures}</span>
@@ -1208,7 +1337,7 @@ export default function DiaryPage() {
             </div>
             {monthlyStats.emergencyDates.length > 0 && (
               <div className="space-y-[var(--spacing-2xs)] pt-1 text-foreground-600">
-                <div className="font-medium text-body-small text-foreground-700">Verabreicht am:</div>
+                <div className="font-medium text-body text-foreground-700">Verabreicht am:</div>
                 <div className="flex flex-wrap gap-[var(--spacing-2xs)]">
                   {monthlyStats.emergencyDates.map((date) => (
                     <span
@@ -1223,7 +1352,7 @@ export default function DiaryPage() {
             )}
           </div>
           {monthlyStats.totalSeizures === 0 && monthlyStats.totalEmergencyMeds === 0 && (
-            <p className="mt-[var(--spacing-m)] text-body-small text-foreground-500">
+            <p className="mt-[var(--spacing-m)] text-body text-foreground-500">
               Noch keine Einträge für diesen Monat.
             </p>
           )}
@@ -1239,15 +1368,6 @@ export default function DiaryPage() {
               <h2 className="text-body font-semibold text-foreground-900 flex-1 min-w-0">
                 Neuer Anfall eintragen
               </h2>
-              <button
-                type="submit"
-                form="seizure-entry-form"
-                disabled={isSaving}
-                className="flex-shrink-0 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
-                aria-label="Eintrag speichern"
-              >
-                {isSaving ? "Wird gespeichert…" : "Speichern"}
-              </button>
               <button
                 type="button"
                 onClick={handleCloseModal}
@@ -1277,7 +1397,7 @@ export default function DiaryPage() {
             >
               {/* Anfallstyp aus Liste */}
               <div ref={typeFieldRef} className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Anfallstyp <span className="text-foreground-800">*</span>
                 </label>
                 <div className="relative">
@@ -1290,7 +1410,7 @@ export default function DiaryPage() {
                         ? formData.type.join(", ")
                         : "Bitte auswählen"
                     }
-                    className={`w-full cursor-pointer rounded-lg border px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:outline-none transition ${
+                    className={`w-full cursor-pointer rounded-lg border px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:outline-none transition ${
                       typeError 
                         ? "border-warning-500 focus:border-warning-500 focus:ring-2 focus:ring-warning-200" 
                         : "border-background-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
@@ -1325,13 +1445,13 @@ export default function DiaryPage() {
                   )}
                 </div>
                 {typeError && (
-                  <p className="text-body-small text-warning-600">{typeError}</p>
+                  <p className="text-body text-warning-600">{typeError}</p>
                 )}
               </div>
 
               {/* Eigener Anfallstyp – zweites Feld, immer sichtbar */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Eigener Anfallstyp
                 </label>
                 <div className="relative">
@@ -1346,7 +1466,7 @@ export default function DiaryPage() {
                       setTypeError("");
                     }}
                     placeholder="Frei eingeben (optional)"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     aria-label="Eigenen Anfallstyp eingeben"
                   />
                   {formData.customType ? (
@@ -1375,14 +1495,14 @@ export default function DiaryPage() {
                     </button>
                   ) : null}
                 </div>
-                <p className="text-body-small text-foreground-500">
+                <p className="text-body text-foreground-500">
                   Nutze dieses Feld, wenn dein Anfallstyp nicht in der Liste steht.
                 </p>
               </div>
 
               {/* Mehr als ein Anfall? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Mehr als ein Anfall?
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
@@ -1400,7 +1520,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body-small text-foreground-700">Nein</span>
+                    <span className="text-body text-foreground-700">Nein</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1408,15 +1528,22 @@ export default function DiaryPage() {
                       name="multipleSeizures"
                       value="ja"
                       checked={formData.multipleSeizures === "ja"}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const isJa = e.target.value === "ja";
                         setFormData((prev) => ({
                           ...prev,
                           multipleSeizures: e.target.value,
-                        }))
-                      }
+                          ...(isJa
+                            ? {
+                                timeFrom: `${(prev.timeFrom || "00:00").split(":")[0]}:00`,
+                                timeTo: `${(prev.timeTo || "00:00").split(":")[0]}:00`,
+                              }
+                            : {}),
+                        }));
+                      }}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body-small text-foreground-700">Ja</span>
+                    <span className="text-body text-foreground-700">Ja</span>
                   </label>
                 </div>
 
@@ -1424,46 +1551,37 @@ export default function DiaryPage() {
                 {formData.multipleSeizures === "nein" && (
                   <>
                     <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-xs)]">
-                      <span className="text-body-small font-medium text-foreground-800 block">
+                      <span className="text-body font-medium text-foreground-800 block">
                         Uhrzeit
                       </span>
-                      <div className="flex gap-[var(--spacing-s)]">
-                        <label
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={(e) => {
-                            const input = e.currentTarget.querySelector('input[type="time"]');
-                            if (input && typeof (input as HTMLInputElement).showPicker === "function") {
-                              try {
-                                (input as HTMLInputElement).showPicker();
-                              } catch {
-                                (input as HTMLInputElement).focus();
-                              }
-                            }
+                      <div className="flex items-center gap-[var(--spacing-2xs)]">
+                        <ScrollTimeSelect
+                          options={hourOptions}
+                          value={(formData.time || "00:00").split(":")[0]}
+                          onChange={(h) => {
+                            const m = (formData.time || "00:00").split(":")[1] || "00";
+                            setFormData((prev) => ({ ...prev, time: `${h}:${m}` }));
                           }}
-                        >
-                          <input
-                            type="time"
-                            value={formData.time}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                time: e.target.value,
-                              }))
-                            }
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer"
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => toastService.show("Uhrzeit übernommen", "success")}
-                          className="flex-shrink-0 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
-                        >
-                          Speichern
-                        </button>
+                          aria-label="Stunde"
+                          className="flex-1 min-w-0"
+                        />
+                        <span className="text-body font-medium text-foreground-600 shrink-0" aria-hidden="true">
+                          :
+                        </span>
+                        <ScrollTimeSelect
+                          options={minuteOptions}
+                          value={roundMinuteToFive((formData.time || "00:00").split(":")[1] ?? "00")}
+                          onChange={(m) => {
+                            const h = (formData.time || "00:00").split(":")[0] || "00";
+                            setFormData((prev) => ({ ...prev, time: `${h}:${m}` }));
+                          }}
+                          aria-label="Minute"
+                          className="flex-1 min-w-0"
+                        />
                       </div>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
-                      <label className="text-body-small font-medium text-foreground-800">
+                      <label className="text-body font-medium text-foreground-800">
                         Dauer
                       </label>
                       <div className="flex gap-[var(--spacing-m)]">
@@ -1481,7 +1599,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Min"
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationMinutes && (
                             <button
@@ -1523,7 +1641,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Sek"
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationSeconds && (
                             <button
@@ -1555,77 +1673,43 @@ export default function DiaryPage() {
                   </>
                 )}
 
-                {/* Wenn Ja: Zeitraum von/bis und Anzahl */}
+                {/* Wenn Ja: Zeitraum von/bis (nur Stunden) und Anzahl – Anfälle werden zwischen den Uhrzeiten verteilt */}
                 {formData.multipleSeizures === "ja" && (
                   <>
                     <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-xs)]">
-                      <span className="text-body-small font-medium text-foreground-800 block">
-                        Zeitraum: von / bis
+                      <span className="text-body font-medium text-foreground-800 block">
+                        Zeitraum: von / bis (nur Stunden)
                       </span>
-                      <div className="flex gap-[var(--spacing-m)]">
-                        <label
-                          className="flex-1 min-w-0 block cursor-pointer"
-                          onClick={(e) => {
-                            const input = e.currentTarget.querySelector('input[type="time"]');
-                            if (input && typeof (input as HTMLInputElement).showPicker === "function") {
-                              try {
-                                (input as HTMLInputElement).showPicker();
-                              } catch {
-                                (input as HTMLInputElement).focus();
-                              }
-                            }
-                          }}
-                        >
-                          <input
-                            type="time"
-                            value={formData.timeFrom}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                timeFrom: e.target.value,
-                              }))
-                            }
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer"
-                            placeholder="Von"
+                      <div className="flex flex-wrap items-center gap-[var(--spacing-s)]">
+                        <div className="flex items-center gap-[var(--spacing-2xs)] flex-1 min-w-0">
+                          <span className="text-body text-foreground-600 shrink-0">Von</span>
+                          <ScrollTimeSelect
+                            options={hourOptions}
+                            value={(formData.timeFrom || "00:00").split(":")[0]}
+                            onChange={(h) => setFormData((prev) => ({ ...prev, timeFrom: `${h}:00` }))}
+                            aria-label="Von Stunde"
+                            className="flex-1 min-w-0"
                           />
-                        </label>
-                        <label
-                          className="flex-1 min-w-0 block cursor-pointer"
-                          onClick={(e) => {
-                            const input = e.currentTarget.querySelector('input[type="time"]');
-                            if (input && typeof (input as HTMLInputElement).showPicker === "function") {
-                              try {
-                                (input as HTMLInputElement).showPicker();
-                              } catch {
-                                (input as HTMLInputElement).focus();
-                              }
-                            }
-                          }}
-                        >
-                          <input
-                            type="time"
-                            value={formData.timeTo}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                timeTo: e.target.value,
-                              }))
-                            }
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer"
-                            placeholder="Bis"
+                          <span className="text-body text-foreground-500 shrink-0">Uhr</span>
+                        </div>
+                        <div className="flex items-center gap-[var(--spacing-2xs)] flex-1 min-w-0">
+                          <span className="text-body text-foreground-600 shrink-0">Bis</span>
+                          <ScrollTimeSelect
+                            options={hourOptions}
+                            value={(formData.timeTo || "00:00").split(":")[0]}
+                            onChange={(h) => setFormData((prev) => ({ ...prev, timeTo: `${h}:00` }))}
+                            aria-label="Bis Stunde"
+                            className="flex-1 min-w-0"
                           />
-                        </label>
+                          <span className="text-body text-foreground-500 shrink-0">Uhr</span>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => toastService.show("Zeit übernommen", "success")}
-                        className="rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
-                      >
-                        Speichern
-                      </button>
+                      <p className="text-body text-foreground-500 pt-[var(--spacing-2xs)]">
+                        Die eingegebenen Anfälle werden gleichmäßig zwischen den beiden Uhrzeiten verteilt.
+                      </p>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
-                      <label className="text-body-small font-medium text-foreground-800">
+                      <label className="text-body font-medium text-foreground-800">
                         Anzahl der Anfälle
                       </label>
                       <div className="relative">
@@ -1642,7 +1726,7 @@ export default function DiaryPage() {
                               seizureCount: e.target.value,
                             }))
                           }
-                          className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           placeholder="Anzahl"
                         />
                         {formData.seizureCount && formData.seizureCount !== "1" && (
@@ -1677,7 +1761,7 @@ export default function DiaryPage() {
 
               {/* Hast du es vorher gespürt? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Hast du es vorher gespürt?
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
@@ -1695,7 +1779,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body-small text-foreground-700">Ja</span>
+                    <span className="text-body text-foreground-700">Ja</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1711,14 +1795,14 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body-small text-foreground-700">Nein</span>
+                    <span className="text-body text-foreground-700">Nein</span>
                   </label>
                 </div>
               </div>
 
               {/* Wie ging es dir danach? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Wie ging es dir danach?
                 </label>
                 <div className="relative">
@@ -1731,7 +1815,7 @@ export default function DiaryPage() {
                         ? formData.afterEffects.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0 && (
@@ -1764,7 +1848,7 @@ export default function DiaryPage() {
 
               {/* Weitere Auffälligkeiten */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Weitere Auffälligkeiten
                 </label>
                 <div className="relative">
@@ -1778,7 +1862,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Weitere Auffälligkeiten eintragen"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                   {formData.customAfterEffects && (
                     <button
@@ -1809,7 +1893,7 @@ export default function DiaryPage() {
 
               {/* Mögliche Auslöser */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Mögliche Auslöser
                 </label>
                 <div className="relative">
@@ -1822,7 +1906,7 @@ export default function DiaryPage() {
                         ? formData.triggers.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.triggers) && formData.triggers.length > 0 && (
@@ -1855,7 +1939,7 @@ export default function DiaryPage() {
 
               {/* Andere Auslöser */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Andere Auslöser
                 </label>
                 <div className="relative">
@@ -1869,7 +1953,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Andere Auslöser eintragen"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                   {formData.customTriggers && (
                     <button
@@ -1900,7 +1984,7 @@ export default function DiaryPage() {
 
               {/* Notfallmedikament eingenommen? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Notfallmedikament eingenommen?
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
@@ -1918,7 +2002,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body-small text-foreground-700">Ja</span>
+                    <span className="text-body text-foreground-700">Ja</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1934,7 +2018,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body-small text-foreground-700">Nein</span>
+                    <span className="text-body text-foreground-700">Nein</span>
                   </label>
                 </div>
                 {formData.emergencyMed === "ja" && (
@@ -1949,7 +2033,7 @@ export default function DiaryPage() {
                         }))
                       }
                       placeholder="Name des Notfallmedikaments"
-                      className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body-small shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                      className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     />
                     {formData.emergencyMedName && (
                       <button
@@ -1981,7 +2065,7 @@ export default function DiaryPage() {
 
               {/* Video Upload - Optional */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-800">
+                <label className="text-body font-medium text-foreground-800">
                   Video hochladen <span className="text-foreground-500">(Optional)</span>
                 </label>
                 <input
@@ -1994,7 +2078,7 @@ export default function DiaryPage() {
                       video: e.target.files?.[0] || null,
                     }))
                   }
-                  className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small shadow-sm cursor-not-allowed bg-background-100 text-foreground-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-body-small file:font-semibold file:bg-background-200 file:text-foreground-400"
+                  className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm cursor-not-allowed bg-background-100 text-foreground-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-body file:font-semibold file:bg-background-200 file:text-foreground-400"
                 />
               </div>
 
@@ -2062,7 +2146,7 @@ export default function DiaryPage() {
                     onChange={() => handleTypeChange(type)}
                     className="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-body-small text-foreground-700">{type}</span>
+                  <span className="text-body text-foreground-700">{type}</span>
                 </label>
               ))}
             </div>
@@ -2070,7 +2154,7 @@ export default function DiaryPage() {
             <div className="sticky bottom-0 border-t border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
               <button
                 onClick={() => setIsTypeModalOpen(false)}
-                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-primary-700"
+                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
               >
                 Fertig
               </button>
@@ -2120,7 +2204,7 @@ export default function DiaryPage() {
                     onChange={() => handleAfterEffectChange(option)}
                     className="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-body-small text-foreground-700">{option}</span>
+                  <span className="text-body text-foreground-700">{option}</span>
                 </label>
               ))}
             </div>
@@ -2128,7 +2212,7 @@ export default function DiaryPage() {
             <div className="sticky bottom-0 border-t border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
               <button
                 onClick={() => setIsAfterEffectsModalOpen(false)}
-                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-primary-700"
+                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
               >
                 Fertig
               </button>
@@ -2178,7 +2262,7 @@ export default function DiaryPage() {
                     onChange={() => handleTriggerChange(trigger)}
                     className="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-body-small text-foreground-700">{trigger}</span>
+                  <span className="text-body text-foreground-700">{trigger}</span>
                 </label>
               ))}
             </div>
@@ -2186,7 +2270,7 @@ export default function DiaryPage() {
             <div className="sticky bottom-0 border-t border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
               <button
                 onClick={() => setIsTriggersModalOpen(false)}
-                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-primary-700"
+                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
               >
                 Fertig
               </button>

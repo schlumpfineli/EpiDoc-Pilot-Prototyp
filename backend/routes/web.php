@@ -27,6 +27,9 @@ Route::prefix('admin/analytics')->middleware([AdminAuth::class])->group(function
     Route::get('/api/endpoint-stats', [AnalyticsController::class, 'endpointStats'])->name('admin.analytics.api.endpointStats');
     Route::get('/api/daily-stats', [AnalyticsController::class, 'dailyStats'])->name('admin.analytics.api.dailyStats');
     Route::get('/api/status-stats', [AnalyticsController::class, 'statusStats'])->name('admin.analytics.api.statusStats');
+    Route::get('/api/befinden-symptoms', [AnalyticsController::class, 'befindenSymptoms'])->name('admin.analytics.api.befindenSymptoms');
+    Route::get('/api/page-views', [AnalyticsController::class, 'pageViews'])->name('admin.analytics.api.pageViews');
+    Route::get('/api/user-sessions', [AnalyticsController::class, 'userSessions'])->name('admin.analytics.api.userSessions');
 });
 
 // TEMPORÄR: Admin Migration Routes (nur für Pilot-Phase, danach entfernen!)
