@@ -245,6 +245,22 @@ export interface Seizure {
   updated_at: string;
 }
 
+export interface Medication {
+  id: number;
+  user_id: number;
+  name: string;
+  dose?: string | null;
+  frequency?: string | null;
+  time_of_day?: string[] | null;
+  notes?: string | null;
+  prescribed_since?: string | null;
+  active: boolean;
+  discontinued_at?: string | null;
+  discontinuation_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UserProfile {
   id: number;
   display_name: string;
@@ -381,6 +397,35 @@ export const seizureApi = {
 
   delete: async (id: number): Promise<{ message: string }> => {
     return apiClient.delete<{ message: string }>(`/seizures/${id}`);
+  },
+};
+
+export const medicationApi = {
+  getAll: async (params?: { active?: boolean }): Promise<{ data: Medication[] }> => {
+    const query = params ? new URLSearchParams(
+      Object.entries(params)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    ).toString() : '';
+    return apiClient.get<{ data: Medication[] }>(
+      `/medications${query ? `?${query}` : ''}`
+    );
+  },
+
+  getOne: async (id: number): Promise<{ data: Medication }> => {
+    return apiClient.get<{ data: Medication }>(`/medications/${id}`);
+  },
+
+  create: async (data: Omit<Medication, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<{ message: string; data: Medication }> => {
+    return apiClient.post<{ message: string; data: Medication }>('/medications', data);
+  },
+
+  update: async (id: number, data: Partial<Medication>): Promise<{ message: string; data: Medication }> => {
+    return apiClient.put<{ message: string; data: Medication }>(`/medications/${id}`, data);
+  },
+
+  delete: async (id: number): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/medications/${id}`);
   },
 };
 

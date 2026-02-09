@@ -19,12 +19,14 @@ export function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
-  // Navigation-Links nur für eingeloggte Benutzer (Profil/Einstellungen zusammengeführt → nur Einstellungen und Support)
+  // Navigation-Links nur für eingeloggte Benutzer
   const navLinks = user ? [
     { href: '/befinden', label: 'Wie geht es dir?' },
     { href: '/diary', label: 'Tagebuch' },
+    { href: '/medikamente', label: 'Medikamente' },
     { href: '/verlauf', label: 'Analyse' },
-    { href: '/einstellungen', label: 'Einstellungen und Support' },
+    { href: '/profil', label: 'Profil' },
+    { href: '/einstellungen', label: 'Einstellungen' },
   ] : [];
 
   // Öffentliche Routen (keine Navbar)
@@ -45,14 +47,14 @@ export function Navbar() {
             <EpiDocLogo size={32} className="h-8 w-8 shrink-0" />
           </Link>
 
-          {/* Desktop Navigation (ab lg; Tablet nutzt Menü-Button) */}
+          {/* Desktop Navigation (ab xl; Tablet nutzt Menü-Button) */}
           {user && navLinks.length > 0 && (
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden xl:flex items-center gap-0.5">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-m py-s rounded-xl text-body font-medium transition-colors ${
+                  className={`px-s py-s rounded-xl text-body-small font-medium transition-colors whitespace-nowrap ${
                     isActive(link.href)
                       ? 'bg-primary-50 text-primary-700'
                       : 'text-foreground-700 hover:bg-background-100 hover:text-foreground-900'
@@ -71,7 +73,7 @@ export function Navbar() {
             ) : user ? (
               <>
                 {/* Desktop User Menu */}
-                <div className="hidden lg:flex items-center gap-m">
+                <div className="hidden xl:flex items-center gap-m">
                   <span className="text-body text-foreground-600">
                     {user.display_name}
                   </span>
@@ -87,7 +89,7 @@ export function Navbar() {
                 {/* Menü-Button (Mobile + Tablet) */}
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="lg:hidden p-2 rounded-xl text-foreground-700 hover:bg-background-100"
+                  className="xl:hidden p-2 rounded-xl text-foreground-700 hover:bg-background-100"
                   aria-label="Menü öffnen"
                 >
                   <svg
@@ -133,7 +135,7 @@ export function Navbar() {
 
         {/* Ausklapp-Menü (Mobile + Tablet) */}
         {isMobileMenuOpen && user && (
-          <div className="border-t border-background-200 py-s lg:hidden">
+          <div className="border-t border-background-200 py-s xl:hidden">
             <div className="space-y-2xs">
               {navLinks.map((link) => (
                 <Link

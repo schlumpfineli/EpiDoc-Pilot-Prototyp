@@ -4,11 +4,6 @@ const nextConfig: NextConfig = {
   // Production-optimierte Konfiguration
   reactStrictMode: true,
 
-  // Keine Profilseite mehr – alles unter Einstellungen und Support; alte Links weiterleiten
-  async redirects() {
-    return [{ source: '/profil', destination: '/einstellungen', permanent: true }];
-  },
-  
   // Turbopack Root-Verzeichnis explizit setzen
   turbopack: {
     root: __dirname,

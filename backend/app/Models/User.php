@@ -76,6 +76,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the medications for the user.
+     */
+    public function medications()
+    {
+        return $this->hasMany(Medication::class);
+    }
+
+    /**
      * Get the page views for the user.
      */
     public function pageViews()

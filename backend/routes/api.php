@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BefindenController;
 use App\Http\Controllers\Api\SeizureController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\MedicationController;
 use App\Http\Controllers\FeedbackController;
 
 // Public routes
@@ -35,6 +36,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Seizure routes
     Route::apiResource('seizures', SeizureController::class);
+
+    // Medication routes
+    Route::apiResource('medications', MedicationController::class);
 
     // User profile routes
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
