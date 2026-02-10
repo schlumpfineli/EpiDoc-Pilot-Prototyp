@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>;
 export const LoggedIn: Story = {
   args: {
     user: {
-      name: 'Jane Doe',
+      display_name: 'Jane Doe',
     },
   },
 };
