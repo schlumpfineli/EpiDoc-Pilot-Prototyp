@@ -25,7 +25,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
-        'disease',
+        'diagnoses',
         'doctors',
         'clinics',
         'pharmacies',
@@ -52,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'diagnoses' => 'array',
             'doctors' => 'array',
             'clinics' => 'array',
             'pharmacies' => 'array',

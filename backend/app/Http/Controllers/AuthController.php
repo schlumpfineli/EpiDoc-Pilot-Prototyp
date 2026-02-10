@@ -115,14 +115,30 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user->update($validator->validated());
+        $validated = $validator->validated();
+
+        // Konvertiere 'disease' (einfacher String vom Frontend) in 'diagnoses' (JSON-Array in DB)
+        if (array_key_exists('disease', $validated)) {
+            $diseaseValue = $validated['disease'];
+            unset($validated['disease']);
+            if ($diseaseValue) {
+                $validated['diagnoses'] = [['type' => $diseaseValue, 'diagnosis_date' => null, 'comment' => null]];
+            } else {
+                $validated['diagnoses'] = null;
+            }
+        }
+
+        $user->update($validated);
 
         $response = $user->only([
-            'id', 'email', 'role', 'disease',
+            'id', 'email', 'role', 'diagnoses',
             'doctors', 'clinics', 'pharmacies', 'emergency_contact',
             'created_at', 'updated_at'
         ]);
         $response['display_name'] = $user->display_name;
+        // Rückwärtskompatibilität: 'disease' als einfachen String zurückgeben
+        $diagnoses = $user->diagnoses;
+        $response['disease'] = is_array($diagnoses) && count($diagnoses) > 0 ? ($diagnoses[0]['type'] ?? null) : null;
 
         return response()->json([
             'message' => 'Profil aktualisiert',

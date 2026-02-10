@@ -23,11 +23,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
         $data = $user->only([
-            'id', 'email', 'role', 'disease',
+            'id', 'email', 'role', 'diagnoses',
             'doctors', 'clinics', 'pharmacies', 'emergency_contact',
             'created_at', 'updated_at'
         ]);
         $data['display_name'] = $user->display_name;
+        // Rückwärtskompatibilität: 'disease' als einfachen String zurückgeben
+        $diagnoses = $user->diagnoses;
+        $data['disease'] = is_array($diagnoses) && count($diagnoses) > 0 ? ($diagnoses[0]['type'] ?? null) : null;
         return response()->json(['user' => $data]);
     });
 
