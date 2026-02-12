@@ -155,7 +155,7 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'current_password' => ['required', 'string'],
-            'new_password' => ['required', 'string', 'min:8'],
+            'new_password' => ['required', 'string', 'min:8', new StrongPassword()],
             'new_password_confirmation' => ['required', 'string', 'same:new_password'],
         ]);
 
@@ -184,11 +184,42 @@ class AuthController extends Controller
     }
 
     /**
-     * Delete user account.
+     * Logout: Aktuelles Token serverseitig invalidieren.
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        // Lösche nur das aktuelle Token (nicht alle Geräte)
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Erfolgreich abgemeldet',
+        ]);
+    }
+
+    /**
+     * Delete user account (erfordert Passwort-Bestätigung).
      */
     public function deleteAccount(Request $request): JsonResponse
     {
         $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Passwort ist erforderlich, um das Konto zu löschen.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        // Prüfe Passwort
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Falsches Passwort. Konto wurde nicht gelöscht.',
+            ], 422);
+        }
 
         // Lösche alle Token des Benutzers
         $user->tokens()->delete();

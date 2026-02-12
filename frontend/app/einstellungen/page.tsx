@@ -13,6 +13,7 @@ export default function EinstellungenPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackForm, setFeedbackForm] = useState<FeedbackData>({
@@ -47,9 +48,13 @@ export default function EinstellungenPage() {
   };
 
   const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      toastService.show("Bitte geben Sie Ihr Passwort ein.", "error");
+      return;
+    }
     try {
       setIsSaving(true);
-      await profileApi.delete();
+      await profileApi.delete(deletePassword);
       toastService.show("Konto erfolgreich gelöscht", "success");
       logout();
       router.push("/login");
@@ -62,6 +67,7 @@ export default function EinstellungenPage() {
     } finally {
       setIsSaving(false);
       setShowDeleteModal(false);
+      setDeletePassword("");
     }
   };
 
@@ -301,13 +307,27 @@ export default function EinstellungenPage() {
                     Möchten Sie Ihr Konto wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
                   </p>
                   <p className="text-body-small text-foreground-600">
-                    Alle Ihre Daten werden unwiderruflich gelöscht.
+                    Alle Ihre Daten werden unwiderruflich gelöscht. Bitte bestätigen Sie mit Ihrem Passwort.
                   </p>
+
+                  <div>
+                    <label htmlFor="delete-password" className="block text-body-small font-medium text-foreground-700 mb-1">
+                      Passwort
+                    </label>
+                    <input
+                      id="delete-password"
+                      type="password"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      placeholder="Ihr aktuelles Passwort"
+                      className="w-full rounded-lg border border-background-200 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body text-foreground-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    />
+                  </div>
 
                   <div className="flex gap-[var(--spacing-m)] pt-[var(--spacing-s)]">
                     <button
                       type="button"
-                      onClick={() => setShowDeleteModal(false)}
+                      onClick={() => { setShowDeleteModal(false); setDeletePassword(""); }}
                       className="flex-1 rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50"
                     >
                       Abbrechen
@@ -315,7 +335,7 @@ export default function EinstellungenPage() {
                     <button
                       type="button"
                       onClick={handleDeleteAccount}
-                      disabled={isSaving}
+                      disabled={isSaving || !deletePassword}
                       className="flex-1 rounded-lg bg-warning-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-warning-600 disabled:opacity-50"
                     >
                       {isSaving ? "Löscht..." : "Konto löschen"}

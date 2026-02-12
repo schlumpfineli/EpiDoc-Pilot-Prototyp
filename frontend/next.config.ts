@@ -20,9 +20,36 @@ const nextConfig: NextConfig = {
     } : false,
   },
   
-  // Headers für bessere Caching-Performance
+  // Security- und Caching-Headers
   async headers() {
     return [
+      // Security-Headers für alle Seiten
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(), microphone=(), camera=()',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+      // Caching für statische Assets
       {
         source: '/:all*(svg|jpg|png|webp|ico)',
         headers: [

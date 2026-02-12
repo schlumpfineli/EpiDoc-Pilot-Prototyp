@@ -23,7 +23,13 @@ class AdminAuth
 
         // Wenn Passwort gesendet wurde, prüfe es
         if ($request->has('admin_password')) {
-            $adminPassword = env('ADMIN_PASSWORD', 'admin123');
+            $adminPassword = config('app.admin_password');
+            
+            if (!$adminPassword) {
+                return response()->view('admin.login', [
+                    'error' => 'Admin-Zugang nicht konfiguriert. Bitte ADMIN_PASSWORD als Umgebungsvariable setzen.',
+                ], 503);
+            }
             
             if ($request->admin_password === $adminPassword) {
                 session(['admin_authenticated' => true]);

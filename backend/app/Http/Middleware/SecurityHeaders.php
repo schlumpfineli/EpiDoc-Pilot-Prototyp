@@ -43,8 +43,8 @@ class SecurityHeaders
 
         // Content-Security-Policy (CSP) - Basis-Konfiguration
         // Anpassen je nach Bedarf
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-        $appUrl = env('APP_URL', 'http://localhost:8000');
+        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+        $appUrl = config('app.url', 'http://localhost:8000');
         
         // Bereinige URLs (entferne ungültige Zeichen)
         $frontendUrl = trim($frontendUrl);

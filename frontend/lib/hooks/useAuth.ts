@@ -83,6 +83,11 @@ export function useAuth() {
     } catch {
       // Session-Ende nur für Statistik; Fehler ignorieren
     }
+    try {
+      await authApi.logout();
+    } catch {
+      // Logout-Fehler ignorieren (Token wird clientseitig trotzdem entfernt)
+    }
     clearToken();
     setUser(null);
     if (typeof window !== "undefined") {

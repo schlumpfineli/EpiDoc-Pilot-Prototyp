@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Api\AnalyticsController;
-use App\Http\Controllers\AdminMigrationController;
+
 use App\Http\Middleware\AdminAuth;
 
 Route::get('/feedback', [FeedbackController::class, 'view'])
@@ -32,10 +32,4 @@ Route::prefix('admin/analytics')->middleware([AdminAuth::class])->group(function
     Route::get('/api/user-sessions', [AnalyticsController::class, 'userSessions'])->name('admin.analytics.api.userSessions');
 });
 
-// TEMPORÄR: Admin Migration Routes (nur für Pilot-Phase, danach entfernen!)
-Route::match(['GET', 'POST'], '/admin/migrate', [AdminMigrationController::class, 'index'])
-    ->middleware([AdminAuth::class])
-    ->name('admin.migrate.index');
-Route::post('/admin/migrate/run', [AdminMigrationController::class, 'run'])
-    ->middleware([AdminAuth::class])
-    ->name('admin.migrate.run');
+// Migration Routes entfernt (Sicherheitsaudit: Migrationen nur über CLI/CI-CD ausführen)

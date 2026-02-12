@@ -126,11 +126,12 @@ class BefindenController extends Controller
                 'data' => $befinden,
             ], 201);
         } catch (\Exception $e) {
-            // Logge den Fehler für Debugging
+            // Logge den Fehler für Debugging (ohne sensitive Gesundheitsdaten)
             \Log::error('Befinden store error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'request' => $request->all(),
                 'exception' => get_class($e),
+                'user_id' => $request->user()?->id,
+                'method' => $request->method(),
+                'url' => $request->path(),
             ]);
 
             // Prüfe auf spezifische Datenbank-Fehler

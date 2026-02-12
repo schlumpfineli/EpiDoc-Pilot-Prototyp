@@ -95,9 +95,7 @@ class FeedbackController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             Log::error('Feedback creation database error', [
                 'error' => $e->getMessage(),
-                'sql' => $e->getSql() ?? null,
-                'bindings' => $e->getBindings() ?? null,
-                'trace' => $e->getTraceAsString(),
+                'user_id' => $request->user()?->id,
             ]);
 
             return response()->json([
@@ -108,7 +106,7 @@ class FeedbackController extends Controller
             Log::error('Feedback creation error', [
                 'error' => $e->getMessage(),
                 'class' => get_class($e),
-                'trace' => $e->getTraceAsString(),
+                'user_id' => $request->user()?->id,
             ]);
 
             return response()->json([

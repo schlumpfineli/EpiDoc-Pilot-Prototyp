@@ -135,4 +135,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Password
+    |--------------------------------------------------------------------------
+    |
+    | Passwort für den Admin-Bereich (Analytics, Feedback, etc.).
+    | MUSS als Umgebungsvariable gesetzt werden – kein Fallback-Wert.
+    |
+    */
+
+    'admin_password' => env('ADMIN_PASSWORD'),
+
 ];

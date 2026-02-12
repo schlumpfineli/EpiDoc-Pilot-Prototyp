@@ -5,8 +5,8 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-// Debug: Zeige API-URL (auch in Production für Debugging)
-if (typeof window !== 'undefined') {
+// Debug: Zeige API-URL nur in Development
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
   console.log('API Base URL:', API_BASE_URL);
   console.log('NEXT_PUBLIC_API_URL env:', process.env.NEXT_PUBLIC_API_URL);
 }
@@ -66,8 +66,8 @@ export class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    // Debug-Logging für API-Requests
-    if (typeof window !== 'undefined') {
+    // Debug-Logging für API-Requests (nur in Development)
+    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
       console.log(`[API] ${options.method || 'GET'} ${url}`, {
         hasToken: !!this.token,
         headers: Object.keys(headers),
@@ -86,8 +86,8 @@ export class ApiClient {
       });
       clearTimeout(timeoutId);
 
-      // Debug-Logging für Response
-      if (typeof window !== 'undefined') {
+      // Debug-Logging für Response (nur in Development)
+      if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
         console.log(`[API] Response ${response.status} for ${url}`, {
           ok: response.ok,
           statusText: response.statusText,
@@ -115,8 +115,8 @@ export class ApiClient {
           };
         }
         
-        // Debug-Logging für Fehler (warn statt error, damit Next.js-Overlay nicht bei jedem API-Fehler erscheint)
-        if (typeof window !== 'undefined') {
+        // Debug-Logging für Fehler (nur in Development)
+        if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
           console.warn(`[API] Error for ${url}:`, error.message, error);
         }
         
@@ -131,7 +131,7 @@ export class ApiClient {
         const timeoutError: ApiError = {
           message: 'Request timeout: Die API-Antwort hat zu lange gedauert. Bitte prüfen Sie Ihre Internetverbindung und die API-Konfiguration.',
         };
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
           console.error(`[API] Timeout for ${url}`);
         }
         throw timeoutError;
@@ -140,16 +140,16 @@ export class ApiClient {
       // Network-Fehler (CORS, Verbindung, etc.)
       if (error instanceof TypeError && error.message.includes('fetch')) {
         const networkError: ApiError = {
-          message: `Netzwerkfehler: Konnte nicht mit dem Server verbinden. Bitte prüfen Sie die API-URL (${this.baseUrl}) und CORS-Einstellungen.`,
+          message: 'Netzwerkfehler: Konnte nicht mit dem Server verbinden. Bitte prüfen Sie Ihre Internetverbindung.',
         };
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
           console.error(`[API] Network error for ${url}:`, error);
         }
         throw networkError;
       }
       
       // Andere Fehler weiterwerfen
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
         console.error(`[API] Unknown error for ${url}:`, error);
       }
       throw error;
@@ -181,8 +181,11 @@ export class ApiClient {
     });
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(endpoint: string, data?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'DELETE',
+      body: data ? JSON.stringify(data) : undefined,
+    });
   }
 }
 
@@ -335,6 +338,10 @@ export const authApi = {
   }): Promise<{ message: string }> => {
     return apiClient.post<{ message: string }>('/reset-password', data);
   },
+
+  logout: async (): Promise<{ message: string }> => {
+    return apiClient.post<{ message: string }>('/logout');
+  },
 };
 
 export const befindenApi = {
@@ -479,8 +486,8 @@ export const profileApi = {
     return apiClient.post<{ message: string }>('/push/unsubscribe', { endpoint });
   },
 
-  delete: async (): Promise<{ message: string }> => {
-    return apiClient.delete<{ message: string }>('/user');
+  delete: async (password: string): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>('/user', { password });
   },
 };
 

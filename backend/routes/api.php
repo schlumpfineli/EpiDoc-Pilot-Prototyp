@@ -9,13 +9,11 @@ use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\MedicationController;
 use App\Http\Controllers\FeedbackController;
 
-// Public routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
-Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+// Public routes (mit Rate-Limiting gegen Brute-Force)
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,5');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
@@ -46,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User profile routes
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     Route::put('/user/password', [AuthController::class, 'changePassword']);
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::delete('/user', [AuthController::class, 'deleteAccount']);
 
     // Feedback routes
