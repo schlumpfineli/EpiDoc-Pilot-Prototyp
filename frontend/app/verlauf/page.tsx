@@ -1306,6 +1306,9 @@ export default function VerlaufPage() {
                 </span>
               )}
             </div>
+            <p className="mt-4 text-body-small text-foreground-400">
+              Alle Daten inkl. Profil exportieren? Unter <span className="font-medium text-foreground-600">Einstellungen → Datenexport</span>.
+            </p>
           </div>
         </div>
       </div>
