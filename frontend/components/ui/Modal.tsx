@@ -54,7 +54,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -65,10 +65,10 @@ export const Modal: React.FC<ModalProps> = ({
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       <div
-        className={`w-full h-auto max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col ${sizeClasses[size]}`}
+        className={`w-full max-h-[90vh] rounded-xl bg-white shadow-xl flex flex-col ${sizeClasses[size]}`}
       >
         {(title || showCloseButton) && (
-          <div className="sticky top-0 flex items-center justify-between border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+          <div className="flex items-center justify-between border-b border-background-200 bg-white px-4 py-3 rounded-t-xl shrink-0">
             {title && (
               <h2 id="modal-title" className="text-body font-semibold text-foreground-900">
                 {title}
@@ -77,7 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
                 aria-label="Schließen"
               >
                 <svg
