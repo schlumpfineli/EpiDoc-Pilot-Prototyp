@@ -358,15 +358,6 @@ export default function MedikamentePage() {
                   </div>
                 )}
               </div>
-
-              {/* Hinweis-Box */}
-              <div className="rounded-xl border border-info-200 bg-info-50 p-[var(--spacing-m)]">
-                <p className="text-body-small text-foreground-700">
-                  <span className="font-semibold">Hinweis:</span> Die hier erfassten Medikamente dienen Ihrer
-                  persönlichen Übersicht. Bitte besprechen Sie Änderungen an Ihrer Medikation immer mit Ihrem
-                  behandelnden Arzt.
-                </p>
-              </div>
             </>
           )}
 
