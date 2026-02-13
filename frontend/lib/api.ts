@@ -270,6 +270,11 @@ export interface UserProfile {
   email: string;
   role: 'patient' | 'relative';
   disease?: string;
+  diagnoses?: Array<{
+    type: string;
+    diagnosis_date?: string | null;
+    comment?: string | null;
+  }>;
   doctors?: Array<{
     name: string;
     phone?: string;

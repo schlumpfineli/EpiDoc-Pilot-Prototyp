@@ -90,6 +90,8 @@ class AuthController extends Controller
             'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:500'],
             'disease' => ['nullable', 'string', 'max:255'],
+            'diagnoses' => ['nullable', 'array'],
+            'diagnoses.*.type' => ['required_with:diagnoses', 'string', 'max:255'],
             'doctors' => ['nullable', 'array'],
             'doctors.*.name' => ['required_with:doctors', 'string', 'max:255'],
             'doctors.*.phone' => ['nullable', 'string', 'max:255'],
@@ -117,8 +119,28 @@ class AuthController extends Controller
 
         $validated = $validator->validated();
 
-        // Konvertiere 'disease' (einfacher String vom Frontend) in 'diagnoses' (JSON-Array in DB)
-        if (array_key_exists('disease', $validated)) {
+        // Wenn 'diagnoses' direkt als Array gesendet wird, dieses verwenden
+        if (array_key_exists('diagnoses', $validated)) {
+            unset($validated['disease']);
+            $diagnosesArr = $validated['diagnoses'];
+            if (is_array($diagnosesArr) && count($diagnosesArr) > 0) {
+                $validated['diagnoses'] = array_values(array_filter(
+                    array_map(fn($d) => [
+                        'type' => $d['type'] ?? '',
+                        'diagnosis_date' => $d['diagnosis_date'] ?? null,
+                        'comment' => $d['comment'] ?? null,
+                    ], $diagnosesArr),
+                    fn($d) => !empty(trim($d['type']))
+                ));
+                if (empty($validated['diagnoses'])) {
+                    $validated['diagnoses'] = null;
+                }
+            } else {
+                $validated['diagnoses'] = null;
+            }
+        }
+        // Rückwärtskompatibilität: 'disease' als einfachen String konvertieren
+        elseif (array_key_exists('disease', $validated)) {
             $diseaseValue = $validated['disease'];
             unset($validated['disease']);
             if ($diseaseValue) {
@@ -139,6 +161,7 @@ class AuthController extends Controller
         // Rückwärtskompatibilität: 'disease' als einfachen String zurückgeben
         $diagnoses = $user->diagnoses;
         $response['disease'] = is_array($diagnoses) && count($diagnoses) > 0 ? ($diagnoses[0]['type'] ?? null) : null;
+        $response['diagnoses'] = $diagnoses;
 
         return response()->json([
             'message' => 'Profil aktualisiert',
