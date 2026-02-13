@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { profileApi, authApi, UserProfile } from "@/lib/api";
-import { toastService, Modal, Input, Button } from "@/components/ui";
+import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -292,38 +292,56 @@ function EmptyState({
   );
 }
 
+const IconChevronDown = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+    />
+  </svg>
+);
+
 function SectionCard({
   icon,
   title,
-  onEdit,
   children,
-  editLabel = "Bearbeiten",
 }: {
   icon: React.ReactNode;
   title: string;
-  onEdit: () => void;
   children: React.ReactNode;
-  editLabel?: string;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="rounded-2xl border border-background-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-background-100 bg-background-25 rounded-t-2xl">
+    <div className="rounded-2xl border border-background-200 bg-white shadow-sm overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between px-4 py-3 bg-background-25 transition-colors hover:bg-background-100 cursor-pointer"
+      >
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-primary-400 shrink-0">{icon}</span>
           <h2 className="text-base sm:text-lg font-semibold text-foreground-900 truncate">
             {title}
           </h2>
         </div>
-        <button
-          type="button"
-          onClick={onEdit}
-          className="inline-flex items-center gap-1 shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-medium text-primary-600 transition-all hover:bg-primary-50 active:scale-[0.97]"
-        >
-          <IconPencil className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{editLabel}</span>
-        </button>
-      </div>
-      <div className="px-4 py-4">{children}</div>
+        <span className={`text-foreground-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
+          <IconChevronDown className="w-5 h-5" />
+        </span>
+      </button>
+
+      {isOpen && (
+        <div className="border-t border-background-100">
+          <div className="px-4 py-4">{children}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -521,8 +539,8 @@ export default function ProfilPage() {
   // ── Page ──
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
+      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-3 sm:px-5 md:px-6 lg:px-10 xl:px-12 2xl:px-16 py-2 sm:py-3 md:py-5 lg:py-6 xl:py-10 2xl:py-12 text-foreground-900">
+        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-7xl flex-col gap-3 sm:gap-5 md:gap-6 lg:gap-10">
           {/* ── Header ── */}
           <header>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground-900 mb-3">
@@ -535,58 +553,22 @@ export default function ProfilPage() {
             {/* ── Privacy Note ── */}
             <PrivacyNote />
 
-            {/* ── Section 1: Account Info ── */}
-            {profileData && (
-              <div className="rounded-2xl border border-background-200 bg-white shadow-sm">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-background-100 bg-background-25 rounded-t-2xl">
-                  <span className="text-primary-400 shrink-0">
-                    <IconUser className="w-5 h-5" />
-                  </span>
-                  <h2 className="text-base sm:text-lg font-semibold text-foreground-900">
-                    Konto-Informationen
-                  </h2>
-                </div>
-                <div className="px-4 py-3 divide-y divide-background-100">
-                  <div className="flex justify-between gap-3 py-2 first:pt-0 last:pb-0">
-                    <span className="text-sm text-foreground-500 shrink-0">
-                      User-ID
-                    </span>
-                    <span className="text-sm font-medium text-foreground-800 text-right break-all">
-                      {profileData.display_name || `User-${profileData.id}`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-3 py-2">
-                    <span className="text-sm text-foreground-500 shrink-0">
-                      E-Mail
-                    </span>
-                    <span className="text-sm font-medium text-foreground-800 text-right break-all">
-                      {profileData.email || "—"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-3 py-2 last:pb-0">
-                    <span className="text-sm text-foreground-500 shrink-0">
-                      Rolle
-                    </span>
-                    <span className="text-sm font-medium text-foreground-800">
-                      {profileData.role === "patient"
-                        ? "Patient"
-                        : "Angehöriger"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Section 2: Diagnose ── */}
+            {/* ── Section 1: Diagnose ── */}
             <SectionCard
               icon={<IconMedical className="w-5 h-5" />}
               title="Diagnose / Epilepsieform"
-              onEdit={() => openModal("disease")}
             >
               {profileData?.disease ? (
-                <p className="text-body text-foreground-800">
-                  {profileData.disease}
-                </p>
+                <div className="space-y-[var(--spacing-s)]">
+                  <p className="text-body text-foreground-800">
+                    {profileData.disease}
+                  </p>
+                  <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <button type="button" onClick={() => openModal("disease")} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition">
+                      Bearbeiten
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <EmptyState
                   message="Noch keine Diagnose erfasst"
@@ -596,38 +578,27 @@ export default function ProfilPage() {
               )}
             </SectionCard>
 
-            {/* ── Section 3: Doctors ── */}
+            {/* ── Section 2: Doctors ── */}
             <SectionCard
               icon={<IconStethoscope className="w-5 h-5" />}
               title="Behandelnde Ärzte"
-              onEdit={() => openModal("doctors")}
             >
               {profileData?.doctors && profileData.doctors.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-[var(--spacing-s)]">
                   {profileData.doctors.map((doc, i) => (
-                    <EntryCard
-                      key={i}
-                      name={doc.name}
-                      details={[
-                        {
-                          icon: <IconPhone className="w-3.5 h-3.5" />,
-                          text: doc.phone || "",
-                        },
-                        {
-                          icon: <IconMail className="w-3.5 h-3.5" />,
-                          text: doc.email || "",
-                        },
-                      ]}
-                    />
+                    <EntryCard key={i} name={doc.name} details={[
+                      { icon: <IconPhone className="w-3.5 h-3.5" />, text: doc.phone || "" },
+                      { icon: <IconMail className="w-3.5 h-3.5" />, text: doc.email || "" },
+                    ]} />
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => openModal("doctors")}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition mt-2"
-                  >
-                    <IconPlus className="w-3.5 h-3.5" />
-                    Arzt hinzufügen
-                  </button>
+                  <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <button type="button" onClick={() => openModal("doctors")} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition">
+                      Bearbeiten
+                    </button>
+                    <button type="button" onClick={() => { openModal("doctors"); addDoctor(); }} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition">
+                      + Hinzufügen
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <EmptyState
@@ -638,38 +609,27 @@ export default function ProfilPage() {
               )}
             </SectionCard>
 
-            {/* ── Section 4: Clinics ── */}
+            {/* ── Section 3: Clinics ── */}
             <SectionCard
               icon={<IconBuilding className="w-5 h-5" />}
               title="Kliniken / Spitäler"
-              onEdit={() => openModal("clinics")}
             >
               {profileData?.clinics && profileData.clinics.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-[var(--spacing-s)]">
                   {profileData.clinics.map((clinic, i) => (
-                    <EntryCard
-                      key={i}
-                      name={clinic.name}
-                      details={[
-                        {
-                          icon: <IconPhone className="w-3.5 h-3.5" />,
-                          text: clinic.phone || "",
-                        },
-                        {
-                          icon: <IconMapPin className="w-3.5 h-3.5" />,
-                          text: clinic.address || "",
-                        },
-                      ]}
-                    />
+                    <EntryCard key={i} name={clinic.name} details={[
+                      { icon: <IconPhone className="w-3.5 h-3.5" />, text: clinic.phone || "" },
+                      { icon: <IconMapPin className="w-3.5 h-3.5" />, text: clinic.address || "" },
+                    ]} />
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => openModal("clinics")}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition mt-2"
-                  >
-                    <IconPlus className="w-3.5 h-3.5" />
-                    Klinik hinzufügen
-                  </button>
+                  <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <button type="button" onClick={() => openModal("clinics")} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition">
+                      Bearbeiten
+                    </button>
+                    <button type="button" onClick={() => { openModal("clinics"); addClinic(); }} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition">
+                      + Hinzufügen
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <EmptyState
@@ -680,38 +640,27 @@ export default function ProfilPage() {
               )}
             </SectionCard>
 
-            {/* ── Section 5: Pharmacies ── */}
+            {/* ── Section 4: Pharmacies ── */}
             <SectionCard
               icon={<IconPills className="w-5 h-5" />}
               title="Apotheken"
-              onEdit={() => openModal("pharmacies")}
             >
               {profileData?.pharmacies && profileData.pharmacies.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-[var(--spacing-s)]">
                   {profileData.pharmacies.map((pharmacy, i) => (
-                    <EntryCard
-                      key={i}
-                      name={pharmacy.name}
-                      details={[
-                        {
-                          icon: <IconPhone className="w-3.5 h-3.5" />,
-                          text: pharmacy.phone || "",
-                        },
-                        {
-                          icon: <IconMapPin className="w-3.5 h-3.5" />,
-                          text: pharmacy.address || "",
-                        },
-                      ]}
-                    />
+                    <EntryCard key={i} name={pharmacy.name} details={[
+                      { icon: <IconPhone className="w-3.5 h-3.5" />, text: pharmacy.phone || "" },
+                      { icon: <IconMapPin className="w-3.5 h-3.5" />, text: pharmacy.address || "" },
+                    ]} />
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => openModal("pharmacies")}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition mt-2"
-                  >
-                    <IconPlus className="w-3.5 h-3.5" />
-                    Apotheke hinzufügen
-                  </button>
+                  <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <button type="button" onClick={() => openModal("pharmacies")} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition">
+                      Bearbeiten
+                    </button>
+                    <button type="button" onClick={() => { openModal("pharmacies"); addPharmacy(); }} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition">
+                      + Hinzufügen
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <EmptyState
@@ -722,33 +671,35 @@ export default function ProfilPage() {
               )}
             </SectionCard>
 
-            {/* ── Section 6: Emergency Contact ── */}
+            {/* ── Section 5: Emergency Contact ── */}
             <SectionCard
               icon={<IconPhone className="w-5 h-5" />}
               title="Notfallkontakt"
-              onEdit={() => openModal("emergency_contact")}
             >
               {profileData?.emergency_contact?.name ? (
-                <div className="space-y-1">
-                  <p className="text-base font-medium text-foreground-900">
-                    {profileData.emergency_contact.name}
-                  </p>
-                  {profileData.emergency_contact.phone && (
-                    <div className="flex items-center gap-2 text-foreground-500">
-                      <IconPhone className="w-3.5 h-3.5" />
-                      <span className="text-sm">
-                        {profileData.emergency_contact.phone}
-                      </span>
-                    </div>
-                  )}
-                  {profileData.emergency_contact.relationship && (
-                    <div className="flex items-center gap-2 text-foreground-500">
-                      <IconUser className="w-3.5 h-3.5" />
-                      <span className="text-sm">
-                        {profileData.emergency_contact.relationship}
-                      </span>
-                    </div>
-                  )}
+                <div className="space-y-[var(--spacing-s)]">
+                  <div className="space-y-1">
+                    <p className="text-base font-medium text-foreground-900">
+                      {profileData.emergency_contact.name}
+                    </p>
+                    {profileData.emergency_contact.phone && (
+                      <div className="flex items-center gap-2 text-foreground-500">
+                        <IconPhone className="w-3.5 h-3.5" />
+                        <span className="text-sm">{profileData.emergency_contact.phone}</span>
+                      </div>
+                    )}
+                    {profileData.emergency_contact.relationship && (
+                      <div className="flex items-center gap-2 text-foreground-500">
+                        <IconUser className="w-3.5 h-3.5" />
+                        <span className="text-sm">{profileData.emergency_contact.relationship}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <button type="button" onClick={() => openModal("emergency_contact")} className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition">
+                      Bearbeiten
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <EmptyState
@@ -763,317 +714,253 @@ export default function ProfilPage() {
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ── MODALS ─────────────────────────────────────────────────────── */}
+      {/* ── MODALS (Diary-Stil) ──────────────────────────────────────── */}
       {/* ════════════════════════════════════════════════════════════════════ */}
 
       {/* ── Disease Modal ── */}
-      <Modal
-        isOpen={activeModal === "disease"}
-        onClose={closeModal}
-        title="Diagnose bearbeiten"
-        size="md"
-      >
-        <div className="p-5 space-y-4">
-          <Input
-            label="Diagnose / Epilepsieform"
-            value={disease}
-            onChange={(e) => setDisease(e.target.value)}
-            placeholder="z.B. Fokale Epilepsie, Juvenile myoklonische Epilepsie..."
-          />
-          <div className="flex gap-3">
-            <Button variant="secondary" fullWidth onClick={closeModal}>
-              Abbrechen
-            </Button>
-            <Button
-              fullWidth
-              onClick={() => saveSection("disease")}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichert..." : "Speichern"}
-            </Button>
+      {activeModal === "disease" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+          <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+            <div className="overflow-y-auto flex-1">
+              <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+                <h2 className="text-body font-semibold text-foreground-900">Diagnose bearbeiten</h2>
+                <button type="button" onClick={closeModal} className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100" aria-label="Schließen">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                <div className="space-y-[var(--spacing-xs)]">
+                  <label className="text-body font-medium text-foreground-800">Diagnose / Epilepsieform</label>
+                  <input
+                    type="text"
+                    value={disease}
+                    onChange={(e) => setDisease(e.target.value)}
+                    placeholder="z.B. Fokale Epilepsie, Juvenile myoklonische Epilepsie..."
+                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition"
+                  />
+                </div>
+                <div className="flex gap-[var(--spacing-m)] pt-3">
+                  <button type="button" onClick={closeModal} className="flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50">
+                    Abbrechen
+                  </button>
+                  <button type="button" onClick={() => saveSection("disease")} disabled={isSaving} className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSaving ? "Speichert..." : "Speichern"}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </Modal>
+      )}
 
       {/* ── Doctors Modal ── */}
-      <Modal
-        isOpen={activeModal === "doctors"}
-        onClose={closeModal}
-        title="Ärzte bearbeiten"
-        size="lg"
-      >
-        <div className="p-5 space-y-4">
-          {doctors.length === 0 && (
-            <p className="text-body-small text-foreground-400 text-center py-3">
-              Noch keine Ärzte hinzugefügt.
-            </p>
-          )}
-          {doctors.map((doc, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-background-200 bg-background-25 p-4 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-body-small font-semibold text-foreground-700">
-                  Arzt {i + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeDoctor(i)}
-                  className="inline-flex items-center gap-1 rounded-lg p-1.5 text-warning-500 hover:bg-warning-50 transition"
-                  aria-label={`Arzt ${i + 1} entfernen`}
-                >
-                  <IconTrash className="w-4 h-4" />
+      {activeModal === "doctors" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+          <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+            <div className="overflow-y-auto flex-1">
+              <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+                <h2 className="text-body font-semibold text-foreground-900">Ärzte bearbeiten</h2>
+                <button type="button" onClick={closeModal} className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100" aria-label="Schließen">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-              <Input
-                label="Name"
-                value={doc.name}
-                onChange={(e) => updateDoctor(i, "name", e.target.value)}
-                placeholder="Name des Arztes"
-              />
-              <Input
-                label="Telefon"
-                type="tel"
-                value={doc.phone || ""}
-                onChange={(e) => updateDoctor(i, "phone", e.target.value)}
-                placeholder="Telefonnummer"
-              />
-              <Input
-                label="E-Mail"
-                type="email"
-                value={doc.email || ""}
-                onChange={(e) => updateDoctor(i, "email", e.target.value)}
-                placeholder="E-Mail-Adresse"
-              />
+              <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                {doctors.length === 0 && (
+                  <p className="text-body text-foreground-400 text-center py-3">
+                    Noch keine Ärzte hinzugefügt.
+                  </p>
+                )}
+                {doctors.map((doc, i) => (
+                  <div key={i} className="rounded-lg border border-background-200 bg-background-25 p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-body font-semibold text-foreground-700">Arzt {i + 1}</span>
+                      <button type="button" onClick={() => removeDoctor(i)} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-warning-500" aria-label={`Arzt ${i + 1} entfernen`} title="Entfernen">
+                        <IconTrash className="w-[1.125rem] h-[1.125rem]" />
+                      </button>
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Name</label>
+                      <input type="text" value={doc.name} onChange={(e) => updateDoctor(i, "name", e.target.value)} placeholder="Name des Arztes" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Telefon</label>
+                      <input type="tel" value={doc.phone || ""} onChange={(e) => updateDoctor(i, "phone", e.target.value)} placeholder="Telefonnummer" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">E-Mail</label>
+                      <input type="email" value={doc.email || ""} onChange={(e) => updateDoctor(i, "email", e.target.value)} placeholder="E-Mail-Adresse" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={addDoctor} className="w-full rounded-lg border-2 border-dashed border-background-300 py-[var(--spacing-s)] text-body font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-1.5">
+                  <IconPlus className="w-4 h-4" />
+                  Arzt hinzufügen
+                </button>
+                <div className="flex gap-[var(--spacing-m)] pt-3">
+                  <button type="button" onClick={closeModal} className="flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50">
+                    Abbrechen
+                  </button>
+                  <button type="button" onClick={() => saveSection("doctors")} disabled={isSaving} className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSaving ? "Speichert..." : "Speichern"}
+                  </button>
+                </div>
+              </div>
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={addDoctor}
-            className="w-full rounded-xl border-2 border-dashed border-background-300 py-3 text-body-small font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-1.5"
-          >
-            <IconPlus className="w-4 h-4" />
-            Arzt hinzufügen
-          </button>
-          <div className="flex gap-3 pt-1">
-            <Button variant="secondary" fullWidth onClick={closeModal}>
-              Abbrechen
-            </Button>
-            <Button
-              fullWidth
-              onClick={() => saveSection("doctors")}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichert..." : "Speichern"}
-            </Button>
           </div>
         </div>
-      </Modal>
+      )}
 
       {/* ── Clinics Modal ── */}
-      <Modal
-        isOpen={activeModal === "clinics"}
-        onClose={closeModal}
-        title="Kliniken bearbeiten"
-        size="lg"
-      >
-        <div className="p-5 space-y-4">
-          {clinics.length === 0 && (
-            <p className="text-body-small text-foreground-400 text-center py-3">
-              Noch keine Kliniken hinzugefügt.
-            </p>
-          )}
-          {clinics.map((clinic, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-background-200 bg-background-25 p-4 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-body-small font-semibold text-foreground-700">
-                  Klinik {i + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeClinic(i)}
-                  className="inline-flex items-center gap-1 rounded-lg p-1.5 text-warning-500 hover:bg-warning-50 transition"
-                  aria-label={`Klinik ${i + 1} entfernen`}
-                >
-                  <IconTrash className="w-4 h-4" />
+      {activeModal === "clinics" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+          <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+            <div className="overflow-y-auto flex-1">
+              <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+                <h2 className="text-body font-semibold text-foreground-900">Kliniken bearbeiten</h2>
+                <button type="button" onClick={closeModal} className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100" aria-label="Schließen">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-              <Input
-                label="Name"
-                value={clinic.name}
-                onChange={(e) => updateClinic(i, "name", e.target.value)}
-                placeholder="Name der Klinik"
-              />
-              <Input
-                label="Telefon"
-                type="tel"
-                value={clinic.phone || ""}
-                onChange={(e) => updateClinic(i, "phone", e.target.value)}
-                placeholder="Telefonnummer"
-              />
-              <Input
-                label="Adresse"
-                value={clinic.address || ""}
-                onChange={(e) => updateClinic(i, "address", e.target.value)}
-                placeholder="Strasse und Ort"
-              />
+              <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                {clinics.length === 0 && (
+                  <p className="text-body text-foreground-400 text-center py-3">
+                    Noch keine Kliniken hinzugefügt.
+                  </p>
+                )}
+                {clinics.map((clinic, i) => (
+                  <div key={i} className="rounded-lg border border-background-200 bg-background-25 p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-body font-semibold text-foreground-700">Klinik {i + 1}</span>
+                      <button type="button" onClick={() => removeClinic(i)} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-warning-500" aria-label={`Klinik ${i + 1} entfernen`} title="Entfernen">
+                        <IconTrash className="w-[1.125rem] h-[1.125rem]" />
+                      </button>
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Name</label>
+                      <input type="text" value={clinic.name} onChange={(e) => updateClinic(i, "name", e.target.value)} placeholder="Name der Klinik" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Telefon</label>
+                      <input type="tel" value={clinic.phone || ""} onChange={(e) => updateClinic(i, "phone", e.target.value)} placeholder="Telefonnummer" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Adresse</label>
+                      <input type="text" value={clinic.address || ""} onChange={(e) => updateClinic(i, "address", e.target.value)} placeholder="Strasse und Ort" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={addClinic} className="w-full rounded-lg border-2 border-dashed border-background-300 py-[var(--spacing-s)] text-body font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-1.5">
+                  <IconPlus className="w-4 h-4" />
+                  Klinik hinzufügen
+                </button>
+                <div className="flex gap-[var(--spacing-m)] pt-3">
+                  <button type="button" onClick={closeModal} className="flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50">
+                    Abbrechen
+                  </button>
+                  <button type="button" onClick={() => saveSection("clinics")} disabled={isSaving} className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSaving ? "Speichert..." : "Speichern"}
+                  </button>
+                </div>
+              </div>
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={addClinic}
-            className="w-full rounded-xl border-2 border-dashed border-background-300 py-3 text-body-small font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-1.5"
-          >
-            <IconPlus className="w-4 h-4" />
-            Klinik hinzufügen
-          </button>
-          <div className="flex gap-3 pt-1">
-            <Button variant="secondary" fullWidth onClick={closeModal}>
-              Abbrechen
-            </Button>
-            <Button
-              fullWidth
-              onClick={() => saveSection("clinics")}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichert..." : "Speichern"}
-            </Button>
           </div>
         </div>
-      </Modal>
+      )}
 
       {/* ── Pharmacies Modal ── */}
-      <Modal
-        isOpen={activeModal === "pharmacies"}
-        onClose={closeModal}
-        title="Apotheken bearbeiten"
-        size="lg"
-      >
-        <div className="p-5 space-y-4">
-          {pharmacies.length === 0 && (
-            <p className="text-body-small text-foreground-400 text-center py-3">
-              Noch keine Apotheken hinzugefügt.
-            </p>
-          )}
-          {pharmacies.map((pharmacy, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-background-200 bg-background-25 p-4 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-body-small font-semibold text-foreground-700">
-                  Apotheke {i + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removePharmacy(i)}
-                  className="inline-flex items-center gap-1 rounded-lg p-1.5 text-warning-500 hover:bg-warning-50 transition"
-                  aria-label={`Apotheke ${i + 1} entfernen`}
-                >
-                  <IconTrash className="w-4 h-4" />
+      {activeModal === "pharmacies" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+          <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+            <div className="overflow-y-auto flex-1">
+              <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+                <h2 className="text-body font-semibold text-foreground-900">Apotheken bearbeiten</h2>
+                <button type="button" onClick={closeModal} className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100" aria-label="Schließen">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-              <Input
-                label="Name"
-                value={pharmacy.name}
-                onChange={(e) => updatePharmacy(i, "name", e.target.value)}
-                placeholder="Name der Apotheke"
-              />
-              <Input
-                label="Telefon"
-                type="tel"
-                value={pharmacy.phone || ""}
-                onChange={(e) => updatePharmacy(i, "phone", e.target.value)}
-                placeholder="Telefonnummer"
-              />
-              <Input
-                label="Adresse"
-                value={pharmacy.address || ""}
-                onChange={(e) => updatePharmacy(i, "address", e.target.value)}
-                placeholder="Strasse und Ort"
-              />
+              <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                {pharmacies.length === 0 && (
+                  <p className="text-body text-foreground-400 text-center py-3">
+                    Noch keine Apotheken hinzugefügt.
+                  </p>
+                )}
+                {pharmacies.map((pharmacy, i) => (
+                  <div key={i} className="rounded-lg border border-background-200 bg-background-25 p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-body font-semibold text-foreground-700">Apotheke {i + 1}</span>
+                      <button type="button" onClick={() => removePharmacy(i)} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-warning-500" aria-label={`Apotheke ${i + 1} entfernen`} title="Entfernen">
+                        <IconTrash className="w-[1.125rem] h-[1.125rem]" />
+                      </button>
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Name</label>
+                      <input type="text" value={pharmacy.name} onChange={(e) => updatePharmacy(i, "name", e.target.value)} placeholder="Name der Apotheke" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Telefon</label>
+                      <input type="tel" value={pharmacy.phone || ""} onChange={(e) => updatePharmacy(i, "phone", e.target.value)} placeholder="Telefonnummer" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-body font-medium text-foreground-800">Adresse</label>
+                      <input type="text" value={pharmacy.address || ""} onChange={(e) => updatePharmacy(i, "address", e.target.value)} placeholder="Strasse und Ort" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={addPharmacy} className="w-full rounded-lg border-2 border-dashed border-background-300 py-[var(--spacing-s)] text-body font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-1.5">
+                  <IconPlus className="w-4 h-4" />
+                  Apotheke hinzufügen
+                </button>
+                <div className="flex gap-[var(--spacing-m)] pt-3">
+                  <button type="button" onClick={closeModal} className="flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50">
+                    Abbrechen
+                  </button>
+                  <button type="button" onClick={() => saveSection("pharmacies")} disabled={isSaving} className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSaving ? "Speichert..." : "Speichern"}
+                  </button>
+                </div>
+              </div>
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={addPharmacy}
-            className="w-full rounded-xl border-2 border-dashed border-background-300 py-3 text-body-small font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-1.5"
-          >
-            <IconPlus className="w-4 h-4" />
-            Apotheke hinzufügen
-          </button>
-          <div className="flex gap-3 pt-1">
-            <Button variant="secondary" fullWidth onClick={closeModal}>
-              Abbrechen
-            </Button>
-            <Button
-              fullWidth
-              onClick={() => saveSection("pharmacies")}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichert..." : "Speichern"}
-            </Button>
           </div>
         </div>
-      </Modal>
+      )}
 
       {/* ── Emergency Contact Modal ── */}
-      <Modal
-        isOpen={activeModal === "emergency_contact"}
-        onClose={closeModal}
-        title="Notfallkontakt bearbeiten"
-        size="md"
-      >
-        <div className="p-5 space-y-4">
-          <Input
-            label="Name"
-            value={emergencyContact.name}
-            onChange={(e) =>
-              setEmergencyContact({ ...emergencyContact, name: e.target.value })
-            }
-            placeholder="Name der Kontaktperson"
-          />
-          <Input
-            label="Telefon"
-            type="tel"
-            value={emergencyContact.phone || ""}
-            onChange={(e) =>
-              setEmergencyContact({
-                ...emergencyContact,
-                phone: e.target.value,
-              })
-            }
-            placeholder="Telefonnummer"
-          />
-          <Input
-            label="Beziehung"
-            value={emergencyContact.relationship || ""}
-            onChange={(e) =>
-              setEmergencyContact({
-                ...emergencyContact,
-                relationship: e.target.value,
-              })
-            }
-            placeholder="z.B. Partner, Elternteil, Freund..."
-          />
-          <div className="flex gap-3">
-            <Button variant="secondary" fullWidth onClick={closeModal}>
-              Abbrechen
-            </Button>
-            <Button
-              fullWidth
-              onClick={() => saveSection("emergency_contact")}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichert..." : "Speichern"}
-            </Button>
+      {activeModal === "emergency_contact" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+          <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+            <div className="overflow-y-auto flex-1">
+              <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+                <h2 className="text-body font-semibold text-foreground-900">Notfallkontakt bearbeiten</h2>
+                <button type="button" onClick={closeModal} className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100" aria-label="Schließen">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">
+                <div className="space-y-[var(--spacing-xs)]">
+                  <label className="text-body font-medium text-foreground-800">Name</label>
+                  <input type="text" value={emergencyContact.name} onChange={(e) => setEmergencyContact({ ...emergencyContact, name: e.target.value })} placeholder="Name der Kontaktperson" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                </div>
+                <div className="space-y-[var(--spacing-xs)]">
+                  <label className="text-body font-medium text-foreground-800">Telefon</label>
+                  <input type="tel" value={emergencyContact.phone || ""} onChange={(e) => setEmergencyContact({ ...emergencyContact, phone: e.target.value })} placeholder="Telefonnummer" className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                </div>
+                <div className="space-y-[var(--spacing-xs)]">
+                  <label className="text-body font-medium text-foreground-800">Beziehung</label>
+                  <input type="text" value={emergencyContact.relationship || ""} onChange={(e) => setEmergencyContact({ ...emergencyContact, relationship: e.target.value })} placeholder="z.B. Partner, Elternteil, Freund..." className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition" />
+                </div>
+                <div className="flex gap-[var(--spacing-m)] pt-3">
+                  <button type="button" onClick={closeModal} className="flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50">
+                    Abbrechen
+                  </button>
+                  <button type="button" onClick={() => saveSection("emergency_contact")} disabled={isSaving} className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSaving ? "Speichert..." : "Speichern"}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </Modal>
+      )}
     </ProtectedRoute>
   );
 }
