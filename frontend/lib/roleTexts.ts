@@ -4,11 +4,11 @@
  * Schlüssel = Patienten-Text (Original, bleibt unverändert für role === 'patient')
  * Wert     = Angehörigen-Text (Beobachterperspektive für role === 'relative')
  *
- * Nur Texte, die sich zwischen den Rollen unterscheiden, sind hier aufgeführt.
- * Alle anderen Texte bleiben für beide Rollen identisch.
+ * Nur Texte, die sich tatsächlich zwischen den Rollen unterscheiden, sind hier
+ * aufgeführt. Einträge mit identischem Wert gehören NICHT in diese Map.
  */
 
-export const caregiverTexts: Record<string, string> = {
+export const caregiverTexts: Readonly<Record<string, string>> = {
   // ─── Navigation ───────────────────────────────────────────────────────────
   "Wie geht es dir?": "Wie geht es der Person?",
 
@@ -20,7 +20,6 @@ export const caregiverTexts: Record<string, string> = {
   "Eigenes Symptom hinzugefügt": "Symptom hinzugefügt",
   "Eigenes Symptom entfernt": "Symptom entfernt",
   "Bitte gib einen Namen ein": "Bitte geben Sie einen Namen ein",
-  "Häufige Beschwerden einblenden": "Häufige Beschwerden einblenden",
 
   // ─── Tagebuch-Seite ───────────────────────────────────────────────────────
   "Wähle einen Tag aus dem Kalender aus, um Anfälle einzutragen oder bereits erfasste Anfälle anzuzeigen.":
@@ -45,9 +44,4 @@ export const caregiverTexts: Record<string, string> = {
     "Exportieren Sie alle Daten (Profil, Anfallstagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur Sicherung.",
   "Regelmässige Erinnerung, Ihr Befinden zu dokumentieren":
     "Regelmässige Erinnerung, das Befinden zu dokumentieren",
-  "Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen":
-    "Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen",
-  "Erinnerung an die Medikamenten-Einnahme":
-    "Erinnerung an die Medikamenten-Einnahme",
-
 };

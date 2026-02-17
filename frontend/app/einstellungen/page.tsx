@@ -848,13 +848,13 @@ export default function EinstellungenPage() {
                 </p>
                 <Toggle
                   label="Tagebuch-Erinnerung"
-                  description={t("Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen")}
+                  description="Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen"
                   checked={notifPrefs.diary}
                   onChange={(v) => updateNotifPref("diary", v)}
                 />
                 <Toggle
                   label="Medikamenten-Erinnerung"
-                  description={t("Erinnerung an die Medikamenten-Einnahme")}
+                  description="Erinnerung an die Medikamenten-Einnahme"
                   checked={notifPrefs.medication}
                   onChange={(v) => updateNotifPref("medication", v)}
                 />

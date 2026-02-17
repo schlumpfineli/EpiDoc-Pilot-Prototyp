@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { format, parseISO, subDays } from "date-fns";
-import { de } from "date-fns/locale";
+import { format, parseISO } from "date-fns";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { befindenApi, Befinden } from "@/lib/api";
 import { toastService } from "@/components/ui";
@@ -89,18 +88,12 @@ export default function BefindenPage() {
   // Optionale Symptome ein-/ausblenden
   const [showOptionalItems, setShowOptionalItems] = useState(false);
 
-  // Kern-Items immer anzeigen
-  const showCoreItems = true;
-    
   // Alle verfügbaren Items (Kern + Beobachtungen + Optional + Custom)
   const allItems = useMemo(() => {
     const items: Array<{ id: string; label: string; type: 'core' | 'optional' | 'custom' | 'observation' }> = [];
     
-    if (showCoreItems) {
-      items.push(...coreItems.map(item => ({ ...item, type: 'core' as const })));
-      // Beobachtungs-Items zu Kern-Items hinzufügen
-      items.push(...observationItems.map(item => ({ ...item, type: 'observation' as const })));
-    }
+    items.push(...coreItems.map(item => ({ ...item, type: 'core' as const })));
+    items.push(...observationItems.map(item => ({ ...item, type: 'observation' as const })));
     
     if (showOptionalItems) {
       items.push(...optionalItems.map(item => ({ ...item, type: 'optional' as const })));
@@ -108,40 +101,24 @@ export default function BefindenPage() {
     
     items.push(...customSymptoms.map(item => ({ ...item, type: 'custom' as const })));
     
-    // Entferne "hhh" falls vorhanden
-    return items.filter(item => item.id !== 'hhh' && item.label !== 'hhh');
-  }, [showCoreItems, showOptionalItems, customSymptoms, observationItems]);
+    return items;
+  }, [showOptionalItems, customSymptoms, observationItems]);
       
   // Lade eigene Symptome aus localStorage
   useEffect(() => {
     const stored = localStorage.getItem('customSymptoms');
-      if (stored) {
-        try {
-        const parsed = JSON.parse(stored);
-        // Entferne "hhh" falls vorhanden
-        const filtered = parsed.filter((item: CustomSymptom) => item.id !== 'hhh' && item.label !== 'hhh');
-        if (filtered.length !== parsed.length) {
-          // "hhh" wurde entfernt, speichere die gefilterte Version
-          localStorage.setItem('customSymptoms', JSON.stringify(filtered));
-        }
-        setCustomSymptoms(filtered);
+    if (stored) {
+      try {
+        setCustomSymptoms(JSON.parse(stored));
       } catch (e) {
         console.error('Fehler beim Laden der eigenen Symptome:', e);
-    }
+      }
     }
     
-    // Lade Beobachtungs-Items aus localStorage
     const storedObservations = localStorage.getItem('observationItems');
     if (storedObservations) {
       try {
-        const parsed = JSON.parse(storedObservations);
-        // Entferne "hhh" falls vorhanden
-        const filtered = parsed.filter((item: CustomSymptom) => item.id !== 'hhh' && item.label !== 'hhh');
-        if (filtered.length !== parsed.length) {
-          // "hhh" wurde entfernt, speichere die gefilterte Version
-          localStorage.setItem('observationItems', JSON.stringify(filtered));
-        }
-        setObservationItems(filtered);
+        setObservationItems(JSON.parse(storedObservations));
       } catch (e) {
         console.error('Fehler beim Laden der Beobachtungs-Items:', e);
       }
@@ -179,19 +156,10 @@ export default function BefindenPage() {
     setLoading(true);
     try {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      console.log('[Befinden] Lade Historie für Datum:', dateStr);
-      const response = await befindenApi.getAll({
-        date: dateStr,
-      });
-      console.log('[Befinden] Historie geladen:', response.data?.length || 0, 'Einträge');
+      const response = await befindenApi.getAll({ date: dateStr });
       setHistory(response.data || []);
     } catch (error: any) {
-      console.error('[Befinden] Fehler beim Laden der Historie:', error);
       const errorMessage = error?.message || 'Fehler beim Laden der Daten';
-      console.error('[Befinden] Fehlerdetails:', {
-        message: errorMessage,
-        error: error,
-      });
       toastService.show(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -202,15 +170,9 @@ export default function BefindenPage() {
   const loadAllHistory = async () => {
     try {
       const response = await befindenApi.getAll({});
-      console.log('[Befinden] Gesamthistorie geladen:', response.data?.length || 0, 'Einträge');
       setAllHistory(response.data || []);
-    } catch (error: any) {
-      console.error('[Befinden] Fehler beim Laden der Gesamthistorie:', error);
-      console.error('[Befinden] Fehlerdetails:', {
-        message: error?.message,
-        error: error,
-      });
-      // Kein Toast hier, da dies im Hintergrund läuft
+    } catch {
+      // Hintergrund-Ladevorgang – Fehler werden stillschweigend ignoriert
     }
   };
 
@@ -225,7 +187,6 @@ export default function BefindenPage() {
     );
     return entry?.rating ?? null;
   };
-
 
   // Toggle Item-Expansion
   const toggleItem = (itemId: string, e?: React.MouseEvent) => {
@@ -352,8 +313,6 @@ export default function BefindenPage() {
       });
     }
   };
-
-
 
   // Eintrag löschen
   const requestDeleteEntry = (date: string, symptomId: string, timeOfDay: TimeOfDay | 'allDay') => {
@@ -1079,9 +1038,6 @@ export default function BefindenPage() {
                                     } else {
                                       displayRating = getRatingForTimeSlot(selectedDate, itemId, slot.id as TimeOfDay);
                                     }
-                                    const slotTempRating = isAllDay
-                                      ? (tempRatings[itemId]?.allDay ?? displayRating ?? null)
-                                      : (tempRatings[itemId]?.[slot.id as TimeOfDay] ?? displayRating ?? null);
                                     const hasExistingEntry = isAllDay
                                       ? (history.some((h) => h.date === dateStr && h.symptom_id === itemId) || (tempRatings[itemId]?.allDay !== undefined && tempRatings[itemId]?.allDay !== null))
                                       : (history.some((h) => h.date === dateStr && h.symptom_id === itemId && h.time_of_day === slot.id) || (tempRatings[itemId]?.[slot.id as TimeOfDay] !== undefined && tempRatings[itemId]?.[slot.id as TimeOfDay] !== null));
@@ -1123,8 +1079,7 @@ export default function BefindenPage() {
           )}
           
           {/* Häufige Beschwerden */}
-          {showCoreItems && (
-            <div className="mb-6">
+          <div className="mb-6">
               <div className="mb-4 mt-2">
                 <h2 className="text-h4 font-semibold text-foreground-900">
                   Häufige Beschwerden
@@ -1369,7 +1324,6 @@ export default function BefindenPage() {
                   })}
                                       </div>
                                     </div>
-          )}
 
           {/* Optionale Symptome */}
           <div className="mb-6">
@@ -1454,9 +1408,6 @@ export default function BefindenPage() {
                                     } else {
                                       displayRating = getRatingForTimeSlot(selectedDate, item.id, slot.id as TimeOfDay);
                                     }
-                                    const slotTempRating = isAllDay
-                                      ? (tempRatings[item.id]?.allDay ?? displayRating ?? null)
-                                      : (tempRatings[item.id]?.[slot.id as TimeOfDay] ?? displayRating ?? null);
                                     const hasExistingEntry = isAllDay
                                       ? (history.some((h) => h.date === dateStr && h.symptom_id === item.id) || (tempRatings[item.id]?.allDay !== undefined && tempRatings[item.id]?.allDay !== null))
                                       : (history.some((h) => h.date === dateStr && h.symptom_id === item.id && h.time_of_day === slot.id) || (tempRatings[item.id]?.[slot.id as TimeOfDay] !== undefined && tempRatings[item.id]?.[slot.id as TimeOfDay] !== null));
@@ -1685,10 +1636,6 @@ export default function BefindenPage() {
                                 </div>
                               )}
                             </div>
-
-
-
-          
                                               </div>
                                             </div>
 
