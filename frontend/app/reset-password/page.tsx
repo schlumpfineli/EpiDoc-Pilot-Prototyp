@@ -72,15 +72,15 @@ function ResetPasswordForm() {
   if (isSuccess) {
     return (
       <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
-        <div className="max-w-md w-full space-y-[var(--spacing-l)]">
-          <div className="rounded-xl border border-success-200 bg-success-50 p-[var(--spacing-l)] text-center space-y-[var(--spacing-m)]">
+        <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
+          <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
             <div className="mx-auto w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
               <svg className="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <div className="space-y-[var(--spacing-s)]">
-              <h1 className="text-h2 text-foreground-900">
+            <div className="space-y-[var(--spacing-m)]">
+              <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900">
                 Passwort erfolgreich zurückgesetzt
               </h1>
               <p className="text-body text-foreground-700">
@@ -104,29 +104,31 @@ function ResetPasswordForm() {
   if (!token || !email) {
     return (
       <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
-        <div className="max-w-md w-full space-y-[var(--spacing-l)]">
-          <div className="rounded-xl border border-error-200 bg-error-50 p-[var(--spacing-l)] text-center space-y-[var(--spacing-m)]">
-            <div className="space-y-[var(--spacing-s)]">
-              <h1 className="text-h2 text-foreground-900">
-                Ungültiger Reset-Link
-              </h1>
-              <p className="text-body text-foreground-700">
-                {apiError || 'Der Reset-Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.'}
-              </p>
+        <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
+          <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
+            <div className="space-y-[var(--spacing-m)]">
+              <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 p-[var(--spacing-m)]">
+                <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900 mb-[var(--spacing-xs)]">
+                  Ungültiger Reset-Link
+                </h1>
+                <p className="text-body text-foreground-700">
+                  {apiError || 'Der Reset-Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.'}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-[var(--spacing-s)]">
-            <Link href="/forgot-password">
-              <Button variant="primary" fullWidth>
-                Neuen Reset-Link anfordern
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="secondary" fullWidth>
-                Zurück zum Login
-              </Button>
-            </Link>
+            <div className="flex flex-col gap-[var(--spacing-s)]">
+              <Link href="/forgot-password">
+                <Button variant="primary" fullWidth>
+                  Neuen Reset-Link anfordern
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="secondary" fullWidth>
+                  Zurück zum Login
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -135,22 +137,23 @@ function ResetPasswordForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
-      <div className="max-w-md w-full space-y-[var(--spacing-l)]">
-        <div className="text-center space-y-[var(--spacing-s)]">
-          <h1 className="text-h1 text-foreground-900">
-            Neues Passwort setzen
-          </h1>
-          <p className="text-body text-foreground-600">
-            Bitte geben Sie Ihr neues Passwort ein.
-          </p>
-        </div>
+      <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
+        <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] space-y-[var(--spacing-l)]">
+          <div className="text-center space-y-[var(--spacing-m)]">
+            <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900">
+              Neues Passwort setzen
+            </h1>
+            <p className="text-body text-foreground-600">
+              Bitte geben Sie Ihr neues Passwort ein.
+            </p>
+          </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-[var(--spacing-m)]">
-          {apiError && (
-            <div className="rounded-xl border border-error-200 bg-error-50 p-[var(--spacing-m)]">
-              <p className="text-body-small text-error-800">{apiError}</p>
-            </div>
-          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-[var(--spacing-l)]">
+            {apiError && (
+              <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 p-[var(--spacing-m)]">
+                <p className="text-body-small text-warning-700">{apiError}</p>
+              </div>
+            )}
 
           {/* Hidden fields für Token und E-Mail */}
           <input type="hidden" {...register('token')} />
@@ -187,20 +190,21 @@ function ResetPasswordForm() {
             />
           </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            fullWidth
-            disabled={isLoading}
-          >
-            {isLoading ? 'Wird zurückgesetzt...' : 'Passwort zurücksetzen'}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              disabled={isLoading}
+            >
+              {isLoading ? 'Wird zurückgesetzt...' : 'Passwort zurücksetzen'}
+            </Button>
+          </form>
 
-        <div className="text-center">
-          <Link href="/login" className="text-body-small text-primary-600 hover:text-primary-700">
-            Zurück zum Login
-          </Link>
+          <div className="text-center pt-[var(--spacing-xs)]">
+            <Link href="/login" className="text-body-small text-primary-600 hover:text-primary-700">
+              Zurück zum Login
+            </Link>
+          </div>
         </div>
       </div>
     </div>

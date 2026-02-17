@@ -20,11 +20,11 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'text-body rounded-xl font-semibold shadow-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+  const baseClasses = 'text-body rounded-xl font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
   
   const variantClasses = {
-    primary: 'bg-primary-500 text-white hover:bg-primary-600 focus-visible:outline-primary-500',
-    secondary: 'border border-secondary-500 bg-white text-secondary-700 hover:border-secondary-600 hover:bg-secondary-50 focus-visible:outline-secondary-500',
+    primary: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus-visible:outline-primary-500',
+    secondary: 'border border-background-300 bg-white text-foreground-800 hover:border-primary-300 hover:bg-primary-50 focus-visible:outline-primary-500',
   };
 
   const sizeClasses = {

@@ -909,7 +909,7 @@ export default function VerlaufPage() {
       <div className="min-h-screen bg-background-50 pb-20">
         {/* Titel, Filter und Grafik (Mobile/Tablet) – zentriert */}
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="mb-2 text-center text-h3 font-semibold text-foreground-900">
+          <h1 className="mb-2 text-center text-h4 sm:text-h3 font-medium text-foreground-900">
             Analyse
           </h1>
           <p className="mb-6 text-center text-body-small text-foreground-500">
@@ -934,10 +934,10 @@ export default function VerlaufPage() {
                     key={range.id}
                     type="button"
                     onClick={() => setTimeRange(range.id)}
-                    className={`rounded-lg border px-4 py-2 text-body-small font-medium transition-colors ${
+                    className={`rounded-full border px-4 py-2 text-body-small font-medium transition-colors ${
                       isActive
-                        ? "border-primary-500 bg-primary-50 text-primary-700"
-                        : "border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25"
+                        ? "border-primary-500/60 bg-primary-50 text-primary-700"
+                        : "border-background-200/60 bg-white text-foreground-700 hover:bg-background-25"
                     }`}
                   >
                     {range.label}
@@ -949,13 +949,13 @@ export default function VerlaufPage() {
 
           {/* Signal-Auswahl – relative z-10 damit Dropdown nicht von Grafik überdeckt wird */}
           <div className="relative z-10 mb-8">
-            <label className="mb-2 block text-body-small font-medium text-foreground-700">
+            <label className="mb-2 block text-body-small text-foreground-400 uppercase tracking-wide">
               {t("Vergleiche Anfälle mit:")}
             </label>
             <select
               value={selectedSignal}
               onChange={(e) => setSelectedSignal(e.target.value)}
-              className="w-full rounded-lg border border-background-200 bg-white px-4 py-2.5 text-body text-foreground-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-background-200/60 bg-white px-4 py-2.5 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Bitte wählen...</option>
               {availableSignalsInRange.map((signal) => (
@@ -971,7 +971,7 @@ export default function VerlaufPage() {
             <div ref={chartContainerRef}>
               {/* Horizontal scrollbare Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
-                <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
+                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
                   <div className="overflow-x-auto">
                     <div className={`relative h-48 min-w-[600px] ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                       <svg
@@ -1058,7 +1058,7 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               ) : (
-                <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
+                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
                   <div className="h-48 flex items-center justify-center">
                     <p className="text-body text-foreground-500">
                       Für den ausgewählten Zeitraum sind keine Daten verfügbar.
@@ -1074,7 +1074,7 @@ export default function VerlaufPage() {
             <div ref={chartContainerRef}>
               {/* Vereinfachte Visualisierung */}
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
-                <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
+                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
                   <div className={`relative h-48 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                     <svg
                       className="h-full w-full"
@@ -1159,7 +1159,7 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               ) : (
-                <div className="mb-6 rounded-lg border border-background-200 bg-background-10 p-4">
+                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
                   <div className="h-48 flex items-center justify-center">
                     <p className="text-body text-foreground-500">
                       Für den ausgewählten Zeitraum sind keine Daten verfügbar.
@@ -1171,7 +1171,7 @@ export default function VerlaufPage() {
           )}
 
           {!selectedSignal && (
-            <div className="rounded-lg border border-background-200 bg-background-10 p-4 text-center">
+            <div className="rounded-2xl border border-background-200/60 bg-white p-6 text-center">
               <p className="text-body text-foreground-600">
                 Wähle ein Signal aus, um mögliche Zusammenhänge zu erkennen.
               </p>
@@ -1184,7 +1184,7 @@ export default function VerlaufPage() {
           <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <div ref={chartContainerRef}>
               {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
-                <div className="rounded-none border-y border-background-200 bg-background-10 p-6 lg:px-8">
+                <div className="rounded-none border-y border-background-200/60 bg-white p-8 lg:px-10">
                   <div className={`relative h-80 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
                     <svg
                       className="h-full w-full"
@@ -1262,7 +1262,7 @@ export default function VerlaufPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-none border-y border-background-200 bg-background-10 p-6">
+                <div className="rounded-none border-y border-background-200/60 bg-white p-8">
                   <div className="h-80 flex items-center justify-center">
                     <p className="text-body text-foreground-500">
                       Für den ausgewählten Zeitraum sind keine Daten verfügbar.
@@ -1276,8 +1276,8 @@ export default function VerlaufPage() {
 
         {/* PDF-Exporte und Rest – zentriert, geringer Abstand zur Grafik */}
         <div className="mx-auto max-w-4xl px-4 pt-1 pb-6 sm:px-6 lg:px-8">
-          <div className="mt-2 mb-6 rounded-xl border border-background-200 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 text-h5 font-semibold text-foreground-900">
+          <div className="mt-2 mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
+            <h2 className="mb-3 text-h5 font-medium text-foreground-900">
               PDF-Exporte
             </h2>
             <p className="mb-4 text-body-small text-foreground-600">
@@ -1288,7 +1288,7 @@ export default function VerlaufPage() {
                 type="button"
                 onClick={handleExportSeizureSummaryPdf}
                 disabled={isExportingSeizurePdf}
-                className="rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
+                className="rounded-full border border-primary-500/60 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
               >
                 {isExportingSeizurePdf ? "Exportiere…" : "Anfälle als Bericht (PDF)"}
               </button>
@@ -1297,7 +1297,7 @@ export default function VerlaufPage() {
                   type="button"
                   onClick={handleExportPdf}
                   disabled={isExportingPdf}
-                  className="rounded-lg border border-primary-500 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
+                  className="rounded-full border border-primary-500/60 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
                 >
                   {isExportingPdf ? "Exportiere…" : "Verlaufskurven als PDF"}
                 </button>

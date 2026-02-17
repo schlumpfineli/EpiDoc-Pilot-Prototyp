@@ -38,7 +38,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-background-200 bg-white shadow-sm">
+    <nav className="sticky top-0 z-50 border-b border-background-200/60 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-s">
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Branding */}
@@ -56,10 +56,10 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-s py-s rounded-xl text-body-small font-medium transition-colors whitespace-nowrap ${
+                  className={`px-s py-2xs rounded-lg text-body-small font-medium transition-all duration-200 whitespace-nowrap ${
                     isActive(link.href)
                       ? 'bg-primary-50 text-primary-700'
-                      : 'text-foreground-700 hover:bg-background-100 hover:text-foreground-900'
+                      : 'text-foreground-400 hover:text-foreground-800 hover:bg-background-50'
                   }`}
                 >
                   {link.label}
@@ -137,29 +137,29 @@ export function Navbar() {
 
         {/* Ausklapp-Menü (Mobile + Tablet) */}
         {isMobileMenuOpen && user && (
-          <div className="border-t border-background-200 py-s xl:hidden">
+          <div className="border-t border-background-200/60 py-s xl:hidden">
             <div className="space-y-2xs">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-m py-s rounded-xl text-body font-medium transition-colors ${
+                  className={`block px-m py-s rounded-lg text-body font-medium transition-all duration-200 ${
                     isActive(link.href)
                       ? 'bg-primary-50 text-primary-700'
-                      : 'text-foreground-700 hover:bg-background-100'
+                      : 'text-foreground-500 hover:text-foreground-800 hover:bg-background-50'
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t border-background-200 pt-2xs mt-2xs">
-                <div className="px-m py-s text-body text-foreground-600">
+              <div className="border-t border-background-200/60 pt-2xs mt-2xs">
+                <div className="px-m py-s text-body-small text-foreground-400">
                   {user.display_name}
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-m py-s rounded-xl text-body font-medium text-foreground-700 hover:bg-background-100"
+                  className="w-full text-left px-m py-s rounded-lg text-body font-medium text-foreground-500 hover:text-foreground-800 hover:bg-background-50"
                 >
                   Abmelden
                 </button>

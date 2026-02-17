@@ -25,14 +25,14 @@ export const Card: React.FC<CardProps> = ({
   };
 
   const variantClasses = {
-    default: 'bg-white',
-    outlined: 'bg-white border border-background-200',
-    elevated: 'bg-white shadow-lg',
+    default: 'bg-white border border-background-200/60',
+    outlined: 'bg-white border border-background-300',
+    elevated: 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]',
   };
 
   return (
     <div
-      className={`rounded-xl ${variantClasses[variant]} ${paddingClasses[padding]} ${className}`}
+      className={`rounded-2xl ${variantClasses[variant]} ${paddingClasses[padding]} ${className}`}
     >
       {children}
     </div>

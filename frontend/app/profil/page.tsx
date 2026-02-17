@@ -31,23 +31,23 @@ type ModalType =
 
 const CSS = {
   input:
-    "w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition",
+    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition",
   btnCancel:
-    "flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50",
+    "flex-1 rounded-xl border-2 border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50",
   btnSave:
-    "flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
+    "flex-1 rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
   btnEdit:
-    "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition",
+    "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-xl transition",
   btnAdd:
-    "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition",
+    "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-xl transition",
   btnAddDashed:
-    "w-full rounded-lg border-2 border-dashed border-background-300 py-[var(--spacing-s)] text-body font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-[var(--spacing-2xs)]",
+    "w-full rounded-xl border-2 border-dashed border-background-300 py-[var(--spacing-s)] text-body font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-[var(--spacing-2xs)]",
   btnDelete:
-    "flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-warning-500",
+    "flex h-9 w-9 items-center justify-center rounded-xl text-foreground-500 transition hover:bg-background-100 hover:text-warning-500",
   btnClose:
-    "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100",
+    "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
   entryCard:
-    "rounded-lg border border-background-200 bg-background-25 p-[var(--spacing-s)] space-y-[var(--spacing-s)]",
+    "rounded-xl border border-background-200/60 bg-white p-[var(--spacing-s)] space-y-[var(--spacing-s)]",
 } as const;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ const IconMapPin = ({ className = "w-4 h-4" }: IconProps) => (
   </svg>
 );
 
-const IconChevronDown = ({ className = "w-5 h-5" }: IconProps) => (
+const IconChevronDown = ({ className = "w-4 h-4" }: IconProps) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
   </svg>
@@ -212,18 +212,18 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-2xl border border-background-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-[var(--spacing-m)] py-[var(--spacing-s)] bg-background-25 transition-colors hover:bg-background-100 cursor-pointer"
+        className="flex w-full items-center justify-between px-[var(--spacing-m)] py-[var(--spacing-s)] bg-white transition-colors hover:bg-background-100 cursor-pointer"
       >
         <div className="flex items-center gap-[var(--spacing-xs)] min-w-0">
           <span className="text-primary-400 shrink-0">{icon}</span>
-          <h2 className="text-body font-semibold text-foreground-900 truncate">{title}</h2>
+          <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
         </div>
-        <span className={`text-foreground-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
-          <IconChevronDown className="w-5 h-5" />
+        <span className={`text-foreground-300 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
+          <IconChevronDown className="w-4 h-4" />
         </span>
       </button>
       {isOpen && (
@@ -237,7 +237,7 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
 
 function EntryCard({ name, details }: { name: string; details: { icon: ReactNode; text: string }[] }) {
   return (
-    <div className="rounded-xl border border-background-200 bg-background-25 px-[var(--spacing-s)] py-[var(--spacing-xs)] space-y-[var(--spacing-3xs)]">
+    <div className="rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] space-y-[var(--spacing-3xs)]">
       <p className="text-body font-medium text-foreground-900 break-words">{name}</p>
       {details
         .filter((d) => d.text)
@@ -254,11 +254,11 @@ function EntryCard({ name, details }: { name: string; details: { icon: ReactNode
 /** Inline-Modal im Diary-Stil (Overlay + Container + Header + Scroll-Body). */
 function InlineModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
       <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
-          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-            <h2 className="text-body font-semibold text-foreground-900">{title}</h2>
+          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+            <h2 className="text-body font-medium text-foreground-900">{title}</h2>
             <button type="button" onClick={onClose} className={CSS.btnClose} aria-label="Schließen">
               <CloseIcon />
             </button>
@@ -454,11 +454,11 @@ export default function ProfilPage() {
   // ── Page ──
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-2xs)]">
-            <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">{t("Mein Profil")}</h1>
+            <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">{t("Mein Profil")}</h1>
             <ProfileCompletionBar percentage={completionPercentage} />
           </div>
 
@@ -471,12 +471,12 @@ export default function ProfilPage() {
                 <div className="space-y-[var(--spacing-s)]">
                   {profileData?.diagnoses && profileData.diagnoses.length > 0 ? (
                     profileData.diagnoses.map((d, i) => (
-                      <div key={i} className="rounded-xl border border-background-200 bg-background-25 px-[var(--spacing-s)] py-[var(--spacing-xs)]">
+                      <div key={i} className="rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)]">
                         <p className="text-body text-foreground-800">{d.type}</p>
                       </div>
                     ))
                   ) : profileData?.disease ? (
-                    <div className="rounded-xl border border-background-200 bg-background-25 px-[var(--spacing-s)] py-[var(--spacing-xs)]">
+                    <div className="rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)]">
                       <p className="text-body text-foreground-800">{profileData.disease}</p>
                     </div>
                   ) : null}
@@ -577,7 +577,7 @@ export default function ProfilPage() {
           {diagnoses.map((diag, i) => (
             <div key={i} className={CSS.entryCard}>
               <div className="flex items-center justify-between">
-                <span className="text-body font-semibold text-foreground-700">Diagnose {i + 1}</span>
+                <span className="text-body font-medium text-foreground-700">Diagnose {i + 1}</span>
                 <button type="button" onClick={() => diagnosisHelpers.remove(i)} className={CSS.btnDelete} aria-label={`Diagnose ${i + 1} entfernen`} title="Entfernen">
                   <IconTrash className="w-[1.125rem] h-[1.125rem]" />
                 </button>
@@ -600,7 +600,7 @@ export default function ProfilPage() {
           {doctors.map((doc, i) => (
             <div key={i} className={CSS.entryCard}>
               <div className="flex items-center justify-between">
-                <span className="text-body font-semibold text-foreground-700">Arzt {i + 1}</span>
+                <span className="text-body font-medium text-foreground-700">Arzt {i + 1}</span>
                 <button type="button" onClick={() => doctorHelpers.remove(i)} className={CSS.btnDelete} aria-label={`Arzt ${i + 1} entfernen`} title="Entfernen">
                   <IconTrash className="w-[1.125rem] h-[1.125rem]" />
                 </button>
@@ -625,7 +625,7 @@ export default function ProfilPage() {
           {clinics.map((clinic, i) => (
             <div key={i} className={CSS.entryCard}>
               <div className="flex items-center justify-between">
-                <span className="text-body font-semibold text-foreground-700">Klinik {i + 1}</span>
+                <span className="text-body font-medium text-foreground-700">Klinik {i + 1}</span>
                 <button type="button" onClick={() => clinicHelpers.remove(i)} className={CSS.btnDelete} aria-label={`Klinik ${i + 1} entfernen`} title="Entfernen">
                   <IconTrash className="w-[1.125rem] h-[1.125rem]" />
                 </button>
@@ -650,7 +650,7 @@ export default function ProfilPage() {
           {pharmacies.map((pharmacy, i) => (
             <div key={i} className={CSS.entryCard}>
               <div className="flex items-center justify-between">
-                <span className="text-body font-semibold text-foreground-700">Apotheke {i + 1}</span>
+                <span className="text-body font-medium text-foreground-700">Apotheke {i + 1}</span>
                 <button type="button" onClick={() => pharmacyHelpers.remove(i)} className={CSS.btnDelete} aria-label={`Apotheke ${i + 1} entfernen`} title="Entfernen">
                   <IconTrash className="w-[1.125rem] h-[1.125rem]" />
                 </button>

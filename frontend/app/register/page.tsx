@@ -113,7 +113,7 @@ export default function RegisterPage() {
           />
 
           {apiError && (
-            <div className="rounded-lg border border-warning-200 bg-warning-50 px-[var(--spacing-m)] py-[var(--spacing-s)]">
+            <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 px-[var(--spacing-m)] py-[var(--spacing-s)]">
               <p className="text-body-small text-warning-700">{apiError}</p>
             </div>
           )}
@@ -123,7 +123,7 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <p className="text-body text-center text-foreground-600">
+        <p className="text-body text-center text-foreground-600 pt-[var(--spacing-xs)]">
           Bereits registriert?{" "}
           <a
             href="/login"

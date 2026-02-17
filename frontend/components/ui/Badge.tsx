@@ -18,22 +18,22 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
 }) => {
   const variantClasses = {
-    primary: 'bg-primary-100 text-primary-800',
-    secondary: 'bg-secondary-100 text-secondary-800',
+    primary: 'bg-primary-50 text-primary-700',
+    secondary: 'bg-secondary-100 text-secondary-700',
     accent: 'bg-accent-100 text-accent-800',
-    success: 'bg-secondary-100 text-secondary-800',
-    warning: 'bg-warning-100 text-warning-800',
-    error: 'bg-warning-100 text-warning-800',
+    success: 'bg-success-100 text-success-700',
+    warning: 'bg-caution-100 text-caution-700',
+    error: 'bg-warning-100 text-warning-700',
   };
 
   const sizeClasses = {
     sm: 'px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] text-body-small',
-    md: 'px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body',
+    md: 'px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small',
   };
 
   return (
     <span
-      className={`inline-flex items-center gap-[var(--spacing-2xs)] rounded-full font-semibold shadow-sm ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center gap-[var(--spacing-2xs)] rounded-full font-medium ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       {children}
     </span>

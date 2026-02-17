@@ -236,22 +236,22 @@ export default function MedikamentePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* Header */}
           <div className="space-y-[var(--spacing-s)]">
-            <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
+            <h1 className="text-headline-4 sm:text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
               Medikamente
             </h1>
 
             {/* Toggle */}
-            <div className="flex rounded-xl bg-background-100 p-[3px]">
+            <div className="flex rounded-2xl bg-background-100 p-[3px]">
               <button
                 type="button"
                 onClick={() => setTab("active")}
-                className={`flex-1 rounded-lg py-[var(--spacing-2xs)] text-body-small font-semibold transition ${
+                className={`flex-1 rounded-lg py-[var(--spacing-2xs)] text-body-small font-medium transition ${
                   tab === "active"
-                    ? "bg-primary-600 text-white shadow-sm"
+                    ? "bg-primary-600 text-white"
                     : "text-foreground-500 hover:text-foreground-700"
                 }`}
               >
@@ -260,9 +260,9 @@ export default function MedikamentePage() {
               <button
                 type="button"
                 onClick={() => setTab("inactive")}
-                className={`flex-1 rounded-lg py-[var(--spacing-2xs)] text-body-small font-semibold transition ${
+                className={`flex-1 rounded-lg py-[var(--spacing-2xs)] text-body-small font-medium transition ${
                   tab === "inactive"
-                    ? "bg-primary-600 text-white shadow-sm"
+                    ? "bg-primary-600 text-white"
                     : "text-foreground-500 hover:text-foreground-700"
                 }`}
               >
@@ -274,15 +274,15 @@ export default function MedikamentePage() {
           {/* ===== TAB: Aktuelle Medikamente ===== */}
           {tab === "active" && (
             <>
-              <div className="rounded-xl border border-background-200 bg-white p-[var(--spacing-m)] shadow-sm">
+              <div className="rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)]">
                 <div className="flex items-center justify-between mb-[var(--spacing-m)]">
-                  <h2 className="text-h5 font-semibold text-foreground-900">
+                  <h2 className="text-h5 font-medium text-foreground-900">
                     Aktuelle Medikamente
                   </h2>
                   <button
                     type="button"
                     onClick={openAddForm}
-                    className="rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small font-medium text-white shadow-sm transition hover:bg-primary-700"
+                    className="rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small font-medium text-white transition hover:bg-primary-700"
                   >
                     + Hinzufügen
                   </button>
@@ -297,7 +297,7 @@ export default function MedikamentePage() {
                     {activeMeds.map((med) => (
                       <div
                         key={med.id}
-                        className="rounded-lg border border-background-200 p-[var(--spacing-m)] transition hover:border-primary-200"
+                        className="rounded-lg border border-background-200/60 p-[var(--spacing-m)] transition hover:border-primary-200"
                       >
                         <div className="flex items-start justify-between gap-[var(--spacing-s)]">
                           <div className="flex-1 min-w-0">
@@ -365,7 +365,7 @@ export default function MedikamentePage() {
           {tab === "inactive" && (
             <>
               {inactiveMeds.length === 0 ? (
-                <div className="rounded-xl border border-background-200 bg-white p-[var(--spacing-m)] shadow-sm text-center">
+                <div className="rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)] text-center">
                   <p className="text-body text-foreground-600 py-[var(--spacing-m)]">
                     Noch keine abgesetzten Medikamente vorhanden.
                   </p>
@@ -378,7 +378,7 @@ export default function MedikamentePage() {
                   {inactiveMeds.map((med) => (
                     <div
                       key={med.id}
-                      className="rounded-xl border border-background-200 bg-white p-[var(--spacing-m)] shadow-sm"
+                      className="rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)]"
                     >
                       <div className="flex items-start justify-between gap-[var(--spacing-s)]">
                         <div className="flex-1 min-w-0">
@@ -468,10 +468,10 @@ export default function MedikamentePage() {
 
         {/* Formular-Modal */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-[var(--spacing-s)]">
-            <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-[var(--spacing-m)] max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-[var(--spacing-m)] max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-[var(--spacing-m)]">
-                <h2 className="text-body font-semibold text-foreground-900">
+                <h2 className="text-body font-medium text-foreground-900">
                   {editingId ? "Medikament bearbeiten" : "Neues Medikament"}
                 </h2>
                 <button
@@ -496,7 +496,7 @@ export default function MedikamentePage() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="z.B. Levetiracetam"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                 </div>
 
@@ -510,7 +510,7 @@ export default function MedikamentePage() {
                     value={form.dose}
                     onChange={(e) => setForm({ ...form, dose: e.target.value })}
                     placeholder="z.B. 500mg"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                 </div>
 
@@ -525,10 +525,10 @@ export default function MedikamentePage() {
                         key={opt.value}
                         type="button"
                         onClick={() => toggleTimeOfDay(opt.value)}
-                        className={`rounded-lg px-[var(--spacing-s)] py-[var(--spacing-3xs)] text-body-small font-medium transition ${
+                        className={`rounded-full px-[var(--spacing-xs)] py-[var(--spacing-3xs)] text-body-small font-medium transition ${
                           form.time_of_day.includes(opt.value)
                             ? "bg-primary-600 text-white"
-                            : "border border-background-200 bg-white text-foreground-700 hover:bg-background-50"
+                            : "bg-primary-50/50 text-foreground-700 hover:bg-primary-50"
                         }`}
                       >
                         {opt.label}
@@ -548,7 +548,7 @@ export default function MedikamentePage() {
                     onChange={(e) =>
                       setForm({ ...form, prescribed_since: e.target.value })
                     }
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                 </div>
 
@@ -562,7 +562,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={3}
                     placeholder="Optionale Notizen..."
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
+                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
                   />
                 </div>
 
@@ -571,7 +571,7 @@ export default function MedikamentePage() {
                   <button
                     type="button"
                     onClick={closeForm}
-                    className="flex-1 rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50"
+                    className="flex-1 rounded-lg border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 transition hover:bg-background-50"
                   >
                     Abbrechen
                   </button>
@@ -579,7 +579,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-50"
+                    className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white transition hover:bg-primary-700 disabled:opacity-50"
                   >
                     {isSaving
                       ? "Speichert..."
@@ -595,10 +595,10 @@ export default function MedikamentePage() {
 
         {/* Absetzen-Modal */}
         {showDiscontinueModal !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-[var(--spacing-s)]">
-            <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-[var(--spacing-m)]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-[var(--spacing-m)]">
               <div className="flex items-center justify-between mb-[var(--spacing-m)]">
-                <h2 className="text-body font-semibold text-foreground-900">
+                <h2 className="text-body font-medium text-foreground-900">
                   Medikament absetzen
                 </h2>
                 <button
@@ -627,7 +627,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setDiscontinuationReason(e.target.value)}
                     rows={3}
                     placeholder="z.B. Nebenwirkungen, Umstellung..."
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
+                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
                   />
                 </div>
                 <div className="flex gap-[var(--spacing-m)] pt-[var(--spacing-s)]">
@@ -637,7 +637,7 @@ export default function MedikamentePage() {
                       setShowDiscontinueModal(null);
                       setDiscontinuationReason("");
                     }}
-                    className="flex-1 rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50"
+                    className="flex-1 rounded-lg border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 transition hover:bg-background-50"
                   >
                     Abbrechen
                   </button>
@@ -645,7 +645,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={() => handleDiscontinue(showDiscontinueModal)}
                     disabled={isSaving}
-                    className="flex-1 rounded-lg bg-info-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-info-700 disabled:opacity-50"
+                    className="flex-1 rounded-lg bg-info-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white transition hover:bg-info-700 disabled:opacity-50"
                   >
                     {isSaving ? "Speichert..." : "Absetzen"}
                   </button>
@@ -657,10 +657,10 @@ export default function MedikamentePage() {
 
         {/* Löschen-Bestätigung */}
         {showDeleteConfirm !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/50 p-[var(--spacing-s)]">
-            <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-[var(--spacing-m)]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-[var(--spacing-m)]">
               <div className="flex items-center justify-between mb-[var(--spacing-m)]">
-                <h2 className="text-body font-semibold text-foreground-900">
+                <h2 className="text-body font-medium text-foreground-900">
                   Medikament löschen
                 </h2>
                 <button
@@ -681,7 +681,7 @@ export default function MedikamentePage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(null)}
-                    className="flex-1 rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50"
+                    className="flex-1 rounded-lg border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 transition hover:bg-background-50"
                   >
                     Abbrechen
                   </button>
@@ -689,7 +689,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={() => handleDelete(showDeleteConfirm)}
                     disabled={isSaving}
-                    className="flex-1 rounded-lg bg-warning-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white shadow-sm transition hover:bg-warning-600 disabled:opacity-50"
+                    className="flex-1 rounded-lg bg-warning-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white transition hover:bg-warning-600 disabled:opacity-50"
                   >
                     {isSaving ? "Löscht..." : "Endgültig löschen"}
                   </button>

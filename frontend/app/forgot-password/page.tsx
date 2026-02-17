@@ -48,15 +48,15 @@ export default function ForgotPasswordPage() {
   if (isSuccess) {
     return (
       <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
-        <div className="max-w-md w-full space-y-[var(--spacing-l)]">
-          <div className="rounded-xl border border-success-200 bg-success-50 p-[var(--spacing-l)] text-center space-y-[var(--spacing-m)]">
+        <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
+          <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
             <div className="mx-auto w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
               <svg className="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <div className="space-y-[var(--spacing-s)]">
-              <h1 className="text-h2 text-foreground-900">
+            <div className="space-y-[var(--spacing-m)]">
+              <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900">
                 E-Mail gesendet
               </h1>
               <p className="text-body text-foreground-700">
@@ -65,8 +65,8 @@ export default function ForgotPasswordPage() {
                   : 'Wenn die E-Mail-Adresse existiert, wurde ein Reset-Link gesendet. Bitte überprüfen Sie Ihr Postfach.'}
               </p>
               {resetUrl && (
-                <div className="mt-[var(--spacing-m)] space-y-[var(--spacing-s)]">
-                  <div className="rounded-lg border border-info-200 bg-info-50 p-[var(--spacing-s)]">
+                <div className="mt-[var(--spacing-l)] space-y-[var(--spacing-m)]">
+                  <div className="rounded-lg border border-info-200/60 bg-info-50/50 p-[var(--spacing-m)]">
                     <p className="text-body-small text-info-800 font-medium mb-[var(--spacing-xs)]">
                       ⚠️ Prototyp-Modus: Link wird direkt angezeigt
                     </p>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
                       In der Produktion würde der Reset-Link per E-Mail versendet werden.
                     </p>
                   </div>
-                  <div className="p-[var(--spacing-m)] bg-white rounded-lg border border-background-200">
+                  <div className="p-[var(--spacing-m)] bg-background-50 rounded-lg border border-background-200/60">
                     <p className="text-body-small text-foreground-600 mb-[var(--spacing-s)] font-medium">
                       Reset-Link:
                     </p>
@@ -104,22 +104,23 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
-      <div className="max-w-md w-full space-y-[var(--spacing-l)]">
-        <div className="text-center space-y-[var(--spacing-s)]">
-          <h1 className="text-h1 text-foreground-900">
-            Passwort vergessen?
-          </h1>
-          <p className="text-body text-foreground-600">
-            Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
-          </p>
-        </div>
+      <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
+        <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] space-y-[var(--spacing-l)]">
+          <div className="text-center space-y-[var(--spacing-m)]">
+            <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900">
+              Passwort vergessen?
+            </h1>
+            <p className="text-body text-foreground-600">
+              Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
+            </p>
+          </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-[var(--spacing-m)]">
-          {apiError && (
-            <div className="rounded-xl border border-error-200 bg-error-50 p-[var(--spacing-m)]">
-              <p className="text-body-small text-error-800">{apiError}</p>
-            </div>
-          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-[var(--spacing-l)]">
+            {apiError && (
+              <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 p-[var(--spacing-m)]">
+                <p className="text-body-small text-warning-700">{apiError}</p>
+              </div>
+            )}
 
           <div className="space-y-[var(--spacing-s)]">
             <Input
@@ -133,20 +134,21 @@ export default function ForgotPasswordPage() {
             />
           </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            fullWidth
-            disabled={isLoading}
-          >
-            {isLoading ? 'Wird gesendet...' : 'Reset-Link anfordern'}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              disabled={isLoading}
+            >
+              {isLoading ? 'Wird gesendet...' : 'Reset-Link anfordern'}
+            </Button>
+          </form>
 
-        <div className="text-center">
-          <Link href="/login" className="text-body-small text-primary-600 hover:text-primary-700">
-            Zurück zum Login
-          </Link>
+          <div className="text-center pt-[var(--spacing-xs)]">
+            <Link href="/login" className="text-body-small text-primary-600 hover:text-primary-700">
+              Zurück zum Login
+            </Link>
+          </div>
         </div>
       </div>
     </div>

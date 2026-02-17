@@ -14,21 +14,21 @@ import { de } from "date-fns/locale";
 
 const CSS = {
   input:
-    "w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition",
+    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition",
   select:
-    "w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200",
+    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200",
   textarea:
-    "w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none",
+    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none",
   btnCancel:
-    "flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50",
+    "flex-1 rounded-xl border-2 border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50",
   btnPrimary:
-    "flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
+    "flex-1 rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
   btnDanger:
-    "flex-1 rounded-lg bg-warning-500 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-warning-600 disabled:opacity-60 disabled:cursor-not-allowed",
+    "flex-1 rounded-xl bg-warning-500 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-warning-600 disabled:opacity-60 disabled:cursor-not-allowed",
   btnClose:
-    "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100",
+    "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
   actionBtn:
-    "w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 shadow-sm transition hover:bg-background-50 text-left",
+    "w-full rounded-xl border border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50 text-left",
 } as const;
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ const IconLogout = ({ className = "w-5 h-5" }: IconProps) => (
   </svg>
 );
 
-const IconChevronDown = ({ className = "w-5 h-5" }: IconProps) => (
+const IconChevronDown = ({ className = "w-4 h-4" }: IconProps) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
   </svg>
@@ -108,18 +108,18 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-2xl border border-background-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-[var(--spacing-m)] py-[var(--spacing-s)] bg-background-25 transition-colors hover:bg-background-100 cursor-pointer"
+        className="flex w-full items-center justify-between px-[var(--spacing-m)] py-[var(--spacing-s)] bg-white transition-colors hover:bg-background-100 cursor-pointer"
       >
         <div className="flex items-center gap-[var(--spacing-xs)] min-w-0">
           <span className="text-primary-400 shrink-0">{icon}</span>
-          <h2 className="text-body font-semibold text-foreground-900 truncate">{title}</h2>
+          <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
         </div>
-        <span className={`text-foreground-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
-          <IconChevronDown className="w-5 h-5" />
+        <span className={`text-foreground-300 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
+          <IconChevronDown className="w-4 h-4" />
         </span>
       </button>
       {isOpen && (
@@ -134,7 +134,7 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-body-small text-foreground-600">{label}</span>
+      <span className="text-body-small text-foreground-400">{label}</span>
       <span className="text-body-small font-medium text-foreground-900">{value}</span>
     </div>
   );
@@ -173,11 +173,11 @@ function Toggle({ label, description, checked, onChange }: {
 
 function InlineModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
       <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
-          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-            <h2 className="text-body font-semibold text-foreground-900">{title}</h2>
+          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
+            <h2 className="text-body font-medium text-foreground-900">{title}</h2>
             <button type="button" onClick={onClose} className={CSS.btnClose} aria-label="Schließen">
               <CloseIcon />
             </button>
@@ -781,12 +781,12 @@ export default function EinstellungenPage() {
   // ── Page ──
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
 
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-2xs)]">
-            <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
+            <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
               Einstellungen
             </h1>
           </div>
@@ -823,7 +823,7 @@ export default function EinstellungenPage() {
                   type="button"
                   onClick={handleExport}
                   disabled={isExporting}
-                  className="w-full rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
+                  className="w-full rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
                 >
                   {isExporting ? (
                     <>
@@ -879,7 +879,7 @@ export default function EinstellungenPage() {
                 <button
                   type="button"
                   onClick={openFeedbackModal}
-                  className="w-full rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white shadow-sm transition hover:bg-primary-700 text-left"
+                  className="w-full rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 text-left"
                 >
                   Feedback senden
                 </button>
@@ -891,11 +891,11 @@ export default function EinstellungenPage() {
               <div className="space-y-[var(--spacing-m)]">
 
                 {/* Kein Medizinprodukt */}
-                <div className="rounded-lg border border-warning-200 bg-warning-50 p-[var(--spacing-s)]">
+                <div className="rounded-xl border border-warning-200 bg-warning-50 p-[var(--spacing-s)]">
                   <div className="flex items-start gap-[var(--spacing-xs)]">
                     <IconWarning className="w-5 h-5 text-warning-500 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-body font-semibold text-warning-800">Kein Medizinprodukt</p>
+                      <p className="text-body font-medium text-warning-800">Kein Medizinprodukt</p>
                       <p className="text-body-small text-warning-700 mt-[var(--spacing-3xs)]">
                         EpiDoc ist kein Medizinprodukt und ersetzt keine ärztliche Beratung, Diagnose oder Behandlung.
                         Die App dient ausschliesslich der persönlichen Dokumentation und Selbstbeobachtung. Bei medizinischen
@@ -907,7 +907,7 @@ export default function EinstellungenPage() {
 
                 {/* Datenschutz */}
                 <div>
-                  <h3 className="text-body font-semibold text-foreground-900 mb-[var(--spacing-2xs)]">Datenschutzerklärung</h3>
+                  <h3 className="text-body font-medium text-foreground-900 mb-[var(--spacing-2xs)]">Datenschutzerklärung</h3>
                   <div className="text-body-small text-foreground-600 space-y-[var(--spacing-2xs)]">
                     <p>
                       Ihre Daten werden vertraulich behandelt und ausschliesslich für die Funktionalität der App verwendet.
@@ -926,7 +926,7 @@ export default function EinstellungenPage() {
 
                 {/* Nutzungsbedingungen */}
                 <div>
-                  <h3 className="text-body font-semibold text-foreground-900 mb-[var(--spacing-2xs)]">Nutzungsbedingungen</h3>
+                  <h3 className="text-body font-medium text-foreground-900 mb-[var(--spacing-2xs)]">Nutzungsbedingungen</h3>
                   <div className="text-body-small text-foreground-600 space-y-[var(--spacing-2xs)]">
                     <p>
                       Die Nutzung von EpiDoc ist freiwillig und kostenlos. Die App befindet sich im Pilotstadium
@@ -942,7 +942,7 @@ export default function EinstellungenPage() {
 
                 {/* Impressum */}
                 <div>
-                  <h3 className="text-body font-semibold text-foreground-900 mb-[var(--spacing-2xs)]">Impressum</h3>
+                  <h3 className="text-body font-medium text-foreground-900 mb-[var(--spacing-2xs)]">Impressum</h3>
                   <div className="text-body-small text-foreground-600 space-y-[var(--spacing-2xs)]">
                     <p>
                       EpiDoc – Digitales Epilepsie-Tagebuch (Prototyp/Pilot)
@@ -982,16 +982,16 @@ export default function EinstellungenPage() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 shadow-sm transition hover:bg-background-50 text-left flex items-center gap-[var(--spacing-xs)]"
+                  className="w-full rounded-xl border border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50 text-left flex items-center gap-[var(--spacing-xs)]"
                 >
                   <IconLogout className="w-4 h-4" />
                   Abmelden
                 </button>
-                <div className="border-t border-background-200 pt-[var(--spacing-s)]">
+                <div className="border-t border-background-200/60 pt-[var(--spacing-s)]">
                   <button
                     type="button"
                     onClick={startDeleteFlow}
-                    className="w-full rounded-lg border border-warning-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-warning-600 shadow-sm transition hover:bg-warning-50 text-left"
+                    className="w-full rounded-xl border border-warning-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-warning-600 transition hover:bg-warning-50 text-left"
                   >
                     Konto löschen
                   </button>
@@ -1005,14 +1005,14 @@ export default function EinstellungenPage() {
 
       {/* ── Bestätigungs-Dialog vor Kontolöschung (Stufe 1) ── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
           <div className="w-full max-w-md rounded-xl bg-white shadow-xl border border-warning-300 ring-2 ring-warning-100 overflow-hidden">
             <div className="p-[var(--spacing-m)] space-y-[var(--spacing-m)]">
               <div className="flex items-center gap-[var(--spacing-s)]">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-100">
                   <IconWarning className="w-5 h-5 text-warning-600" />
                 </div>
-                <h2 className="text-body font-semibold text-foreground-900">Konto wirklich löschen?</h2>
+                <h2 className="text-body font-medium text-foreground-900">Konto wirklich löschen?</h2>
               </div>
               <div className="space-y-[var(--spacing-xs)]">
                 <p className="text-body text-foreground-700">

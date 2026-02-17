@@ -683,7 +683,7 @@ export default function BefindenPage() {
     const deleteConf = deleteConfirmations[itemId];
 
     return (
-      <div className="mt-4 space-y-3 rounded-lg border border-background-200 bg-background-25 p-4">
+      <div className="mt-4 space-y-3 rounded-xl bg-background-50/50 p-4">
         <div className="flex items-center justify-between gap-2">
           {[1, 3, 5, 8, 10].map((value) => {
             const isActive = tempRating !== null && tempRating === value;
@@ -935,10 +935,10 @@ export default function BefindenPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-background-50 pb-20">
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="mb-2 text-center text-h3 font-semibold text-foreground-900">
+          <h1 className="mb-1 text-center text-h4 sm:text-h3 font-semibold text-foreground-900">
             {t("Wie geht es dir?")}
           </h1>
-          <p className="mb-6 text-center text-body-small text-foreground-500">
+          <p className="mb-8 text-center text-body-small text-foreground-400">
             {t("Erfasse dein Befinden täglich. Detaillierte Werte und Muster findest du in der Analyse.")}
           </p>
 
@@ -959,7 +959,7 @@ export default function BefindenPage() {
           {/* Favoriten (häufig verwendete Items) – Bewertung öffnet direkt darunter */}
           {favoriteItems.length > 0 && (
             <div className="mb-6">
-              <h2 className="mb-4 mt-2 text-h4 font-semibold text-foreground-900">
+              <h2 className="mb-4 mt-2 text-body-small font-medium text-foreground-400 uppercase tracking-wide">
                 {t("Deine häufigsten Beschwerden")}
               </h2>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -979,13 +979,13 @@ export default function BefindenPage() {
                   const selectedTimeSlot = expandedTimeSlots[itemId];
 
                   return (
-                    <div key={itemId} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
+                    <div key={itemId} className="rounded-xl bg-white border border-background-200/60 overflow-hidden">
                       <button
                         type="button"
                         onClick={(e) => toggleItem(itemId, e)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-background-25"
+                        className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50"
                       >
-                        <span className="text-body font-medium text-foreground-900">{item.label}</span>
+                        <span className="text-body font-normal text-foreground-800">{item.label}</span>
                         <div className="flex items-center gap-2">
                           {hasEntry && (
                             <span className="rounded-full bg-primary-200 px-2 py-0.5 text-[10px] font-medium text-foreground-700">
@@ -1009,7 +1009,7 @@ export default function BefindenPage() {
                       </button>
 
                       {isExpanded && (
-                        <div className="border-t border-background-200 p-4">
+                        <div className="border-t border-background-200/40 p-5">
                           {(() => {
                             const timeSlots: Array<{ id: TimeOfDay | 'allDay' }> = [
                               { id: 'allDay' },
@@ -1046,10 +1046,10 @@ export default function BefindenPage() {
                                         <button
                                           type="button"
                                           onClick={() => toggleTimeSlot(itemId, slot.id)}
-                                          className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out relative ${
+                                          className={`flex flex-col w-full min-h-14 items-center justify-center gap-1 rounded-xl border px-3 py-2.5 text-body-small transition-all duration-200 relative ${
                                             isSelected
-                                              ? 'border-primary-500 bg-primary-50 text-foreground-900'
-                                              : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
+                                              ? 'border-primary-300 bg-primary-50 text-foreground-900'
+                                              : 'border-background-200/60 bg-white text-foreground-500 hover:border-primary-200 hover:text-foreground-700'
                                           }`}
                                           title={getTimeSlotLabel(slot.id)}
                                         >
@@ -1081,7 +1081,7 @@ export default function BefindenPage() {
           {/* Häufige Beschwerden */}
           <div className="mb-6">
               <div className="mb-4 mt-2">
-                <h2 className="text-h4 font-semibold text-foreground-900">
+                <h2 className="text-body-small font-medium text-foreground-400 uppercase tracking-wide">
                   Häufige Beschwerden
                 </h2>
               </div>
@@ -1098,11 +1098,11 @@ export default function BefindenPage() {
                   const isExpanded = expandedItems[item.id];
 
                     return (
-                    <div key={item.id} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
+                    <div key={item.id} className="rounded-xl bg-white border border-background-200/60 overflow-hidden">
                         <button
                           type="button"
                         onClick={(e) => toggleItem(item.id, e)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-background-25"
+                        className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50"
                       >
                         <span className="text-body font-medium text-foreground-900">{item.label}</span>
                         <div className="flex items-center gap-2">
@@ -1124,7 +1124,7 @@ export default function BefindenPage() {
 
                       {/* Tageszeit-Auswahl - erscheint direkt unter dem Item */}
                         {isExpanded && (
-                        <div className="border-t border-background-200 p-4">
+                        <div className="border-t border-background-200/40 p-5">
                           {(() => {
                             const timeSlots: Array<{ id: TimeOfDay | 'allDay' }> = [
                               { id: 'allDay' },
@@ -1172,10 +1172,10 @@ export default function BefindenPage() {
                                                 <button
                                                   type="button"
                                           onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                              className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out relative ${
+                                              className={`flex flex-col w-full min-h-14 items-center justify-center gap-1 rounded-xl border px-3 py-2.5 text-body-small transition-all duration-200 relative ${
                                                     isSelected
-                                              ? 'border-primary-500 bg-primary-50 text-foreground-900'
-                                              : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
+                                              ? 'border-primary-300 bg-primary-50 text-foreground-900'
+                                              : 'border-background-200/60 bg-white text-foreground-500 hover:border-primary-200 hover:text-foreground-700'
                                           }`}
                                           title={getTimeSlotLabel(slot.id)}
                                         >
@@ -1214,11 +1214,11 @@ export default function BefindenPage() {
                   const isExpanded = expandedItems[item.id];
 
                       return (
-                    <div key={item.id} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
+                    <div key={item.id} className="rounded-xl bg-white border border-background-200/60 overflow-hidden">
                                                 <button
                                                   type="button"
                         onClick={(e) => toggleItem(item.id, e)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-background-25"
+                        className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50"
                       >
                         <span className="text-body font-medium text-foreground-900">{item.label}</span>
                         <div className="flex items-center gap-2">
@@ -1235,7 +1235,7 @@ export default function BefindenPage() {
 
                       {/* Tageszeit-Auswahl - erscheint direkt unter dem Item */}
                         {isExpanded && (
-                        <div className="border-t border-background-200 p-4">
+                        <div className="border-t border-background-200/40 p-5">
                           {(() => {
                             const timeSlots: Array<{ id: TimeOfDay | 'allDay' }> = [
                               { id: 'allDay' },
@@ -1285,8 +1285,8 @@ export default function BefindenPage() {
                                           onClick={() => toggleTimeSlot(item.id, slot.id)}
                                           className={`flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-body transition-colors duration-150 ease-out ${
                                             isSelected
-                                              ? 'border-primary-500 bg-primary-50 text-foreground-900'
-                                              : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
+                                              ? 'border-primary-300 bg-primary-50 text-foreground-900'
+                                              : 'border-background-200/60 bg-white text-foreground-500 hover:border-primary-200 hover:text-foreground-700'
                                           }`}
                                           title={getTimeSlotLabel(slot.id)}
                                         >
@@ -1349,11 +1349,11 @@ export default function BefindenPage() {
                   const selectedTimeSlot = expandedTimeSlots[item.id];
 
                   return (
-                    <div key={item.id} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
+                    <div key={item.id} className="rounded-xl bg-white border border-background-200/60 overflow-hidden">
                       <button
                         type="button"
                         onClick={(e) => toggleItem(item.id, e)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-background-25"
+                        className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50"
                       >
                         <span className="text-body font-medium text-foreground-900">{item.label}</span>
                         <div className="flex items-center gap-2">
@@ -1379,7 +1379,7 @@ export default function BefindenPage() {
                       </button>
 
                       {isExpanded && (
-                        <div className="border-t border-background-200 p-4">
+                        <div className="border-t border-background-200/40 p-5">
                           {(() => {
                             const timeSlots: Array<{ id: TimeOfDay | 'allDay' }> = [
                               { id: 'allDay' },
@@ -1416,10 +1416,10 @@ export default function BefindenPage() {
                                         <button
                                           type="button"
                                           onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                          className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out relative ${
+                                          className={`flex flex-col w-full min-h-14 items-center justify-center gap-1 rounded-xl border px-3 py-2.5 text-body-small transition-all duration-200 relative ${
                                             isSelected
-                                              ? 'border-primary-500 bg-primary-50 text-foreground-900'
-                                              : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
+                                              ? 'border-primary-300 bg-primary-50 text-foreground-900'
+                                              : 'border-background-200/60 bg-white text-foreground-500 hover:border-primary-200 hover:text-foreground-700'
                                           }`}
                                           title={getTimeSlotLabel(slot.id)}
                                         >
@@ -1513,7 +1513,7 @@ export default function BefindenPage() {
                   const isExpanded = expandedItems[item.id];
 
                       return (
-                    <div key={item.id} className="rounded-lg border border-background-200 bg-background-10 overflow-hidden">
+                    <div key={item.id} className="rounded-xl bg-white border border-background-200/60 overflow-hidden">
                       <div className="flex min-h-[48px] w-full items-stretch">
                         <button
                           type="button"
@@ -1555,7 +1555,7 @@ export default function BefindenPage() {
 
                       {/* Tageszeit-Auswahl - erscheint direkt unter dem Item */}
                         {isExpanded && (
-                        <div className="border-t border-background-200 p-4">
+                        <div className="border-t border-background-200/40 p-5">
                           {(() => {
                             const timeSlots: Array<{ id: TimeOfDay | 'allDay' }> = [
                               { id: 'allDay' },
@@ -1603,10 +1603,10 @@ export default function BefindenPage() {
                                         <button
                                           type="button"
                                           onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                          className={`flex flex-col w-full min-h-16 items-center justify-center gap-1 rounded-lg border px-3 py-3 text-body transition-colors duration-150 ease-out relative ${
+                                          className={`flex flex-col w-full min-h-14 items-center justify-center gap-1 rounded-xl border px-3 py-2.5 text-body-small transition-all duration-200 relative ${
                                             isSelected
-                                              ? 'border-primary-500 bg-primary-50 text-foreground-900'
-                                              : 'border-background-200 bg-background-10 text-foreground-700 hover:bg-background-25'
+                                              ? 'border-primary-300 bg-primary-50 text-foreground-900'
+                                              : 'border-background-200/60 bg-white text-foreground-500 hover:border-primary-200 hover:text-foreground-700'
                                           }`}
                                           title={getTimeSlotLabel(slot.id)}
                                         >

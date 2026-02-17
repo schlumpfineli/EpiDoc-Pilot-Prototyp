@@ -955,10 +955,10 @@ export default function DiaryPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
-      <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
-        <div className="space-y-[var(--spacing-2xs)] sm:space-y-[var(--spacing-2xs)]">
-          <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
+      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:py-[var(--spacing-xl)] text-foreground-900">
+      <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
+        <div>
+          <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]">
             Anfallstagebuch
           </h1>
         </div>
@@ -969,15 +969,15 @@ export default function DiaryPage() {
             ref={monthNavRef}
             type="button"
             onClick={handleMonthNavClick}
-            className="mb-[var(--spacing-s)] flex w-full items-center justify-between rounded-xl bg-primary-500 px-[var(--spacing-m)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] text-white shadow-sm transition-colors hover:bg-primary-400 active:bg-primary-300 focus-visible:outline focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-500"
+            className="flex w-full items-center justify-between rounded-full bg-white border border-background-200/60 px-[var(--spacing-xs)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-xs)] transition-all duration-200 hover:border-primary-300 hover:shadow-[0_1px_3px_rgba(0,0,0,0.04)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary-200"
             aria-label="Monat wechseln: links vorheriger, Mitte aktueller Monat, rechts nächster"
           >
             <span
               aria-hidden
-              className="flex h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 flex-shrink-0 items-center justify-center rounded-lg"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full text-foreground-400 hover:text-foreground-700 transition-colors"
             >
               <svg
-                className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7"
+                className="h-4 w-4 sm:h-5 sm:w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -986,17 +986,17 @@ export default function DiaryPage() {
               </svg>
             </span>
             <span
-              className="min-w-0 flex-1 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] text-center text-h4 sm:text-h3 font-semibold"
+              className="min-w-0 flex-1 text-center text-body sm:text-h5 font-medium text-foreground-900"
               aria-hidden
             >
               {format(currentDate, "MMMM yyyy", { locale: de })}
             </span>
             <span
-              className="flex h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 flex-shrink-0 items-center justify-center rounded-lg"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full text-foreground-400 hover:text-foreground-700 transition-colors"
               aria-hidden
             >
               <svg
-                className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7"
+                className="h-4 w-4 sm:h-5 sm:w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1008,13 +1008,13 @@ export default function DiaryPage() {
         </div>
 
         {/* Calendar Grid */}
-        <div className="rounded-xl bg-white shadow-sm ring-1 ring-background-200 p-[var(--spacing-s)]">
+        <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-s)] sm:p-[var(--spacing-m)]">
           {/* Weekday Headers */}
-          <div className="grid grid-cols-7 gap-[var(--spacing-2xs)] mb-[var(--spacing-2xs)]">
+          <div className="grid grid-cols-7 gap-[var(--spacing-2xs)] mb-[var(--spacing-xs)]">
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center text-body font-medium text-foreground-900 py-2"
+                className="text-center text-body-small font-medium text-foreground-400 py-1"
               >
                 {day}
               </div>
@@ -1036,15 +1036,12 @@ export default function DiaryPage() {
               const hasSeizure = entry?.hasSeizure;
               const hasEmergency = entry?.hasEmergencyMed;
 
-              let borderClass = "border-background-200";
-              let bgClass = "bg-background-50 text-foreground-900";
+              let cellClass = "bg-transparent text-foreground-700 hover:bg-primary-50";
 
               if (hasSeizure) {
-                borderClass = "border-accent-300";
-                bgClass = "bg-accent-100 text-foreground-900"; // Markierte Tage in Akzentfarbe
+                cellClass = "bg-accent-100/60 text-foreground-900 ring-1 ring-accent-300/50";
               } else if (isCurrentDay) {
-                borderClass = "border-secondary-300";
-                bgClass = "bg-secondary-100 text-foreground-900"; // Aktuelles Datum in Sekundärfarbe
+                cellClass = "bg-primary-50 text-primary-700 ring-1 ring-primary-200";
               }
 
               return (
@@ -1052,13 +1049,13 @@ export default function DiaryPage() {
                   key={dayKey}
                   onClick={() => handleDayClick(day)}
                   className={`
-                    relative aspect-square rounded-lg border transition-all duration-200 ${borderClass}
-                    ${bgClass}
-                    hover:border-primary-400 hover:bg-primary-50
-                    ${entry ? "font-semibold" : "font-normal"}
+                    relative aspect-square rounded-xl transition-all duration-200
+                    ${cellClass}
+                    hover:ring-1 hover:ring-primary-300
+                    ${entry ? "font-medium" : "font-normal"}
                   `}
                 >
-                  <span className="text-body sm:text-h5 md:text-h4 flex items-center justify-center h-full">{format(day, "d")}</span>
+                  <span className="text-body sm:text-h5 flex items-center justify-center h-full">{format(day, "d")}</span>
                 </button>
               );
             })}
@@ -1084,9 +1081,9 @@ export default function DiaryPage() {
             <div className="mt-[var(--spacing-l)] space-y-[var(--spacing-m)]">
               {/* Einzelfall Card */}
               {!isSeries && (
-                <div className="rounded-xl bg-white shadow-sm ring-1 ring-background-200 overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-background-200 bg-primary-50 px-[var(--spacing-m)] py-[var(--spacing-s)]">
-                    <h3 className="text-body font-semibold text-foreground-900">
+                <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-s)]">
+                    <h3 className="text-body font-medium text-foreground-900">
                       Einzelfall - {format(viewingDate, "dd.MM.yyyy", { locale: de })}
                     </h3>
                     <div className="flex items-center gap-[var(--spacing-2xs)]">
@@ -1121,23 +1118,23 @@ export default function DiaryPage() {
                       return (
                         <div
                           key={index}
-                          className="border border-background-200 rounded-lg p-[var(--spacing-s)] bg-background-50"
+                          className="rounded-xl p-[var(--spacing-s)] border-b border-background-200/40 last:border-b-0"
                         >
-                          <div className="flex items-start justify-between mb-[var(--spacing-s)]">
+                          <div className="flex items-start justify-between mb-[var(--spacing-xs)]">
                             <div className="flex-1">
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body font-medium text-foreground-700">Zeit: </span>
-                                <span className="text-body text-foreground-900">{seizure.time || "Nicht angegeben"}</span>
+                                <span className="text-body-small text-foreground-400">Zeit: </span>
+                                <span className="text-body-small font-medium text-foreground-900">{seizure.time || "Nicht angegeben"}</span>
                               </div>
                               
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body font-medium text-foreground-700">Anfallstyp: </span>
+                                <span className="text-body-small text-foreground-400">Anfallstyp: </span>
                                 <div className="flex flex-wrap gap-[var(--spacing-2xs)] mt-[var(--spacing-2xs)]">
                                   {allTypes.length > 0 ? (
                                     allTypes.map((type, idx) => (
                                       <span
                                         key={idx}
-                                        className="inline-block text-body text-foreground-700 bg-white rounded-md px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] border border-background-200"
+                                        className="inline-block text-body-small text-foreground-700 bg-primary-50/50 rounded-full px-[var(--spacing-xs)] py-[var(--spacing-3xs)]"
                                       >
                                         {type}
                                       </span>
@@ -1197,9 +1194,9 @@ export default function DiaryPage() {
 
               {/* Anfallsserie Card */}
               {isSeries && (
-                <div className="rounded-xl bg-white shadow-sm ring-1 ring-background-200 overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-background-200 bg-primary-50 px-[var(--spacing-m)] py-[var(--spacing-s)]">
-                    <h3 className="text-body font-semibold text-foreground-900">
+                <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-s)]">
+                    <h3 className="text-body font-medium text-foreground-900">
                       Anfallsserie - {format(viewingDate, "dd.MM.yyyy", { locale: de })}
                     </h3>
                     <div className="flex items-center gap-[var(--spacing-2xs)]">
@@ -1242,28 +1239,28 @@ export default function DiaryPage() {
                       return (
                         <div
                           key={blockIndex}
-                          className="border border-background-200 rounded-lg p-[var(--spacing-s)] bg-background-50"
+                          className="rounded-xl p-[var(--spacing-s)] border-b border-background-200/40 last:border-b-0"
                         >
-                          <div className="flex items-start justify-between mb-[var(--spacing-s)]">
+                          <div className="flex items-start justify-between mb-[var(--spacing-xs)]">
                             <div className="flex-1">
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body font-medium text-foreground-700">Zeitblock: </span>
-                                <span className="text-body text-foreground-900">{block.label}</span>
+                                <span className="text-body-small text-foreground-400">Zeitblock: </span>
+                                <span className="text-body-small font-medium text-foreground-900">{block.label}</span>
                               </div>
                               
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body font-medium text-foreground-700">Anzahl: </span>
-                                <span className="text-body text-foreground-900">{block.count}</span>
+                                <span className="text-body-small text-foreground-400">Anzahl: </span>
+                                <span className="text-body-small font-medium text-foreground-900">{block.count}</span>
                               </div>
                               
                               <div className="mb-[var(--spacing-2xs)]">
-                                <span className="text-body font-medium text-foreground-700">Anfallstypen: </span>
+                                <span className="text-body-small text-foreground-400">Anfallstypen: </span>
                                 <div className="flex flex-wrap gap-[var(--spacing-2xs)] mt-[var(--spacing-2xs)]">
                                   {block.types.length > 0 ? (
                                     block.types.map((type, idx) => (
                                       <span
                                         key={idx}
-                                        className="inline-block text-body text-foreground-700 bg-white rounded-md px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] border border-background-200"
+                                        className="inline-block text-body-small text-foreground-700 bg-primary-50/50 rounded-full px-[var(--spacing-xs)] py-[var(--spacing-3xs)]"
                                       >
                                         {type}
                                       </span>
@@ -1322,9 +1319,9 @@ export default function DiaryPage() {
         })()}
 
         {/* Monthly Summary */}
-        <div className="mt-[var(--spacing-l)] rounded-xl bg-white shadow-sm ring-1 ring-background-200 p-[var(--spacing-s)]">
-          <h3 className="text-body font-semibold text-foreground-900 mb-[var(--spacing-m)]">
-            Monatszusammenfassung - {format(currentDate, "MMMM yyyy", { locale: de })}
+        <div className="mt-[var(--spacing-s)] rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-m)]">
+          <h3 className="text-body-small font-medium text-foreground-400 uppercase tracking-wide mb-[var(--spacing-m)]">
+            {format(currentDate, "MMMM yyyy", { locale: de })} — Zusammenfassung
           </h3>
           <div className="text-body text-foreground-700">
             <div className="flex justify-between pb-2">
@@ -1342,7 +1339,7 @@ export default function DiaryPage() {
                   {monthlyStats.emergencyDates.map((date) => (
                     <span
                       key={date}
-                      className="rounded-md bg-background-100 px-2 py-1 text-[10px] font-medium text-foreground-700 ring-1 ring-background-200"
+                      className="rounded-full bg-primary-50/60 px-2 py-0.5 text-body-small font-medium text-foreground-600"
                     >
                       {format(new Date(date), "dd.MM.")}
                     </span>
@@ -1361,11 +1358,11 @@ export default function DiaryPage() {
 
       {/* Modal */}
       {isModalOpen && selectedDate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
-          <div className="w-full h-auto max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+          <div className="w-full h-auto max-h-[90vh] rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col">
             <div className="overflow-y-auto flex-1">
-            <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <h2 className="text-body font-semibold text-foreground-900 flex-1 min-w-0">
+            <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-m)]">
+              <h2 className="text-body font-medium text-foreground-900 flex-1 min-w-0">
                 Neuer Anfall eintragen
               </h2>
               <button
