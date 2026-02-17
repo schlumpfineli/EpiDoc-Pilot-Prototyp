@@ -22,111 +22,152 @@
     --font-cabinet-grotesk: var(--font-cabinet-grotesk);
 
     /*
-     * Semantic color mappings
-     * Maps generic names to specific color values for easier theming
+     * Semantic color mappings — Neues Farbschema
+     *
+     * Core:    Salbei (#B7E4C7 / #74C69D), Himmelblau (#BDE0FE / #4EA8DE)
+     * Neutral: Cremeweiß (#FEFEFA), Surface (#FFFFFF)
+     * Text:    Primary (#344E41), Secondary (#52796F), Disabled (#A8BDB4)
+     * Status:  Error (#F28482), Caution (#FFD6A5), Success (#95D5B2), Info (#90E0EF)
+     * Akzent:  CTA-Gold (#FFD166) — für visuelle Spannung
      */
-    /* FOREGROUND / TEXT - #1C1F26 (Sehr dunkles Grau) - Fließtext, Überschriften, Labels, Erklärtext */
-    --color-foreground-50: oklch(0.70 0.01 250);
-    --color-foreground-100: oklch(0.65 0.01 250);
-    --color-foreground-200: oklch(0.60 0.01 250);
-    --color-foreground-300: oklch(0.55 0.01 250);
-    --color-foreground-400: oklch(0.50 0.01 250);
-    --color-foreground-500: oklch(0.45 0.01 250);
-    --color-foreground-600: oklch(0.40 0.01 250);
-    --color-foreground-700: oklch(0.35 0.01 250);
-    --color-foreground-800: oklch(0.30 0.01 250);
-    --color-foreground-900: oklch(0.25 0.01 250); /* #1C1F26 base */
-    --color-foreground-950: oklch(0.20 0.01 250);
 
-    /* BACKGROUND - #F5F6F8 (Helles Grau) - Haupt-App-Hintergrund, Scroll-Bereiche, Formularseiten */
-    --color-background-10: oklch(0.99 0 0);
-    --color-background-25: oklch(0.98 0 0);
-    --color-background-50: oklch(0.96 0 0); /* #F5F6F8 base */
-    --color-background-100: oklch(0.94 0 0);
-    --color-background-200: oklch(0.92 0 0);
-    --color-background-300: oklch(0.90 0 0);
-    --color-background-400: oklch(0.88 0 0);
-    --color-background-500: oklch(0.86 0 0);
-    --color-background-600: oklch(0.84 0 0);
-    --color-background-700: oklch(0.82 0 0);
-    --color-background-800: oklch(0.80 0 0);
-    --color-background-900: oklch(0.78 0 0);
-    --color-background-950: oklch(0.76 0 0);
+    /* FOREGROUND / TEXT - #344E41 (Dunkles Waldgrün)
+       50 ≈ #A8BDB4 (disabled), 400 ≈ #52796F (secondary text), 900 ≈ #344E41 (primary text) */
+    --color-foreground-50: oklch(0.77 0.02 160);
+    --color-foreground-100: oklch(0.72 0.03 160);
+    --color-foreground-200: oklch(0.67 0.03 160);
+    --color-foreground-300: oklch(0.62 0.03 160);
+    --color-foreground-400: oklch(0.52 0.04 165); /* #52796F secondary text */
+    --color-foreground-500: oklch(0.47 0.04 162);
+    --color-foreground-600: oklch(0.42 0.04 160);
+    --color-foreground-700: oklch(0.39 0.04 160);
+    --color-foreground-800: oklch(0.37 0.04 160);
+    --color-foreground-900: oklch(0.34 0.04 160); /* #344E41 base */
+    --color-foreground-950: oklch(0.28 0.03 160);
 
-   /* PRIMARY - #1F2A44 (Dunkles Blau/Grau) - App-Header, Hauptnavigation, Primäre Buttons, Aktive Tabs, Wichtige Icons */
-   --color-primary-50:  oklch(0.95 0.01 250);
-   --color-primary-100: oklch(0.90 0.02 250);
-   --color-primary-200: oklch(0.80 0.03 250);
-   --color-primary-300: oklch(0.70 0.04 250);
-   --color-primary-400: oklch(0.55 0.05 250);
-   --color-primary-500: oklch(0.30 0.04 250); /* #1F2A44 base */
-   --color-primary-600: oklch(0.35 0.04 250);
-   --color-primary-700: oklch(0.30 0.04 250);
-   --color-primary-800: oklch(0.25 0.03 250);
-   --color-primary-900: oklch(0.20 0.03 250);
-   --color-primary-950: oklch(0.15 0.02 250);
-   --color-primary: oklch(0.30 0.04 250); /* #1F2A44 */
-   --color-primary-light: oklch(0.60 0.05 250);
+    /* BACKGROUND - #FEFEFA (Cremeweiß)
+       10 = #FFFFFF (Surface/Cards), 50 = #FEFEFA (App-Hintergrund) */
+    --color-background-10: oklch(1.00 0 0);       /* #FFFFFF — Surface, Cards, Module */
+    --color-background-25: oklch(0.998 0.003 100);
+    --color-background-50: oklch(0.995 0.005 100); /* #FEFEFA base */
+    --color-background-100: oklch(0.97 0.006 100);
+    --color-background-200: oklch(0.95 0.007 100);
+    --color-background-300: oklch(0.93 0.008 100);
+    --color-background-400: oklch(0.91 0.009 100);
+    --color-background-500: oklch(0.89 0.01 100);
+    --color-background-600: oklch(0.87 0.01 100);
+    --color-background-700: oklch(0.85 0.01 100);
+    --color-background-800: oklch(0.83 0.01 100);
+    --color-background-900: oklch(0.81 0.01 100);
+    --color-background-950: oklch(0.79 0.01 100);
 
-   /* SECONDARY - Blaugrau - Sekundäre Buttons (Border + heller Hintergrund), Fortschrittsanzeigen, Bestätigungen */
-   --color-secondary-50:  oklch(0.97 0.01 250);
-   --color-secondary-100: oklch(0.94 0.015 250);
-   --color-secondary-200: oklch(0.88 0.02 250);
-   --color-secondary-300: oklch(0.75 0.025 250);
-   --color-secondary-400: oklch(0.60 0.03 250);
-   --color-secondary-500: oklch(0.50 0.02 250); /* Blaugrau base für Borders */
-   --color-secondary-600: oklch(0.45 0.025 250);
-   --color-secondary-700: oklch(0.40 0.03 250);
-   --color-secondary-800: oklch(0.35 0.025 250);
-   --color-secondary-900: oklch(0.30 0.02 250);
-   --color-secondary-950: oklch(0.25 0.015 250);
-   --color-secondary: oklch(0.50 0.02 250); /* Blaugrau */
-   --color-secondary-light: oklch(0.65 0.025 250);
+   /* PRIMARY - Salbei-Grün — Primäre Buttons, Header, aktive Tabs, Slider
+      50 ≈ #E7F5EF, 200 ≈ #B7E4C7, 300 ≈ #95D5B2, 500 ≈ #74C69D, 600 ≈ #52B788 */
+   --color-primary-50:  oklch(0.96 0.02 158);  /* #E7F5EF — sec. Button-Hintergrund */
+   --color-primary-100: oklch(0.93 0.03 158);
+   --color-primary-200: oklch(0.88 0.06 158);  /* #B7E4C7 — helle Flächen, Card-Bg */
+   --color-primary-300: oklch(0.82 0.08 158);  /* #95D5B2 — Success-Nähe */
+   --color-primary-400: oklch(0.79 0.09 158);
+   --color-primary-500: oklch(0.76 0.10 158);  /* #74C69D — Button-Bg, aktive Zustände */
+   --color-primary-600: oklch(0.70 0.12 158);  /* #52B788 — Hover */
+   --color-primary-700: oklch(0.58 0.10 158);  /* dunkler, guter Textkontrast */
+   --color-primary-800: oklch(0.48 0.08 158);
+   --color-primary-900: oklch(0.40 0.06 158);
+   --color-primary-950: oklch(0.30 0.04 158);
+   --color-primary: oklch(0.76 0.10 158);      /* #74C69D */
+   --color-primary-light: oklch(0.88 0.06 158); /* #B7E4C7 */
 
-    /* ACCENT - #9ED2BE (Helles Grün/Mint) - Button-Hover, Card-Hintergründe, Info-Boxen, Grafische Akzente, Slider/Fortschrittsleisten */
-    --color-accent-50:  oklch(0.98 0.02 150);
-   --color-accent-100: oklch(0.95 0.03 150);
-   --color-accent-200: oklch(0.90 0.04 150);
-   --color-accent-300: oklch(0.85 0.05 150);
-   --color-accent-400: oklch(0.82 0.06 150);
-   --color-accent-500: oklch(0.78 0.07 150); /* #9ED2BE base */
-   --color-accent-600: oklch(0.70 0.06 150);
-   --color-accent-700: oklch(0.65 0.05 150);
-   --color-accent-800: oklch(0.60 0.05 150);
-   --color-accent-900: oklch(0.55 0.04 150);
-   --color-accent-950: oklch(0.50 0.03 150);
-   --color-accent: oklch(0.78 0.07 150); /* #9ED2BE */
-   --color-accent-light: oklch(0.85 0.06 150);
+   /* SECONDARY - Himmelblau — Charts, Sektionen, Highlights, Links, Icons, Progress
+      200 ≈ #BDE0FE, 500 ≈ #4EA8DE */
+   --color-secondary-50:  oklch(0.97 0.02 235);
+   --color-secondary-100: oklch(0.94 0.03 235);
+   --color-secondary-200: oklch(0.90 0.05 237); /* #BDE0FE — helle Sektionen */
+   --color-secondary-300: oklch(0.85 0.07 237);
+   --color-secondary-400: oklch(0.78 0.09 236);
+   --color-secondary-500: oklch(0.70 0.11 235); /* #4EA8DE — Links, Icons, Progress */
+   --color-secondary-600: oklch(0.62 0.10 235);
+   --color-secondary-700: oklch(0.52 0.09 235);
+   --color-secondary-800: oklch(0.42 0.07 235);
+   --color-secondary-900: oklch(0.35 0.06 235);
+   --color-secondary-950: oklch(0.28 0.04 235);
+   --color-secondary: oklch(0.70 0.11 235);     /* #4EA8DE */
+   --color-secondary-light: oklch(0.90 0.05 237); /* #BDE0FE */
 
-    /* WARNING - #C44D4D (Rot) - Warnungen, Fehler, Negative Statuswerte */
-   --color-warning-50:  oklch(0.96 0.03 25);
-   --color-warning-100: oklch(0.90 0.05 25);
-   --color-warning-200: oklch(0.85 0.07 25);
-   --color-warning-300: oklch(0.75 0.09 25);
-   --color-warning-400: oklch(0.65 0.10 25);
-   --color-warning-500: oklch(0.55 0.11 25); /* #C44D4D base */
-   --color-warning-600: oklch(0.50 0.10 25);
-   --color-warning-700: oklch(0.45 0.09 25);
-   --color-warning-800: oklch(0.40 0.08 25);
-   --color-warning-900: oklch(0.35 0.07 25);
-   --color-warning-950: oklch(0.30 0.06 25);
-   --color-warning: oklch(0.55 0.11 25); /* #C44D4D */
-   --color-warning-light: oklch(0.70 0.10 25);
+    /* ACCENT - #FFD166 (Warmes CTA-Gold) — Call-to-Action, grafische Akzente, Highlights
+       Gibt dem grün-blauen Schema visuelle Spannung und Wärme */
+    --color-accent-50:  oklch(0.98 0.04 85);
+   --color-accent-100: oklch(0.96 0.06 85);
+   --color-accent-200: oklch(0.93 0.09 85);
+   --color-accent-300: oklch(0.90 0.12 85);
+   --color-accent-400: oklch(0.87 0.14 85);    /* #FFD166 base */
+   --color-accent-500: oklch(0.80 0.13 85);
+   --color-accent-600: oklch(0.72 0.12 85);
+   --color-accent-700: oklch(0.65 0.11 85);
+   --color-accent-800: oklch(0.58 0.10 85);
+   --color-accent-900: oklch(0.50 0.09 85);
+   --color-accent-950: oklch(0.42 0.08 85);
+   --color-accent: oklch(0.87 0.14 85);         /* #FFD166 */
+   --color-accent-light: oklch(0.93 0.09 85);
 
-   /* INFO / HINT - #E6C15A (Gelb) - Hinweise, Informationen, Wichtige Meldungen */
-   --color-info-50:  oklch(0.98 0.05 85);
-   --color-info-100: oklch(0.95 0.07 85);
-   --color-info-200: oklch(0.90 0.09 85);
-   --color-info-300: oklch(0.85 0.11 85);
-   --color-info-400: oklch(0.82 0.12 85);
-   --color-info-500: oklch(0.75 0.13 85); /* #E6C15A base */
-   --color-info-600: oklch(0.70 0.12 85);
-   --color-info-700: oklch(0.65 0.11 85);
-   --color-info-800: oklch(0.60 0.10 85);
-   --color-info-900: oklch(0.55 0.09 85);
-   --color-info-950: oklch(0.50 0.08 85);
-   --color-info: oklch(0.75 0.13 85); /* #E6C15A */
-   --color-info-light: oklch(0.85 0.12 85);
+    /* WARNING / ERROR - #F28482 (Gedämpftes Koralle) — Fehler, Validierung, Warnungen */
+   --color-warning-50:  oklch(0.97 0.02 22);
+   --color-warning-100: oklch(0.93 0.05 22);
+   --color-warning-200: oklch(0.88 0.07 22);
+   --color-warning-300: oklch(0.83 0.09 22);
+   --color-warning-400: oklch(0.78 0.11 22);
+   --color-warning-500: oklch(0.71 0.13 22);    /* #F28482 base */
+   --color-warning-600: oklch(0.62 0.12 22);
+   --color-warning-700: oklch(0.55 0.11 22);
+   --color-warning-800: oklch(0.48 0.10 22);
+   --color-warning-900: oklch(0.40 0.08 22);
+   --color-warning-950: oklch(0.33 0.06 22);
+   --color-warning: oklch(0.71 0.13 22);        /* #F28482 */
+   --color-warning-light: oklch(0.83 0.09 22);
+
+   /* INFO - #90E0EF (Soft Cyan) — Hinweise, Informationsmeldungen, sekundäre Aktionen */
+   --color-info-50:  oklch(0.97 0.02 210);
+   --color-info-100: oklch(0.95 0.03 210);
+   --color-info-200: oklch(0.92 0.05 210);
+   --color-info-300: oklch(0.89 0.06 210);
+   --color-info-400: oklch(0.86 0.07 210);      /* #90E0EF base */
+   --color-info-500: oklch(0.78 0.08 210);
+   --color-info-600: oklch(0.68 0.07 210);
+   --color-info-700: oklch(0.58 0.06 210);
+   --color-info-800: oklch(0.50 0.05 210);
+   --color-info-900: oklch(0.42 0.04 210);
+   --color-info-950: oklch(0.35 0.03 210);
+   --color-info: oklch(0.86 0.07 210);          /* #90E0EF */
+   --color-info-light: oklch(0.92 0.05 210);
+
+   /* SUCCESS - #95D5B2 (Weiches Grün) — Positive Bestätigungen, Erfolgsmeldungen */
+   --color-success-50:  oklch(0.96 0.02 158);
+   --color-success-100: oklch(0.93 0.04 158);
+   --color-success-200: oklch(0.88 0.06 158);
+   --color-success-300: oklch(0.82 0.08 158);   /* #95D5B2 base */
+   --color-success-400: oklch(0.75 0.09 158);
+   --color-success-500: oklch(0.68 0.10 158);
+   --color-success-600: oklch(0.58 0.09 158);
+   --color-success-700: oklch(0.50 0.08 158);
+   --color-success-800: oklch(0.42 0.06 158);
+   --color-success-900: oklch(0.35 0.05 158);
+   --color-success-950: oklch(0.28 0.04 158);
+   --color-success: oklch(0.82 0.08 158);       /* #95D5B2 */
+   --color-success-light: oklch(0.93 0.04 158);
+
+   /* CAUTION - #FFD6A5 (Warmes Apricot) — Warnhinweise (nicht-kritisch), Erinnerungen */
+   --color-caution-50:  oklch(0.98 0.02 70);
+   --color-caution-100: oklch(0.96 0.04 70);
+   --color-caution-200: oklch(0.93 0.06 70);
+   --color-caution-300: oklch(0.89 0.09 70);    /* #FFD6A5 base */
+   --color-caution-400: oklch(0.82 0.10 70);
+   --color-caution-500: oklch(0.75 0.11 70);
+   --color-caution-600: oklch(0.65 0.10 70);
+   --color-caution-700: oklch(0.58 0.09 70);
+   --color-caution-800: oklch(0.50 0.08 70);
+   --color-caution-900: oklch(0.42 0.07 70);
+   --color-caution-950: oklch(0.35 0.06 70);
+   --color-caution: oklch(0.89 0.09 70);        /* #FFD6A5 */
+   --color-caution-light: oklch(0.96 0.04 70);
 
     /*
      * Responsive Spacing Scale
@@ -354,7 +395,7 @@ body {
 .react-datepicker__input-container input {
     width: 100%;
     border-radius: 0.5rem;
-    border: 1px solid oklch(0.92 0 0);
+    border: 1px solid var(--color-background-200);
     padding: var(--spacing-2xs) var(--spacing-m);
     font-size: var(--font-size-body);
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -362,13 +403,13 @@ body {
 
 .react-datepicker__input-container input:focus {
     outline: none;
-    border-color: oklch(0.30 0.04 250);
-    box-shadow: 0 0 0 2px oklch(0.90 0.02 250);
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px var(--color-primary-100);
 }
 
 .react-datepicker {
     font-family: var(--font-general-sans);
-    border: 1px solid oklch(0.92 0 0);
+    border: 1px solid var(--color-background-200);
     border-radius: 0.75rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     font-size: var(--font-size-body);
@@ -399,45 +440,45 @@ body {
 }
 
 .react-datepicker__header {
-    background-color: oklch(0.96 0 0);
-    border-bottom: 1px solid oklch(0.92 0 0);
+    background-color: var(--color-background-50);
+    border-bottom: 1px solid var(--color-background-200);
     border-radius: 0.75rem 0.75rem 0 0;
     padding-top: 0.75rem;
 }
 
 .react-datepicker__current-month {
-    color: oklch(0.30 0.04 250);
+    color: var(--color-foreground-900);
     font-weight: 600;
     font-size: var(--font-size-body);
 }
 
 .react-datepicker__day-name {
-    color: oklch(0.40 0.01 250);
+    color: var(--color-foreground-400);
     font-weight: 500;
     font-size: var(--font-size-body-small);
 }
 
 .react-datepicker__day {
-    color: oklch(0.30 0.01 250);
+    color: var(--color-foreground-900);
     border-radius: 0.375rem;
     margin: 0.125rem;
 }
 
 .react-datepicker__day:hover {
-    background-color: oklch(0.95 0.01 250);
+    background-color: var(--color-primary-50);
     border-radius: 0.375rem;
 }
 
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
-    background-color: oklch(0.30 0.04 250) !important;
+    background-color: var(--color-primary-500) !important;
     color: white !important;
     border-radius: 0.375rem;
 }
 
 .react-datepicker__day--today {
     font-weight: 600;
-    color: oklch(0.30 0.04 250);
+    color: var(--color-primary-600);
 }
 
 .react-datepicker__navigation {
@@ -445,17 +486,17 @@ body {
 }
 
 .react-datepicker__navigation-icon::before {
-    border-color: oklch(0.40 0.01 250);
+    border-color: var(--color-foreground-400);
 }
 
 .react-datepicker__navigation:hover *::before {
-    border-color: oklch(0.30 0.04 250);
+    border-color: var(--color-primary-500);
 }
 
 .react-datepicker__month-dropdown,
 .react-datepicker__year-dropdown {
     background-color: white;
-    border: 1px solid oklch(0.92 0 0);
+    border: 1px solid var(--color-background-200);
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
@@ -478,8 +519,8 @@ body {
   border-radius: 0.375rem;
   background: linear-gradient(
     to right,
-    var(--slider-fill-color, var(--color-accent-500)) 0%,
-    var(--slider-fill-color, var(--color-accent-500)) var(--slider-fill-percentage, 50%),
+    var(--slider-fill-color, var(--color-primary-500)) 0%,
+    var(--slider-fill-color, var(--color-primary-500)) var(--slider-fill-percentage, 50%),
     var(--color-background-200) var(--slider-fill-percentage, 50%),
     var(--color-background-200) 100%
   );
@@ -491,15 +532,15 @@ body {
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background: var(--slider-thumb-color, var(--color-accent-500));
-  box-shadow: 0 0 0 2px var(--color-accent-300), 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--slider-thumb-color, var(--color-primary-500));
+  box-shadow: 0 0 0 2px var(--color-primary-200), 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 150ms ease-out;
   margin-top: -0.125rem;
 }
 
 .rating-slider::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 3px var(--color-accent-300), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 3px var(--color-primary-200), 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .rating-slider:disabled::-webkit-slider-thumb {
@@ -514,8 +555,8 @@ body {
   border-radius: 0.375rem;
   background: linear-gradient(
     to right,
-    var(--slider-fill-color, var(--color-accent-500)) 0%,
-    var(--slider-fill-color, var(--color-accent-500)) var(--slider-fill-percentage, 50%),
+    var(--slider-fill-color, var(--color-primary-500)) 0%,
+    var(--slider-fill-color, var(--color-primary-500)) var(--slider-fill-percentage, 50%),
     var(--color-background-200) var(--slider-fill-percentage, 50%),
     var(--color-background-200) 100%
   );
@@ -526,15 +567,15 @@ body {
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background: var(--slider-thumb-color, var(--color-accent-500));
+  background: var(--slider-thumb-color, var(--color-primary-500));
   border: none;
-  box-shadow: 0 0 0 2px var(--color-accent-300), 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px var(--color-primary-200), 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 150ms ease-out;
 }
 
 .rating-slider::-moz-range-thumb:hover {
-  box-shadow: 0 0 0 3px var(--color-accent-300), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 3px var(--color-primary-200), 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .rating-slider:disabled::-moz-range-thumb {
@@ -572,11 +613,28 @@ div.react-datepicker__year-option {
 
 .react-datepicker__month-option:hover,
 .react-datepicker__year-option:hover {
-    background-color: oklch(0.95 0.01 250);
+    background-color: var(--color-primary-50);
 }
 
 .react-datepicker__month-option--selected,
 .react-datepicker__year-option--selected {
-    background-color: oklch(0.30 0.04 250);
+    background-color: var(--color-primary-500);
     color: white;
+}
+
+/**
+ * Gradient Utilities
+ * Salbei → Himmelblau Verlauf für Hero-Bereiche, Header, dekorative Flächen
+ */
+.gradient-hero {
+    background: linear-gradient(135deg, var(--color-primary-200) 0%, var(--color-secondary-200) 100%);
+}
+
+.gradient-hero-vivid {
+    background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-secondary-500) 100%);
+    color: white;
+}
+
+.gradient-hero-subtle {
+    background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%);
 }
