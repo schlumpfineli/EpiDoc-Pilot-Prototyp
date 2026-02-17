@@ -52,6 +52,7 @@ class DatabaseSeeder extends Seeder
         // Demo-Daten generieren (nur wenn noch keine Daten vorhanden sind)
         $this->generateDemoData($testUser);
         $this->generateDemoData($patientUser);
+        $this->generateDemoData($relativeUser);
     }
 
     /**
