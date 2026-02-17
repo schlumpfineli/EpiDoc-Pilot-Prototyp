@@ -126,6 +126,12 @@ export class ApiClient {
       return response.json();
     } catch (error) {
       clearTimeout(timeoutId);
+      
+      // ApiError-Objekte (von !response.ok oben geworfen) direkt weiterleiten
+      if (error && typeof error === 'object' && 'message' in error && !(error instanceof Error)) {
+        throw error;
+      }
+      
       // Wenn Request abgebrochen wurde (Timeout)
       if (error instanceof Error && error.name === 'AbortError') {
         const timeoutError: ApiError = {
@@ -138,7 +144,7 @@ export class ApiClient {
       }
       
       // Network-Fehler (CORS, Verbindung, etc.)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+      if (error instanceof TypeError) {
         const networkError: ApiError = {
           message: 'Netzwerkfehler: Konnte nicht mit dem Server verbinden. Bitte prüfen Sie Ihre Internetverbindung.',
         };
@@ -148,11 +154,14 @@ export class ApiClient {
         throw networkError;
       }
       
-      // Andere Fehler weiterwerfen
+      // Andere Fehler mit nützlicher Fehlermeldung weiterwerfen
       if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
         console.error(`[API] Unknown error for ${url}:`, error);
       }
-      throw error;
+      const fallbackError: ApiError = {
+        message: (error as any)?.message || 'Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
+      };
+      throw fallbackError;
     }
   }
 
