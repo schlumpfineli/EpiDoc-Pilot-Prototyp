@@ -59,9 +59,3 @@ Route::middleware('auth:sanctum')->group(function () {
 // Admin Analytics routes (protected by AdminAuth via web routes)
 // Diese Routen sind über Web-Interface verfügbar unter /admin/analytics
 
-// TEMPORÄR: Einmaliger Seeder-Endpunkt (nach Nutzung wieder entfernen!)
-Route::get('/run-seed-temp-8x7k2m', function () {
-    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    return response()->json(['message' => 'Seeder ausgeführt', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
-});
-
