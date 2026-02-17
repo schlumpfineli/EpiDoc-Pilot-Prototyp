@@ -176,7 +176,7 @@ function ScrollTimeSelect({
       >
         <span>{value}</span>
         <svg className={`h-4 w-4 text-foreground-500 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       {isOpen && (
@@ -244,9 +244,9 @@ export default function DiaryPage() {
         if (!loadedEntries[dateStr]) {
           loadedEntries[dateStr] = {
             hasSeizure: true,
-            hasEmergencyMed: seizure.emergency_med || false,
-            seizureCount: seizure.seizure_count || 1,
-            emergencyCount: seizure.emergency_med ? 1 : 0,
+            hasEmergencyMed: false,
+            seizureCount: 0,
+            emergencyCount: 0,
             seizures: [],
           };
         }
@@ -254,7 +254,7 @@ export default function DiaryPage() {
         // Konvertiere Seizure zu SeizureFormData
         const seizureTime = format(parseISO(seizure.date), "HH:mm");
         const seizureData: SeizureFormData = {
-          id: seizure.id, // Backend-ID speichern für Updates
+          id: seizure.id,
           type: Array.isArray(seizure.type) ? seizure.type : [],
           customType: seizure.custom_type || "",
           multipleSeizures: (seizure.seizure_count || 1) > 1 ? "ja" : "nein",
@@ -278,6 +278,16 @@ export default function DiaryPage() {
         
         loadedEntries[dateStr].seizures.push(seizureData);
       });
+
+      // Aggregate pro Tag korrekt berechnen (über ALLE Seizures des Tages)
+      for (const dateStr of Object.keys(loadedEntries)) {
+        const entry = loadedEntries[dateStr];
+        entry.seizureCount = entry.seizures.length;
+        entry.hasEmergencyMed = entry.seizures.some(
+          (s) => s.emergencyMed === "ja"
+        );
+        entry.emergencyCount = entry.hasEmergencyMed ? 1 : 0;
+      }
       
       setEntries(loadedEntries);
       
@@ -329,7 +339,7 @@ export default function DiaryPage() {
         triggers: seizureData.triggers.length > 0 ? seizureData.triggers : undefined,
         custom_triggers: seizureData.customTriggers || undefined,
         emergency_med: seizureData.emergencyMed === "ja",
-        emergency_med_name: seizureData.emergencyMedName || undefined,
+        emergency_med_name: seizureData.emergencyMed === "ja" ? (seizureData.emergencyMedName || "") : undefined,
         video_path: undefined, // Video-Upload noch nicht implementiert
       };
 
@@ -906,6 +916,8 @@ export default function DiaryPage() {
           await saveSeizureToBackend(dayKey, seizure, false);
         }
       }
+      // Nach erfolgreichem Speichern: Daten vom Backend neu laden (IDs + Konsistenz)
+      await loadSeizureData();
     } catch (error) {
       // Fehler wird bereits in saveSeizureToBackend behandelt
       console.error("Fehler beim Speichern:", error);
@@ -982,7 +994,7 @@ export default function DiaryPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
               </svg>
             </span>
             <span
@@ -1001,14 +1013,14 @@ export default function DiaryPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
               </svg>
             </span>
           </button>
         </div>
 
         {/* Calendar Grid */}
-        <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-s)] sm:p-[var(--spacing-m)]">
+        <div className="rounded-2xl bg-white p-[var(--spacing-s)] sm:p-[var(--spacing-m)]">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-[var(--spacing-2xs)] mb-[var(--spacing-xs)]">
             {weekDays.map((day) => (
@@ -1036,11 +1048,9 @@ export default function DiaryPage() {
               const hasSeizure = entry?.hasSeizure;
               const hasEmergency = entry?.hasEmergencyMed;
 
-              let cellClass = "bg-transparent text-foreground-700 hover:bg-primary-50";
+              let cellClass = "bg-transparent text-foreground-700 hover:bg-primary-50/60";
 
-              if (hasSeizure) {
-                cellClass = "bg-accent-100/60 text-foreground-900 ring-1 ring-accent-300/50";
-              } else if (isCurrentDay) {
+              if (isCurrentDay) {
                 cellClass = "bg-primary-50 text-primary-700 ring-1 ring-primary-200";
               }
 
@@ -1051,11 +1061,19 @@ export default function DiaryPage() {
                   className={`
                     relative aspect-square rounded-xl transition-all duration-200
                     ${cellClass}
-                    hover:ring-1 hover:ring-primary-300
+                    hover:ring-1 hover:ring-primary-300/60
                     ${entry ? "font-medium" : "font-normal"}
                   `}
                 >
-                  <span className="text-body sm:text-h5 flex items-center justify-center h-full">{format(day, "d")}</span>
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <span className="text-body sm:text-h5">{format(day, "d")}</span>
+                    {(hasSeizure || hasEmergency) && (
+                      <div className="flex items-center justify-center gap-[3px] mt-[1px]">
+                        {hasSeizure && <span className="block w-[5px] h-[5px] rounded-full bg-[#5FAF87]" />}
+                        {hasEmergency && <span className="block w-[5px] h-[5px] rounded-full bg-[#3E8FB8]" />}
+                      </div>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -1082,28 +1100,28 @@ export default function DiaryPage() {
               {/* Einzelfall Card */}
               {!isSeries && (
                 <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-s)]">
+                  <div className="flex items-center justify-between border-b border-background-200/40 px-[var(--spacing-m)] py-[var(--spacing-s)]">
                     <h3 className="text-body font-medium text-foreground-900">
-                      Einzelfall - {format(viewingDate, "dd.MM.yyyy", { locale: de })}
+                      Einzelfall — {format(viewingDate, "dd.MM.yyyy", { locale: de })}
                     </h3>
-                    <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <div className="flex items-center gap-[var(--spacing-xs)]">
                       <button
                         onClick={() => handleAddNewSeizure(viewingDate)}
-                        className="flex h-9 w-9 items-center justify-center text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        className="flex items-center gap-[var(--spacing-2xs)] text-body-small font-medium text-primary-600 hover:text-primary-700 transition"
                         aria-label="Neuer Anfall"
-                        title="Neuer Anfall"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                         </svg>
+                        <span className="hidden sm:inline">Hinzufügen</span>
                       </button>
                       <button
                         onClick={() => setViewingDate(null)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100 hover:text-foreground-900"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700"
                         aria-label="Schließen"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1162,25 +1180,25 @@ export default function DiaryPage() {
                               </div>
                             </div>
                             
-                            <div className="flex flex-col gap-[var(--spacing-2xs)] ml-[var(--spacing-s)] self-start">
+                            <div className="flex items-center gap-[var(--spacing-2xs)] ml-[var(--spacing-s)] self-start">
                               <button
                                 onClick={() => handleEditSeizure(viewingDate, index)}
-                                className="flex items-center justify-center h-9 w-9 text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 hover:text-primary-600 hover:bg-primary-50 transition"
                                 aria-label="Bearbeiten"
                                 title="Bearbeiten"
                               >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                               </button>
                               <button
                                 onClick={() => handleDeleteSeizure(seizure.id, viewingDate)}
-                                className="flex items-center justify-center h-9 w-9 text-secondary-600 hover:text-secondary-700 border border-secondary-300 hover:border-secondary-400 rounded-lg transition"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 hover:text-warning-600 hover:bg-warning-50 transition"
                                 aria-label="Löschen"
                                 title="Löschen"
                               >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
                             </div>
@@ -1195,38 +1213,38 @@ export default function DiaryPage() {
               {/* Anfallsserie Card */}
               {isSeries && (
                 <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-s)]">
+                  <div className="flex items-center justify-between border-b border-background-200/40 px-[var(--spacing-m)] py-[var(--spacing-s)]">
                     <h3 className="text-body font-medium text-foreground-900">
-                      Anfallsserie - {format(viewingDate, "dd.MM.yyyy", { locale: de })}
+                      Anfallsserie — {format(viewingDate, "dd.MM.yyyy", { locale: de })}
                     </h3>
-                    <div className="flex items-center gap-[var(--spacing-2xs)]">
+                    <div className="flex items-center gap-[var(--spacing-xs)]">
                       <button
                         onClick={() => handleAddNewSeizure(viewingDate)}
-                        className="flex h-9 w-9 items-center justify-center text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        className="flex items-center gap-[var(--spacing-2xs)] text-body-small font-medium text-primary-600 hover:text-primary-700 transition"
                         aria-label="Neuer Anfall"
-                        title="Neuer Anfall"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                         </svg>
+                        <span className="hidden sm:inline">Hinzufügen</span>
                       </button>
                       <button
                         onClick={() => handleDeleteDay(viewingDate)}
-                        className="flex h-9 w-9 items-center justify-center border border-secondary-500 bg-white text-secondary-700 hover:border-secondary-600 hover:bg-secondary-50 rounded-lg transition"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 hover:text-warning-600 hover:bg-warning-50 transition"
                         aria-label="Tag löschen"
                         title="Tag löschen"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>
                       <button
                         onClick={() => setViewingDate(null)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100 hover:text-foreground-900"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700"
                         aria-label="Schließen"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1283,7 +1301,12 @@ export default function DiaryPage() {
                               </div>
                             </div>
                             
-                            <div className="flex flex-col items-center gap-[var(--spacing-2xs)] ml-auto pl-[var(--spacing-s)] self-start flex-shrink-0">
+                            <div className="flex items-center gap-[var(--spacing-2xs)] ml-auto pl-[var(--spacing-s)] self-start flex-shrink-0">
+                              {block.seizures.length > 1 && (
+                                <span className="text-body-small text-foreground-400 whitespace-nowrap">
+                                  {block.seizures.length}×
+                                </span>
+                              )}
                               <button
                                 onClick={() => {
                                   if (block.seizures.length > 0 && viewingDate) {
@@ -1293,19 +1316,14 @@ export default function DiaryPage() {
                                     }
                                   }
                                 }}
-                                className="flex items-center justify-center h-9 w-9 text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 hover:text-primary-600 hover:bg-primary-50 transition"
                                 aria-label="Zeitblock bearbeiten"
                                 title="Bearbeiten"
                               >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                               </button>
-                              {block.seizures.length > 1 && (
-                                <span className="text-body-small text-foreground-500 whitespace-nowrap">
-                                  {block.seizures.length} Einträge
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -1318,38 +1336,41 @@ export default function DiaryPage() {
           );
         })()}
 
-        {/* Monthly Summary */}
-        <div className="mt-[var(--spacing-s)] rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-m)]">
+        {/* Monthly Summary — KPI Style */}
+        <div className="mt-[var(--spacing-s)] rounded-2xl bg-white p-[var(--spacing-m)]">
           <h3 className="section-label mb-[var(--spacing-m)]">
             {format(currentDate, "MMMM yyyy", { locale: de })} — Zusammenfassung
           </h3>
-          <div className="text-body text-foreground-700">
-            <div className="flex justify-between pb-2">
-              <span>Anfälle (gesamt):</span>
-              <span className="font-medium text-foreground-900">{monthlyStats.totalSeizures}</span>
+
+          <div className="grid grid-cols-2 gap-[var(--spacing-s)]">
+            <div className="flex flex-col items-center rounded-xl bg-primary-50/40 py-[var(--spacing-s)] px-[var(--spacing-xs)]">
+              <span className="text-h2 font-semibold text-primary-700 leading-none">{monthlyStats.totalSeizures}</span>
+              <span className="text-body-small text-foreground-500 mt-[var(--spacing-2xs)]">Anfälle</span>
             </div>
-            <div className="flex justify-between pb-1">
-              <span>Notfallmedikamente:</span>
-              <span className="font-medium text-foreground-900">{monthlyStats.totalEmergencyMeds}</span>
+            <div className="flex flex-col items-center rounded-xl bg-secondary-50/40 py-[var(--spacing-s)] px-[var(--spacing-xs)]">
+              <span className="text-h2 font-semibold text-secondary-700 leading-none">{monthlyStats.totalEmergencyMeds}</span>
+              <span className="text-body-small text-foreground-500 mt-[var(--spacing-2xs)]">Notfallmedis</span>
             </div>
-            {monthlyStats.emergencyDates.length > 0 && (
-              <div className="space-y-[var(--spacing-2xs)] pt-1 text-foreground-600">
-                <div className="font-medium text-body text-foreground-700">Verabreicht am:</div>
-                <div className="flex flex-wrap gap-[var(--spacing-2xs)]">
-                  {monthlyStats.emergencyDates.map((date) => (
-                    <span
-                      key={date}
-                      className="rounded-full bg-primary-50/60 px-2 py-0.5 text-body-small font-medium text-foreground-600"
-                    >
-                      {format(new Date(date), "dd.MM.")}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
+
+          {monthlyStats.emergencyDates.length > 0 && (
+            <div className="mt-[var(--spacing-m)] pt-[var(--spacing-s)] border-t border-background-200/40">
+              <span className="text-body-small text-foreground-400">Verabreicht am</span>
+              <div className="flex flex-wrap gap-[var(--spacing-2xs)] mt-[var(--spacing-2xs)]">
+                {monthlyStats.emergencyDates.map((date) => (
+                  <span
+                    key={date}
+                    className="rounded-full bg-secondary-50/60 px-2.5 py-0.5 text-body-small font-medium text-secondary-700"
+                  >
+                    {format(new Date(date), "dd.MM.")}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {monthlyStats.totalSeizures === 0 && monthlyStats.totalEmergencyMeds === 0 && (
-            <p className="mt-[var(--spacing-m)] text-body text-foreground-500">
+            <p className="mt-[var(--spacing-s)] text-body-small text-foreground-400 text-center">
               Noch keine Einträge für diesen Monat.
             </p>
           )}
@@ -1361,18 +1382,18 @@ export default function DiaryPage() {
         <div className="modal-overlay">
           <div className="modal-container overflow-hidden">
             <div className="overflow-y-auto flex-1">
-            <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-m)]">
+            <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
               <h2 className="text-body font-medium text-foreground-900 flex-1 min-w-0">
                 Neuer Anfall eintragen
               </h2>
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700"
                 aria-label="Schließen"
               >
                 <svg
-                  className="h-5 w-5 sm:h-6 sm:w-6"
+                  className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1380,7 +1401,7 @@ export default function DiaryPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
@@ -1390,12 +1411,12 @@ export default function DiaryPage() {
             <form
               id="seizure-entry-form"
               onSubmit={handleSubmit}
-              className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]"
+              className="px-[var(--spacing-m)] py-[var(--spacing-m)] space-y-[var(--spacing-m)]"
             >
               {/* Anfallstyp aus Liste */}
               <div ref={typeFieldRef} className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
-                  Anfallstyp <span className="text-foreground-800">*</span>
+                <label className="text-body-small font-medium text-foreground-500">
+                  Anfallstyp <span className="text-foreground-300 text-body-small font-normal ml-1">Pflicht</span>
                 </label>
                 <div className="relative">
                   <input
@@ -1407,10 +1428,10 @@ export default function DiaryPage() {
                         ? formData.type.join(", ")
                         : "Bitte auswählen"
                     }
-                    className={`w-full cursor-pointer rounded-lg border px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:outline-none transition ${
+                    className={`w-full cursor-pointer rounded-xl border px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:outline-none transition ${
                       typeError 
-                        ? "border-warning-500 focus:border-warning-500 focus:ring-2 focus:ring-warning-200" 
-                        : "border-background-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
+                        ? "border-warning-400 focus:border-warning-400 focus:ring-1 focus:ring-warning-200" 
+                        : "border-background-200/60 focus:border-primary-400 focus:ring-1 focus:ring-primary-200"
                     }`}
                     placeholder="Bitte auswählen"
                   />
@@ -1434,7 +1455,7 @@ export default function DiaryPage() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={1.5}
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
@@ -1448,7 +1469,7 @@ export default function DiaryPage() {
 
               {/* Mehr als ein Anfall? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   Mehr als ein Anfall?
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
@@ -1497,7 +1518,7 @@ export default function DiaryPage() {
                 {formData.multipleSeizures === "nein" && (
                   <>
                     <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-xs)]">
-                      <span className="text-body font-medium text-foreground-800 block">
+                      <span className="text-body-small font-medium text-foreground-500 block">
                         Uhrzeit
                       </span>
                       <div className="flex items-center gap-[var(--spacing-2xs)]">
@@ -1527,7 +1548,7 @@ export default function DiaryPage() {
                       </div>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
-                      <label className="text-body font-medium text-foreground-800">
+                      <label className="text-body-small font-medium text-foreground-500">
                         Dauer
                       </label>
                       <div className="flex gap-[var(--spacing-m)]">
@@ -1545,7 +1566,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Min"
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationMinutes && (
                             <button
@@ -1565,7 +1586,7 @@ export default function DiaryPage() {
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  strokeWidth={2}
+                                  strokeWidth={1.5}
                                   d="M6 18L18 6M6 6l12 12"
                                 />
                               </svg>
@@ -1587,7 +1608,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Sek"
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationSeconds && (
                             <button
@@ -1607,7 +1628,7 @@ export default function DiaryPage() {
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  strokeWidth={2}
+                                  strokeWidth={1.5}
                                   d="M6 18L18 6M6 6l12 12"
                                 />
                               </svg>
@@ -1623,7 +1644,7 @@ export default function DiaryPage() {
                 {formData.multipleSeizures === "ja" && (
                   <>
                     <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-xs)]">
-                      <span className="text-body font-medium text-foreground-800 block">
+                      <span className="text-body-small font-medium text-foreground-500 block">
                         Zeitraum: von / bis (nur Stunden)
                       </span>
                       <div className="flex flex-wrap items-center gap-[var(--spacing-s)]">
@@ -1652,7 +1673,7 @@ export default function DiaryPage() {
                       </div>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
-                      <label className="text-body font-medium text-foreground-800">
+                      <label className="text-body-small font-medium text-foreground-500">
                         Anzahl der Anfälle
                       </label>
                       <div className="flex items-center gap-[var(--spacing-xs)]">
@@ -1670,7 +1691,7 @@ export default function DiaryPage() {
                                 seizureCount: e.target.value,
                               }))
                             }
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="Anzahl"
                           />
                           {formData.seizureCount && formData.seizureCount !== "1" && (
@@ -1691,7 +1712,7 @@ export default function DiaryPage() {
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  strokeWidth={2}
+                                  strokeWidth={1.5}
                                   d="M6 18L18 6M6 6l12 12"
                                 />
                               </svg>
@@ -1700,11 +1721,11 @@ export default function DiaryPage() {
                         </div>
                         {formData.seizureCount && parseInt(formData.seizureCount) >= 1 && (
                           <span
-                            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 border border-primary-300 text-primary-600"
+                            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50/60 text-primary-500"
                             title="Anzahl bestätigt"
                           >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                             </svg>
                           </span>
                         )}
@@ -1716,7 +1737,7 @@ export default function DiaryPage() {
 
               {/* Hast du es vorher gespürt? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   {t("Hast du es vorher gespürt?")}
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
@@ -1757,7 +1778,7 @@ export default function DiaryPage() {
 
               {/* Wie ging es dir danach? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   {t("Wie ging es dir danach?")}
                 </label>
                 <div className="relative">
@@ -1770,7 +1791,7 @@ export default function DiaryPage() {
                         ? formData.afterEffects.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0 && (
@@ -1792,7 +1813,7 @@ export default function DiaryPage() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={1.5}
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
@@ -1803,7 +1824,7 @@ export default function DiaryPage() {
 
               {/* Weitere Auffälligkeiten */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   Weitere Auffälligkeiten
                 </label>
                 <div className="relative">
@@ -1817,7 +1838,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Weitere Auffälligkeiten eintragen"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
                   />
                   {formData.customAfterEffects && (
                     <button
@@ -1837,7 +1858,7 @@ export default function DiaryPage() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={1.5}
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
@@ -1848,7 +1869,7 @@ export default function DiaryPage() {
 
               {/* Mögliche Auslöser */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   Mögliche Auslöser
                 </label>
                 <div className="relative">
@@ -1861,7 +1882,7 @@ export default function DiaryPage() {
                         ? formData.triggers.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.triggers) && formData.triggers.length > 0 && (
@@ -1883,7 +1904,7 @@ export default function DiaryPage() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={1.5}
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
@@ -1894,7 +1915,7 @@ export default function DiaryPage() {
 
               {/* Andere Auslöser */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   Andere Auslöser
                 </label>
                 <div className="relative">
@@ -1908,7 +1929,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Andere Auslöser eintragen"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
                   />
                   {formData.customTriggers && (
                     <button
@@ -1928,7 +1949,7 @@ export default function DiaryPage() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={1.5}
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
@@ -1939,7 +1960,7 @@ export default function DiaryPage() {
 
               {/* Notfallmedikament eingenommen? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
+                <label className="text-body-small font-medium text-foreground-500">
                   Notfallmedikament eingenommen?
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
@@ -1988,7 +2009,7 @@ export default function DiaryPage() {
                         }))
                       }
                       placeholder="Name des Notfallmedikaments"
-                      className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                      className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
                     />
                     {formData.emergencyMedName && (
                       <button
@@ -2008,7 +2029,7 @@ export default function DiaryPage() {
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            strokeWidth={2}
+                            strokeWidth={1.5}
                             d="M6 18L18 6M6 6l12 12"
                           />
                         </svg>
@@ -2020,8 +2041,8 @@ export default function DiaryPage() {
 
               {/* Video Upload - Optional */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
-                  Video hochladen <span className="text-foreground-500">(Optional)</span>
+                <label className="text-body-small font-medium text-foreground-500">
+                  Video hochladen <span className="text-foreground-300 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="file"
@@ -2033,23 +2054,23 @@ export default function DiaryPage() {
                       video: e.target.files?.[0] || null,
                     }))
                   }
-                  className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body shadow-sm cursor-not-allowed bg-background-100 text-foreground-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-body file:font-semibold file:bg-background-200 file:text-foreground-400"
+                  className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body cursor-not-allowed bg-background-50 text-foreground-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-body file:font-medium file:bg-background-100 file:text-foreground-400"
                 />
               </div>
 
               {/* Buttons – Abbrechen und Speichern (groß für bessere Erkennbarkeit) */}
-              <div className="flex gap-[var(--spacing-m)] pt-3">
+              <div className="flex gap-[var(--spacing-s)] pt-[var(--spacing-s)] border-t border-background-200/40 mt-[var(--spacing-xs)]">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="flex-1 rounded-lg border-2 border-background-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-foreground-700 shadow-sm transition hover:bg-background-50"
+                  className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-600 transition hover:bg-background-50"
                 >
                   Abbrechen
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 rounded-xl bg-primary-500 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-600 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSaving ? "Wird gespeichert…" : "Speichern"}
                 </button>
@@ -2062,10 +2083,10 @@ export default function DiaryPage() {
 
       {/* Typ-Auswahl Modal */}
       {isTypeModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
-          <div className="w-full h-auto max-h-[80vh] overflow-y-auto rounded-xl bg-white shadow-xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <h3 className="text-body font-semibold text-foreground-900">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+          <div className="modal-container max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 flex items-center justify-between border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
+              <h3 className="text-body font-medium text-foreground-900">
                 Typ auswählen
               </h3>
               <button
@@ -2082,7 +2103,7 @@ export default function DiaryPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
@@ -2120,10 +2141,10 @@ export default function DiaryPage() {
 
       {/* After Effects Modal */}
       {isAfterEffectsModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
-          <div className="w-full h-auto max-h-[80vh] overflow-y-auto rounded-xl bg-white shadow-xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <h3 className="text-body font-semibold text-foreground-900">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+          <div className="modal-container max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 flex items-center justify-between border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
+              <h3 className="text-body font-medium text-foreground-900">
                 {t("Wie ging es dir danach?")}
               </h3>
               <button
@@ -2140,7 +2161,7 @@ export default function DiaryPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
@@ -2178,10 +2199,10 @@ export default function DiaryPage() {
 
       {/* Triggers Modal */}
       {isTriggersModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-[var(--spacing-s)]">
-          <div className="w-full h-auto max-h-[80vh] overflow-y-auto rounded-xl bg-white shadow-xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <h3 className="text-body font-semibold text-foreground-900">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+          <div className="modal-container max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 flex items-center justify-between border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
+              <h3 className="text-body font-medium text-foreground-900">
                 Mögliche Auslöser?
               </h3>
               <button
@@ -2198,7 +2219,7 @@ export default function DiaryPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
