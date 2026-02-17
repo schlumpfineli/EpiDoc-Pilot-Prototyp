@@ -1,6 +1,6 @@
 // Service Worker für EpiDoc
 // WICHTIG: Cache-Version erhöhen bei jedem relevanten Update
-const CACHE_NAME = 'epidoc-v2';
+const CACHE_NAME = 'epidoc-v3';
 const STATIC_ASSETS = [
   '/favicon.ico',
 ];
