@@ -89,8 +89,8 @@ export default function BefindenPage() {
   // Optionale Symptome ein-/ausblenden
   const [showOptionalItems, setShowOptionalItems] = useState(false);
 
-  // Kern-Items ein-/ausblenden
-  const [showCoreItems, setShowCoreItems] = useState(true);
+  // Kern-Items immer anzeigen
+  const showCoreItems = true;
     
   // Alle verfügbaren Items (Kern + Beobachtungen + Optional + Custom)
   const allItems = useMemo(() => {
@@ -622,52 +622,41 @@ export default function BefindenPage() {
     }
   };
 
-  // Accent-Farbe basierend auf Rating-Wert (niedrig = accent-500, hoch = accent-700)
-  const getAccentColorForRating = (rating: number): string => {
-    if (rating <= 2) return 'accent-500';
-    if (rating <= 4) return 'accent-550';
-    if (rating <= 6) return 'accent-600';
-    if (rating <= 8) return 'accent-650';
-    return 'accent-700';
+  // Farbe basierend auf Rating-Wert (Grün → Gelb → Orange → Rot, gedeckte Farben)
+  const getRatingColor = (rating: number): string => {
+    if (rating <= 2) return 'rating-green';
+    if (rating <= 4) return 'rating-lime';
+    if (rating <= 6) return 'rating-yellow';
+    if (rating <= 8) return 'rating-orange';
+    return 'rating-red';
   };
 
-  // Accent-Farbe als CSS-Variable für Slider-Thumb
-  const getAccentColorVar = (rating: number): string => {
-    const colorClass = getAccentColorForRating(rating);
+  // Farbe als CSS-Wert für Slider-Thumb
+  const getRatingColorVar = (rating: number): string => {
     const colorMap: Record<string, string> = {
-      'accent-500': 'var(--color-accent-500)',
-      'accent-550': 'oklch(0.74 0.065 150)',
-      'accent-600': 'var(--color-accent-600)',
-      'accent-650': 'oklch(0.675 0.055 150)',
-      'accent-700': 'var(--color-accent-700)',
+      'rating-green': 'oklch(0.65 0.12 145)',
+      'rating-lime': 'oklch(0.65 0.10 120)',
+      'rating-yellow': 'oklch(0.68 0.12 85)',
+      'rating-orange': 'oklch(0.62 0.14 55)',
+      'rating-red': 'oklch(0.55 0.14 25)',
     };
-    return colorMap[colorClass] || colorMap['accent-500'];
+    return colorMap[getRatingColor(rating)] || colorMap['rating-green'];
   };
 
   // Slider-Style basierend auf Rating-Wert
   const getSliderStyle = (rating: number | null): React.CSSProperties => {
     if (rating === null) {
       return {
-        '--slider-thumb-color': 'var(--color-accent-500)',
-        '--slider-fill-color': 'var(--color-accent-500)',
+        '--slider-thumb-color': 'oklch(0.65 0.12 145)',
+        '--slider-fill-color': 'oklch(0.65 0.12 145)',
         '--slider-fill-percentage': '50%',
       } as React.CSSProperties;
     }
     const percentage = ((rating - 1) / 9) * 100;
-    const thumbColor = getAccentColorVar(rating);
-    const colorClass = getAccentColorForRating(rating);
-    // Verwende CSS-Variablen für die Farben
-    const accentColors: Record<string, string> = {
-      'accent-500': 'var(--color-accent-500)',
-      'accent-550': 'oklch(0.74 0.065 150)',
-      'accent-600': 'var(--color-accent-600)',
-      'accent-650': 'oklch(0.675 0.055 150)',
-      'accent-700': 'var(--color-accent-700)',
-    };
-    const fillColor = accentColors[colorClass] || accentColors['accent-500'];
+    const color = getRatingColorVar(rating);
     return {
-      '--slider-thumb-color': thumbColor,
-      '--slider-fill-color': fillColor,
+      '--slider-thumb-color': color,
+      '--slider-fill-color': color,
       '--slider-fill-percentage': `${percentage}%`,
     } as React.CSSProperties;
   };
@@ -1136,18 +1125,11 @@ export default function BefindenPage() {
           {/* Häufige Beschwerden */}
           {showCoreItems && (
             <div className="mb-6">
-              <div className="mb-4 mt-2 flex items-center justify-between">
+              <div className="mb-4 mt-2">
                 <h2 className="text-h4 font-semibold text-foreground-900">
                   Häufige Beschwerden
                 </h2>
-              <button
-                type="button"
-                  onClick={() => setShowCoreItems(false)}
-                  className="text-body-small text-foreground-500 hover:text-foreground-700"
-                >
-                  Ausblenden
-              </button>
-                                        </div>
+              </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {/* Standard Kern-Items */}
                 {coreItems.map((item) => {
@@ -1587,7 +1569,7 @@ export default function BefindenPage() {
                           onClick={(e) => toggleItem(item.id, e)}
                           className="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 px-4 py-3 pr-2 text-left transition-colors hover:bg-background-25 active:bg-background-200 sm:max-w-[calc(100%-3rem)]"
                         >
-                          <span className="text-body font-medium text-foreground-900 truncate">{item.label}</span>
+                          <span className={`text-body font-medium text-foreground-900 ${isExpanded ? '' : 'truncate'}`}>{item.label}</span>
                           <div className="flex items-center gap-4 flex-shrink-0">
                             {avgRating !== null && (
                               <span className="rounded-full bg-secondary-200 px-2 py-0.5 text-[10px] font-medium text-foreground-700">
@@ -1706,18 +1688,7 @@ export default function BefindenPage() {
 
 
 
-          {/* Kern-Items wieder einblenden, wenn ausgeblendet */}
-          {!showCoreItems && (
-            <div className="mb-6">
-                            <button
-                              type="button"
-                onClick={() => setShowCoreItems(true)}
-                className="text-body text-foreground-500 hover:text-foreground-700"
-              >
-                {t("Häufige Beschwerden einblenden")}
-                            </button>
-                                                  </div>
-                                                )}
+          
                                               </div>
                                             </div>
 
