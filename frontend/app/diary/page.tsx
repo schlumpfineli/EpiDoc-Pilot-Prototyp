@@ -172,7 +172,7 @@ function ScrollTimeSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
-        className={`w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body text-left shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer flex items-center justify-between ${isOpen ? "border-primary-500 ring-2 ring-primary-200" : ""}`}
+        className={`w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body text-left shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer flex items-center justify-between ${isOpen ? "border-primary-500 ring-2 ring-primary-200" : ""}`}
       >
         <span>{value}</span>
         <svg className={`h-4 w-4 text-foreground-500 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -1065,7 +1065,7 @@ export default function DiaryPage() {
           </div>
         </div>
 
-        <p className="text-body text-foreground-600 text-center px-[var(--spacing-m)] mt-[var(--spacing-s)]">
+        <p className="text-body-small text-foreground-600 text-center px-[var(--spacing-m)] mt-[var(--spacing-s)]">
           {t("Wähle einen Tag aus dem Kalender aus, um Anfälle einzutragen oder bereits erfasste Anfälle anzuzeigen.")}
         </p>
 
@@ -1089,30 +1089,24 @@ export default function DiaryPage() {
                     <h3 className="text-body font-semibold text-foreground-900">
                       Einzelfall - {format(viewingDate, "dd.MM.yyyy", { locale: de })}
                     </h3>
-                    <div className="flex items-center gap-[var(--spacing-s)]">
+                    <div className="flex items-center gap-[var(--spacing-2xs)]">
                       <button
                         onClick={() => handleAddNewSeizure(viewingDate)}
-                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        className="flex h-9 w-9 items-center justify-center text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        aria-label="Neuer Anfall"
+                        title="Neuer Anfall"
                       >
-                        + Neuer Anfall
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
                       </button>
                       <button
                         onClick={() => setViewingDate(null)}
-                        className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100 hover:text-foreground-900"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100 hover:text-foreground-900"
                         aria-label="Schließen"
                       >
-                        <svg
-                          className="h-5 w-5 sm:h-6 sm:w-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1163,7 +1157,7 @@ export default function DiaryPage() {
                                 }`}>
                                   {seizure.emergencyMed === "yes" || seizure.emergencyMed === "ja" ? "Ja" : "Nein"}
                                 </span>
-                                {seizure.emergencyMedName && (
+                                {(seizure.emergencyMed === "yes" || seizure.emergencyMed === "ja") && seizure.emergencyMedName && (
                                   <span className="text-body text-foreground-600 ml-[var(--spacing-2xs)]">
                                     ({seizure.emergencyMedName})
                                   </span>
@@ -1171,20 +1165,26 @@ export default function DiaryPage() {
                               </div>
                             </div>
                             
-                            <div className="flex items-center gap-[var(--spacing-2xs)] ml-[var(--spacing-s)]">
+                            <div className="flex flex-col gap-[var(--spacing-2xs)] ml-[var(--spacing-s)] self-start">
                               <button
                                 onClick={() => handleEditSeizure(viewingDate, index)}
-                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
+                                className="flex items-center justify-center h-9 w-9 text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
                                 aria-label="Bearbeiten"
+                                title="Bearbeiten"
                               >
-                                Bearbeiten
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
                               </button>
                               <button
                                 onClick={() => handleDeleteSeizure(seizure.id, viewingDate)}
-                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-secondary-600 hover:text-secondary-700 border border-secondary-300 hover:border-secondary-400 rounded-lg transition"
+                                className="flex items-center justify-center h-9 w-9 text-secondary-600 hover:text-secondary-700 border border-secondary-300 hover:border-secondary-400 rounded-lg transition"
                                 aria-label="Löschen"
+                                title="Löschen"
                               >
-                                Löschen
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -1202,37 +1202,34 @@ export default function DiaryPage() {
                     <h3 className="text-body font-semibold text-foreground-900">
                       Anfallsserie - {format(viewingDate, "dd.MM.yyyy", { locale: de })}
                     </h3>
-                    <div className="flex items-center gap-[var(--spacing-s)]">
+                    <div className="flex items-center gap-[var(--spacing-2xs)]">
                       <button
                         onClick={() => handleAddNewSeizure(viewingDate)}
-                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        className="flex h-9 w-9 items-center justify-center text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition"
+                        aria-label="Neuer Anfall"
+                        title="Neuer Anfall"
                       >
-                        + Neuer Anfall
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
                       </button>
                       <button
                         onClick={() => handleDeleteDay(viewingDate)}
-                        className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium border border-secondary-500 bg-white text-secondary-700 hover:border-secondary-600 hover:bg-secondary-50 rounded-lg transition"
+                        className="flex h-9 w-9 items-center justify-center border border-secondary-500 bg-white text-secondary-700 hover:border-secondary-600 hover:bg-secondary-50 rounded-lg transition"
                         aria-label="Tag löschen"
+                        title="Tag löschen"
                       >
-                        Tag löschen
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                       <button
                         onClick={() => setViewingDate(null)}
-                        className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100 hover:text-foreground-900"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100 hover:text-foreground-900"
                         aria-label="Schließen"
                       >
-                        <svg
-                          className="h-5 w-5 sm:h-6 sm:w-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1289,11 +1286,9 @@ export default function DiaryPage() {
                               </div>
                             </div>
                             
-                            <div className="flex items-center gap-[var(--spacing-2xs)] ml-[var(--spacing-s)]">
+                            <div className="flex flex-col items-center gap-[var(--spacing-2xs)] ml-auto pl-[var(--spacing-s)] self-start flex-shrink-0">
                               <button
                                 onClick={() => {
-                                  // Öffne Modal zum Bearbeiten des Zeitblocks
-                                  // Bearbeite den ersten Anfall des Blocks als Startpunkt
                                   if (block.seizures.length > 0 && viewingDate) {
                                     const firstSeizureIndex = seizures.findIndex(s => s.id === block.seizures[0].id);
                                     if (firstSeizureIndex !== -1) {
@@ -1301,14 +1296,17 @@ export default function DiaryPage() {
                                     }
                                   }
                                 }}
-                                className="px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
+                                className="flex items-center justify-center h-9 w-9 text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 rounded-lg transition"
                                 aria-label="Zeitblock bearbeiten"
+                                title="Bearbeiten"
                               >
-                                Bearbeiten
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
                               </button>
                               {block.seizures.length > 1 && (
-                                <span className="text-body text-foreground-500">
-                                  ({block.seizures.length} Einträge)
+                                <span className="text-body-small text-foreground-500 whitespace-nowrap">
+                                  {block.seizures.length} Einträge
                                 </span>
                               )}
                             </div>
@@ -1412,7 +1410,7 @@ export default function DiaryPage() {
                         ? formData.type.join(", ")
                         : "Bitte auswählen"
                     }
-                    className={`w-full cursor-pointer rounded-lg border px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:outline-none transition ${
+                    className={`w-full cursor-pointer rounded-lg border px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:outline-none transition ${
                       typeError 
                         ? "border-warning-500 focus:border-warning-500 focus:ring-2 focus:ring-warning-200" 
                         : "border-background-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
@@ -1449,57 +1447,6 @@ export default function DiaryPage() {
                 {typeError && (
                   <p className="text-body text-warning-600">{typeError}</p>
                 )}
-              </div>
-
-              {/* Eigener Anfallstyp – zweites Feld, immer sichtbar */}
-              <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body font-medium text-foreground-800">
-                  Eigener Anfallstyp
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formData.customType}
-                    onChange={(e) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        customType: e.target.value,
-                      }));
-                      setTypeError("");
-                    }}
-                    placeholder="Frei eingeben (optional)"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                    aria-label="Eigenen Anfallstyp eingeben"
-                  />
-                  {formData.customType ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData((prev) => ({ ...prev, customType: "" }));
-                        setTypeError("");
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                      aria-label="Eingabe löschen"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  ) : null}
-                </div>
-                <p className="text-body text-foreground-500">
-                  {t("Nutze dieses Feld, wenn dein Anfallstyp nicht in der Liste steht.")}
-                </p>
               </div>
 
               {/* Mehr als ein Anfall? */}
@@ -1601,7 +1548,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Min"
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationMinutes && (
                             <button
@@ -1643,7 +1590,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Sek"
-                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationSeconds && (
                             <button
@@ -1706,54 +1653,63 @@ export default function DiaryPage() {
                           <span className="text-body text-foreground-500 shrink-0">Uhr</span>
                         </div>
                       </div>
-                      <p className="text-body text-foreground-500 pt-[var(--spacing-2xs)]">
-                        Die eingegebenen Anfälle werden gleichmäßig zwischen den beiden Uhrzeiten verteilt.
-                      </p>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
                       <label className="text-body font-medium text-foreground-800">
                         Anzahl der Anfälle
                       </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="1"
-                          step="1"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          value={formData.seizureCount}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              seizureCount: e.target.value,
-                            }))
-                          }
-                          className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          placeholder="Anzahl"
-                        />
-                        {formData.seizureCount && formData.seizureCount !== "1" && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setFormData((prev) => ({ ...prev, seizureCount: "1" }))
+                      <div className="flex items-center gap-[var(--spacing-xs)]">
+                        <div className="relative flex-1">
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={formData.seizureCount}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                seizureCount: e.target.value,
+                              }))
                             }
-                            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                            aria-label="Löschen"
-                          >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                            className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            placeholder="Anzahl"
+                          />
+                          {formData.seizureCount && formData.seizureCount !== "1" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData((prev) => ({ ...prev, seizureCount: "1" }))
+                              }
+                              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
+                              aria-label="Zurücksetzen"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                        {formData.seizureCount && parseInt(formData.seizureCount) >= 1 && (
+                          <span
+                            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 border border-primary-300 text-primary-600"
+                            title="Anzahl bestätigt"
+                          >
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                          </button>
+                          </span>
                         )}
                       </div>
                     </div>
@@ -1817,7 +1773,7 @@ export default function DiaryPage() {
                         ? formData.afterEffects.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0 && (
@@ -1864,7 +1820,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Weitere Auffälligkeiten eintragen"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                   {formData.customAfterEffects && (
                     <button
@@ -1908,7 +1864,7 @@ export default function DiaryPage() {
                         ? formData.triggers.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.triggers) && formData.triggers.length > 0 && (
@@ -1955,7 +1911,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Andere Auslöser eintragen"
-                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   />
                   {formData.customTriggers && (
                     <button
@@ -2035,7 +1991,7 @@ export default function DiaryPage() {
                         }))
                       }
                       placeholder="Name des Notfallmedikaments"
-                      className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-2xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                      className="w-full rounded-lg border border-background-200 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                     />
                     {formData.emergencyMedName && (
                       <button
