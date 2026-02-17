@@ -108,14 +108,19 @@ class DatabaseSeeder extends Seeder
                 $seizureDates[] = $day;
                 // Mehrheit einzelne Anfälle (75%), ab und zu Serien (25%)
                 $seizureCountThisDay = rand(1, 10) <= 8 ? 1 : rand(2, 3);
-                \App\Models\Seizure::factory()->create([
+                $types = ['focal', 'absence'];
+                $afterEffects = ['confusion', 'tiredness', 'headache', 'muscle_ache'];
+                $triggers = ['stress', 'lack_of_sleep', 'alcohol', 'flashing_lights'];
+                \App\Models\Seizure::create([
                     'user_id' => $user->id,
                     'date' => $date->format('Y-m-d'),
                     'seizure_count' => $seizureCountThisDay,
                     'duration_minutes' => rand(1, 8),
                     'duration_seconds' => rand(0, 59),
                     'emergency_med' => rand(0, 4) === 0,
-                    'type' => [['focal', 'absence'][rand(0, 1)]],
+                    'type' => [$types[rand(0, 1)]],
+                    'after_effects' => array_slice($afterEffects, 0, rand(0, 2)) ?: null,
+                    'triggers' => array_slice($triggers, 0, rand(0, 2)) ?: null,
                 ]);
             }
 
