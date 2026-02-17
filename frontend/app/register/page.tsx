@@ -109,7 +109,7 @@ export default function RegisterPage() {
             autoComplete="new-password"
             {...register("password")}
             error={errors.password?.message}
-            helperText="Mindestens 8 Zeichen, 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl"
+            helperText="Mindestens 8 Zeichen, 1 Grossbuchstabe, 1 Kleinbuchstabe, 1 Zahl"
           />
 
           {apiError && (
