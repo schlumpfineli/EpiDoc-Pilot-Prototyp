@@ -249,10 +249,10 @@ export default function MedikamentePage() {
               <button
                 type="button"
                 onClick={() => setTab("active")}
-                className={`flex-1 rounded-lg py-[var(--spacing-2xs)] text-body-small font-medium transition ${
+                className={`flex-1 rounded-xl py-[var(--spacing-2xs)] text-body-small font-medium transition ${
                   tab === "active"
-                    ? "bg-primary-600 text-white"
-                    : "text-foreground-500 hover:text-foreground-700"
+                    ? "bg-primary-500 text-white"
+                    : "text-foreground-400 hover:text-foreground-700"
                 }`}
               >
                 Aktuell
@@ -260,10 +260,10 @@ export default function MedikamentePage() {
               <button
                 type="button"
                 onClick={() => setTab("inactive")}
-                className={`flex-1 rounded-lg py-[var(--spacing-2xs)] text-body-small font-medium transition ${
+                className={`flex-1 rounded-xl py-[var(--spacing-2xs)] text-body-small font-medium transition ${
                   tab === "inactive"
-                    ? "bg-primary-600 text-white"
-                    : "text-foreground-500 hover:text-foreground-700"
+                    ? "bg-primary-500 text-white"
+                    : "text-foreground-400 hover:text-foreground-700"
                 }`}
               >
                 Abgesetzt
@@ -274,90 +274,86 @@ export default function MedikamentePage() {
           {/* ===== TAB: Aktuelle Medikamente ===== */}
           {tab === "active" && (
             <>
-              <div className="rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)]">
-                <div className="flex items-center justify-between mb-[var(--spacing-m)]">
-                  <h2 className="text-h5 font-medium text-foreground-900">
-                    Aktuelle Medikamente
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={openAddForm}
-                    className="rounded-lg bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body-small font-medium text-white transition hover:bg-primary-700"
-                  >
-                    + Hinzufügen
-                  </button>
-                </div>
+              <div className="flex items-center justify-between mb-[var(--spacing-m)]">
+                <h2 className="section-label">Aktuelle Medikamente</h2>
+                <button
+                  type="button"
+                  onClick={openAddForm}
+                  className="flex items-center gap-[3px] text-[13px] text-primary-400 hover:text-primary-600 transition"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Hinzufügen
+                </button>
+              </div>
 
-                {activeMeds.length === 0 ? (
-                  <p className="text-body-small text-foreground-600 py-[var(--spacing-m)] text-center">
+              {activeMeds.length === 0 ? (
+                <div className="rounded-2xl bg-white py-[var(--spacing-l)] text-center">
+                  <p className="text-body-small text-foreground-400">
                     Noch keine Medikamente erfasst.
                   </p>
-                ) : (
-                  <div className="space-y-[var(--spacing-s)]">
-                    {activeMeds.map((med) => (
-                      <div
-                        key={med.id}
-                        className="rounded-lg border border-background-200/60 p-[var(--spacing-m)] transition hover:border-primary-200"
-                      >
-                        <div className="flex items-start justify-between gap-[var(--spacing-s)]">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-body font-semibold text-foreground-900">
-                              {med.name}
-                            </h3>
-                            <div className="mt-[var(--spacing-2xs)] space-y-[var(--spacing-3xs)]">
-                              {med.dose && (
-                                <p className="text-body-small text-foreground-600">
-                                  <span className="font-medium">Dosierung:</span>{" "}
-                                  {med.dose}
-                                </p>
-                              )}
-                              <p className="text-body-small text-foreground-600">
-                                <span className="font-medium">Einnahmezeit:</span>{" "}
-                                {formatTimeOfDay(med.time_of_day)}
-                              </p>
-                              {med.prescribed_since && (
-                                <p className="text-body-small text-foreground-600">
-                                  <span className="font-medium">Seit:</span>{" "}
-                                  {new Date(med.prescribed_since).toLocaleDateString("de-CH")}
-                                </p>
-                              )}
-                              {med.notes && (
-                                <p className="text-body-small text-foreground-500 italic">
-                                  {med.notes}
-                                </p>
-                              )}
-                            </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-white divide-y divide-background-200/40">
+                  {activeMeds.map((med) => (
+                    <div
+                      key={med.id}
+                      className="px-[var(--spacing-m)] py-[var(--spacing-s)] first:rounded-t-2xl last:rounded-b-2xl transition hover:bg-background-50/50"
+                    >
+                      <div className="flex items-start justify-between gap-[var(--spacing-s)]">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-body font-medium text-foreground-900">
+                            {med.name}
+                            {med.dose && (
+                              <span className="font-normal text-foreground-500 ml-[var(--spacing-2xs)]">{med.dose}</span>
+                            )}
+                          </h3>
+                          <div className="mt-[var(--spacing-3xs)] flex flex-wrap items-center gap-x-[var(--spacing-s)] gap-y-[var(--spacing-3xs)]">
+                            <span className="text-body-small text-foreground-500">
+                              {formatTimeOfDay(med.time_of_day)}
+                            </span>
+                            {med.prescribed_since && (
+                              <span className="text-body-small text-foreground-400">
+                                seit {new Date(med.prescribed_since).toLocaleDateString("de-CH")}
+                              </span>
+                            )}
                           </div>
-                          <div className="flex gap-[var(--spacing-2xs)] shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => openEditForm(med)}
-                              className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-primary-600"
-                              aria-label="Bearbeiten"
-                              title="Bearbeiten"
-                            >
-                              <svg className="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setShowDiscontinueModal(med.id)}
-                              className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-warning-500"
-                              aria-label="Absetzen"
-                              title="Absetzen"
-                            >
-                              <svg className="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
+                          {med.notes && (
+                            <p className="text-body-small text-foreground-400 mt-[var(--spacing-3xs)]">
+                              {med.notes}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-[var(--spacing-2xs)] shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => openEditForm(med)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-primary-600 hover:bg-primary-50"
+                            aria-label="Bearbeiten"
+                            title="Bearbeiten"
+                          >
+                            <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowDiscontinueModal(med.id)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-warning-600 hover:bg-warning-50"
+                            aria-label="Absetzen"
+                            title="Absetzen"
+                          >
+                            <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
@@ -365,95 +361,68 @@ export default function MedikamentePage() {
           {tab === "inactive" && (
             <>
               {inactiveMeds.length === 0 ? (
-                <div className="rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)] text-center">
-                  <p className="text-body text-foreground-600 py-[var(--spacing-m)]">
-                    Noch keine abgesetzten Medikamente vorhanden.
-                  </p>
-                  <p className="text-body-small text-foreground-500">
-                    Wenn Sie ein Medikament absetzen, wird es hier mit dem Einnahmezeitraum angezeigt.
+                <div className="rounded-2xl bg-white py-[var(--spacing-l)] text-center">
+                  <p className="text-body-small text-foreground-400">
+                    Noch keine abgesetzten Medikamente.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-[var(--spacing-s)]">
+                <div className="rounded-2xl bg-white divide-y divide-background-200/40">
                   {inactiveMeds.map((med) => (
                     <div
                       key={med.id}
-                      className="rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)]"
+                      className="px-[var(--spacing-m)] py-[var(--spacing-s)] first:rounded-t-2xl last:rounded-b-2xl"
                     >
                       <div className="flex items-start justify-between gap-[var(--spacing-s)]">
                         <div className="flex-1 min-w-0">
-                          {/* Name und Dosierung */}
-                          <h3 className="text-body font-semibold text-foreground-800">
+                          <h3 className="text-body font-medium text-foreground-700">
                             {med.name}
                             {med.dose && (
-                              <span className="font-normal text-foreground-600">
-                                {" "}– {med.dose}
-                              </span>
+                              <span className="font-normal text-foreground-400 ml-[var(--spacing-2xs)]">{med.dose}</span>
                             )}
                           </h3>
 
-                          {/* Zeitraum */}
-                          <div className="mt-[var(--spacing-2xs)]">
-                            {formatDateRange(med) ? (
-                              <div className="flex items-center gap-[var(--spacing-2xs)]">
-                                <svg className="h-4 w-4 text-foreground-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span className="text-body-small font-medium text-foreground-700">
-                                  {formatDateRange(med)}
-                                </span>
-                              </div>
-                            ) : (
-                              <p className="text-body-small text-foreground-400 italic">
-                                Kein Zeitraum erfasst
-                              </p>
+                          <div className="mt-[var(--spacing-3xs)] flex flex-wrap items-center gap-x-[var(--spacing-s)] gap-y-[var(--spacing-3xs)]">
+                            {formatDateRange(med) && (
+                              <span className="text-body-small text-foreground-500">{formatDateRange(med)}</span>
+                            )}
+                            {med.time_of_day && med.time_of_day.length > 0 && (
+                              <span className="text-body-small text-foreground-400">{formatTimeOfDay(med.time_of_day)}</span>
                             )}
                           </div>
 
-                          {/* Details */}
-                          <div className="mt-[var(--spacing-2xs)] space-y-[var(--spacing-3xs)]">
-                            {med.time_of_day && med.time_of_day.length > 0 && (
-                              <p className="text-body-small text-foreground-500">
-                                Einnahmezeit: {formatTimeOfDay(med.time_of_day)}
-                              </p>
-                            )}
-                            {med.discontinuation_reason && (
-                              <p className="text-body-small text-foreground-500">
-                                <span className="font-medium">Absetzungsgrund:</span>{" "}
-                                {med.discontinuation_reason}
-                              </p>
-                            )}
-                            {med.notes && (
-                              <p className="text-body-small text-foreground-500 italic">
-                                {med.notes}
-                              </p>
-                            )}
-                          </div>
+                          {med.discontinuation_reason && (
+                            <p className="text-body-small text-foreground-400 mt-[var(--spacing-3xs)]">
+                              Grund: {med.discontinuation_reason}
+                            </p>
+                          )}
+                          {med.notes && (
+                            <p className="text-body-small text-foreground-400 mt-[var(--spacing-3xs)]">{med.notes}</p>
+                          )}
                         </div>
 
-                        {/* Aktionen */}
-                        <div className="flex gap-[var(--spacing-2xs)] shrink-0">
+                        <div className="flex items-center gap-[var(--spacing-2xs)] shrink-0">
                           <button
                             type="button"
                             onClick={() => handleReactivate(med.id)}
                             disabled={isSaving}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-accent-700 disabled:opacity-50"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-primary-600 hover:bg-primary-50 disabled:opacity-50"
                             aria-label="Reaktivieren"
                             title="Reaktivieren"
                           >
-                            <svg className="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                           </button>
                           <button
                             type="button"
                             onClick={() => setShowDeleteConfirm(med.id)}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-500 transition hover:bg-background-100 hover:text-warning-500"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-warning-600 hover:bg-warning-50"
                             aria-label="Löschen"
                             title="Löschen"
                           >
-                            <svg className="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
                         </div>
@@ -469,54 +438,54 @@ export default function MedikamentePage() {
         {/* Formular-Modal */}
         {showForm && (
           <div className="modal-overlay">
-            <div className="modal-container max-w-md p-[var(--spacing-m)] overflow-y-auto">
-              <div className="flex items-center justify-between mb-[var(--spacing-m)]">
+            <div className="modal-container max-w-md px-[var(--spacing-l)] py-[var(--spacing-m)] overflow-y-auto">
+              <div className="flex items-center justify-between mb-[var(--spacing-l)]">
                 <h2 className="text-body font-medium text-foreground-900">
                   {editingId ? "Medikament bearbeiten" : "Neues Medikament"}
                 </h2>
                 <button
                   onClick={closeForm}
-                  className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700"
                   aria-label="Schließen"
                 >
-                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
               <div className="space-y-[var(--spacing-m)]">
-                {/* Name */}
-                <div>
-                  <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                    Medikamentenname <span className="text-warning-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="z.B. Levetiracetam"
-                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                  />
-                </div>
-
-                {/* Dosierung */}
-                <div>
-                  <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
-                    Dosierung
-                  </label>
-                  <input
-                    type="text"
-                    value={form.dose}
-                    onChange={(e) => setForm({ ...form, dose: e.target.value })}
-                    placeholder="z.B. 500mg"
-                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                  />
+                {/* Name + Dosierung */}
+                <div className="flex gap-[var(--spacing-s)]">
+                  <div className="flex-[2]">
+                    <label className="block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]">
+                      Medikament <span className="text-foreground-300 font-normal ml-1">Pflicht</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="z.B. Levetiracetam"
+                      className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]">
+                      Dosierung
+                    </label>
+                    <input
+                      type="text"
+                      value={form.dose}
+                      onChange={(e) => setForm({ ...form, dose: e.target.value })}
+                      placeholder="500mg"
+                      className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100"
+                    />
+                  </div>
                 </div>
 
                 {/* Einnahmezeit */}
                 <div>
-                  <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
+                  <label className="block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]">
                     Einnahmezeit
                   </label>
                   <div className="flex flex-wrap gap-[var(--spacing-2xs)]">
@@ -527,8 +496,8 @@ export default function MedikamentePage() {
                         onClick={() => toggleTimeOfDay(opt.value)}
                         className={`rounded-full px-[var(--spacing-xs)] py-[var(--spacing-3xs)] text-body-small font-medium transition ${
                           form.time_of_day.includes(opt.value)
-                            ? "bg-primary-600 text-white"
-                            : "bg-primary-50/50 text-foreground-700 hover:bg-primary-50"
+                            ? "bg-[#B7E4C7] text-foreground-800"
+                            : "bg-[#F2F7F4] text-foreground-500 hover:bg-[#E8F0EC]"
                         }`}
                       >
                         {opt.label}
@@ -539,7 +508,7 @@ export default function MedikamentePage() {
 
                 {/* Verschrieben seit */}
                 <div>
-                  <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
+                  <label className="block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]">
                     Verschrieben seit
                   </label>
                   <input
@@ -548,13 +517,13 @@ export default function MedikamentePage() {
                     onChange={(e) =>
                       setForm({ ...form, prescribed_since: e.target.value })
                     }
-                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100"
                   />
                 </div>
 
                 {/* Bemerkungen */}
                 <div>
-                  <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
+                  <label className="block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]">
                     Bemerkungen
                   </label>
                   <textarea
@@ -562,7 +531,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={3}
                     placeholder="Optionale Notizen..."
-                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
+                    className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100 resize-none"
                   />
                 </div>
 
@@ -571,7 +540,7 @@ export default function MedikamentePage() {
                   <button
                     type="button"
                     onClick={closeForm}
-                    className="flex-1 rounded-lg border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 transition hover:bg-background-50"
+                    className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-600 transition hover:bg-background-50"
                   >
                     Abbrechen
                   </button>
@@ -579,7 +548,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex-1 rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white transition hover:bg-primary-700 disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-primary-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-white transition hover:bg-primary-600 disabled:opacity-50"
                   >
                     {isSaving
                       ? "Speichert..."
@@ -606,11 +575,11 @@ export default function MedikamentePage() {
                     setShowDiscontinueModal(null);
                     setDiscontinuationReason("");
                   }}
-                  className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700"
                   aria-label="Schließen"
                 >
-                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
@@ -619,7 +588,7 @@ export default function MedikamentePage() {
                   Möchten Sie dieses Medikament als abgesetzt markieren?
                 </p>
                 <div>
-                  <label className="block text-body-small font-medium text-foreground-800 mb-[var(--spacing-2xs)]">
+                  <label className="block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]">
                     Grund für die Absetzung (optional)
                   </label>
                   <textarea
@@ -627,7 +596,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setDiscontinuationReason(e.target.value)}
                     rows={3}
                     placeholder="z.B. Nebenwirkungen, Umstellung..."
-                    className="w-full rounded-lg border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
+                    className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100 resize-none"
                   />
                 </div>
                 <div className="flex gap-[var(--spacing-m)] pt-[var(--spacing-s)]">
@@ -637,7 +606,7 @@ export default function MedikamentePage() {
                       setShowDiscontinueModal(null);
                       setDiscontinuationReason("");
                     }}
-                    className="flex-1 rounded-lg border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 transition hover:bg-background-50"
+                    className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-600 transition hover:bg-background-50"
                   >
                     Abbrechen
                   </button>
@@ -645,7 +614,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={() => handleDiscontinue(showDiscontinueModal)}
                     disabled={isSaving}
-                    className="flex-1 rounded-lg bg-info-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white transition hover:bg-info-700 disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-info-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-white transition hover:bg-info-600 disabled:opacity-50"
                   >
                     {isSaving ? "Speichert..." : "Absetzen"}
                   </button>
@@ -665,11 +634,11 @@ export default function MedikamentePage() {
                 </h2>
                 <button
                   onClick={() => setShowDeleteConfirm(null)}
-                  className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700"
                   aria-label="Schließen"
                 >
-                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
@@ -681,7 +650,7 @@ export default function MedikamentePage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(null)}
-                    className="flex-1 rounded-lg border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-foreground-700 transition hover:bg-background-50"
+                    className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-600 transition hover:bg-background-50"
                   >
                     Abbrechen
                   </button>
@@ -689,7 +658,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={() => handleDelete(showDeleteConfirm)}
                     disabled={isSaving}
-                    className="flex-1 rounded-lg bg-warning-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-semibold text-white transition hover:bg-warning-600 disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-warning-500 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-white transition hover:bg-warning-600 disabled:opacity-50"
                   >
                     {isSaving ? "Löscht..." : "Endgültig löschen"}
                   </button>
