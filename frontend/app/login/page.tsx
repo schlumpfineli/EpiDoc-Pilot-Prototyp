@@ -63,9 +63,9 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background-50 to-white px-[var(--spacing-m)] sm:px-[var(--spacing-l)] md:px-[var(--spacing-xl)] py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)] text-foreground-900">
-      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto space-y-[var(--spacing-l)] sm:space-y-[var(--spacing-xl)] md:space-y-[var(--spacing-2xl)]">
-        <div className="space-y-[var(--spacing-m)] text-center">
+    <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+      <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
+        <div className="space-y-[var(--spacing-2xs)] sm:space-y-[var(--spacing-2xs)]">
           <div className="flex items-center justify-center gap-[var(--spacing-xs)] mb-[var(--spacing-xs)]">
             <EpiDocLogo size={100} />
             <p className="text-headline-4 font-bold text-primary-600">EpiDoc</p>
@@ -73,7 +73,7 @@ function LoginForm() {
           <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
             Anmelden
           </h1>
-          <p className="text-body text-foreground-600 max-w-prose mx-auto">
+          <p className="text-body text-foreground-600 text-center">
             Melde dich mit deiner E-Mail und deinem Passwort an.
           </p>
         </div>
@@ -139,10 +139,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background-50 to-white px-[var(--spacing-m)]">
-        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto text-center">
-          <p className="text-body text-foreground-600">Lädt...</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-body text-foreground-600">Lädt...</div>
       </div>
     }>
       <LoginForm />
