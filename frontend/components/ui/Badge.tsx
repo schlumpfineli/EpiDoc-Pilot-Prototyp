@@ -17,7 +17,7 @@ export const Badge: React.FC<BadgeProps> = ({
   size = 'md',
   className = '',
 }) => {
-  const variantClasses = {
+  const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
     primary: 'bg-primary-50 text-primary-700',
     secondary: 'bg-secondary-100 text-secondary-700',
     accent: 'bg-accent-100 text-accent-800',
@@ -26,7 +26,7 @@ export const Badge: React.FC<BadgeProps> = ({
     error: 'bg-warning-100 text-warning-700',
   };
 
-  const sizeClasses = {
+  const sizeClasses: Record<NonNullable<BadgeProps['size']>, string> = {
     sm: 'px-[var(--spacing-2xs)] py-[var(--spacing-3xs)] text-body-small',
     md: 'px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small',
   };

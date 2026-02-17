@@ -54,7 +54,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/30 backdrop-blur-[2px] p-4"
+      className="modal-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -65,12 +65,12 @@ export const Modal: React.FC<ModalProps> = ({
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       <div
-        className={`w-full max-h-[90vh] rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col ${sizeClasses[size]}`}
+        className={`modal-container ${sizeClasses[size]}`}
       >
         {(title || showCloseButton) && (
           <div className="flex items-center justify-between border-b border-background-200/60 bg-white px-5 py-4 rounded-t-2xl shrink-0">
             {title && (
-              <h2 id="modal-title" className="text-body font-semibold text-foreground-900">
+              <h2 id="modal-title" className="text-body font-medium text-foreground-900">
                 {title}
               </h2>
             )}

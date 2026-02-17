@@ -1320,7 +1320,7 @@ export default function DiaryPage() {
 
         {/* Monthly Summary */}
         <div className="mt-[var(--spacing-s)] rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-m)]">
-          <h3 className="text-body-small font-medium text-foreground-400 uppercase tracking-wide mb-[var(--spacing-m)]">
+          <h3 className="section-label mb-[var(--spacing-m)]">
             {format(currentDate, "MMMM yyyy", { locale: de })} — Zusammenfassung
           </h3>
           <div className="text-body text-foreground-700">
@@ -1358,8 +1358,8 @@ export default function DiaryPage() {
 
       {/* Modal */}
       {isModalOpen && selectedDate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-          <div className="w-full h-auto max-h-[90vh] rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col">
+        <div className="modal-overlay">
+          <div className="modal-container overflow-hidden">
             <div className="overflow-y-auto flex-1">
             <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-m)]">
               <h2 className="text-body font-medium text-foreground-900 flex-1 min-w-0">

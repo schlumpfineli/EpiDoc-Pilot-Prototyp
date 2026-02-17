@@ -468,8 +468,8 @@ export default function MedikamentePage() {
 
         {/* Formular-Modal */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-[var(--spacing-m)] max-h-[90vh] overflow-y-auto">
+          <div className="modal-overlay">
+            <div className="modal-container max-w-md p-[var(--spacing-m)] overflow-y-auto">
               <div className="flex items-center justify-between mb-[var(--spacing-m)]">
                 <h2 className="text-body font-medium text-foreground-900">
                   {editingId ? "Medikament bearbeiten" : "Neues Medikament"}
@@ -595,8 +595,8 @@ export default function MedikamentePage() {
 
         {/* Absetzen-Modal */}
         {showDiscontinueModal !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-[var(--spacing-m)]">
+          <div className="modal-overlay">
+            <div className="modal-container max-w-md p-[var(--spacing-m)]">
               <div className="flex items-center justify-between mb-[var(--spacing-m)]">
                 <h2 className="text-body font-medium text-foreground-900">
                   Medikament absetzen
@@ -657,8 +657,8 @@ export default function MedikamentePage() {
 
         {/* Löschen-Bestätigung */}
         {showDeleteConfirm !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-[var(--spacing-m)]">
+          <div className="modal-overlay">
+            <div className="modal-container max-w-md p-[var(--spacing-m)]">
               <div className="flex items-center justify-between mb-[var(--spacing-m)]">
                 <h2 className="text-body font-medium text-foreground-900">
                   Medikament löschen

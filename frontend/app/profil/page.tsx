@@ -47,7 +47,7 @@ const CSS = {
   btnClose:
     "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
   entryCard:
-    "rounded-xl border border-background-200/60 bg-white p-[var(--spacing-s)] space-y-[var(--spacing-s)]",
+    "rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-s)] space-y-[var(--spacing-s)]",
 } as const;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ function EntryCard({ name, details }: { name: string; details: { icon: ReactNode
 /** Inline-Modal im Diary-Stil (Overlay + Container + Header + Scroll-Body). */
 function InlineModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
+    <div className="modal-overlay">
       <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
           <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">

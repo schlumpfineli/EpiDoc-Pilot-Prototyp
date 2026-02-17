@@ -638,3 +638,19 @@ div.react-datepicker__year-option {
 .gradient-hero-subtle {
     background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%);
 }
+
+/* ── Wiederverwendbare Utility-Klassen ────────────────────────────────────── */
+
+.section-label {
+    @apply text-body-small font-medium text-foreground-400 uppercase tracking-wide;
+}
+
+.modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px];
+    padding: var(--spacing-s);
+}
+
+.modal-container {
+    @apply w-full max-h-[90vh] rounded-2xl bg-white flex flex-col;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}

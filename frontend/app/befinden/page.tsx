@@ -959,7 +959,7 @@ export default function BefindenPage() {
           {/* Favoriten (häufig verwendete Items) – Bewertung öffnet direkt darunter */}
           {favoriteItems.length > 0 && (
             <div className="mb-6">
-              <h2 className="mb-4 mt-2 text-body-small font-medium text-foreground-400 uppercase tracking-wide">
+              <h2 className="mb-4 mt-2 section-label">
                 {t("Deine häufigsten Beschwerden")}
               </h2>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1081,7 +1081,7 @@ export default function BefindenPage() {
           {/* Häufige Beschwerden */}
           <div className="mb-6">
               <div className="mb-4 mt-2">
-                <h2 className="text-body-small font-medium text-foreground-400 uppercase tracking-wide">
+                <h2 className="section-label">
                   Häufige Beschwerden
                 </h2>
               </div>

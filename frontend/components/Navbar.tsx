@@ -21,6 +21,20 @@ export function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
+  const navLinkBase = 'rounded-lg font-medium transition-all duration-200 whitespace-nowrap';
+  const navLinkActive = 'bg-primary-50 text-primary-700';
+
+  const navLinkClasses = (href: string, mobile = false): string => {
+    if (mobile) {
+      return `block px-m py-s ${navLinkBase} text-body ${
+        isActive(href) ? navLinkActive : 'text-foreground-500 hover:text-foreground-800 hover:bg-background-50'
+      }`;
+    }
+    return `px-s py-2xs ${navLinkBase} text-body-small ${
+      isActive(href) ? navLinkActive : 'text-foreground-400 hover:text-foreground-800 hover:bg-background-50'
+    }`;
+  };
+
   // Navigation-Links nur für eingeloggte Benutzer
   const navLinks = user ? [
     { href: '/befinden', label: t('Wie geht es dir?') },
@@ -53,15 +67,7 @@ export function Navbar() {
           {user && navLinks.length > 0 && (
             <div className="hidden xl:flex items-center gap-0.5">
               {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-s py-2xs rounded-lg text-body-small font-medium transition-all duration-200 whitespace-nowrap ${
-                    isActive(link.href)
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-foreground-400 hover:text-foreground-800 hover:bg-background-50'
-                  }`}
-                >
+                <Link key={link.href} href={link.href} className={navLinkClasses(link.href)}>
                   {link.label}
                 </Link>
               ))}
@@ -140,16 +146,7 @@ export function Navbar() {
           <div className="border-t border-background-200/60 py-s xl:hidden">
             <div className="space-y-2xs">
               {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-m py-s rounded-lg text-body font-medium transition-all duration-200 ${
-                    isActive(link.href)
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-foreground-500 hover:text-foreground-800 hover:bg-background-50'
-                  }`}
-                >
+                <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={navLinkClasses(link.href, true)}>
                   {link.label}
                 </Link>
               ))}

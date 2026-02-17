@@ -12,13 +12,13 @@ import { de } from "date-fns/locale";
 
 // ─── Shared CSS Classes ──────────────────────────────────────────────────────
 
+const inputBase =
+  "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200";
+
 const CSS = {
-  input:
-    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition",
-  select:
-    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200",
-  textarea:
-    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none",
+  input: `${inputBase} transition`,
+  select: inputBase,
+  textarea: `${inputBase} resize-none`,
   btnCancel:
     "flex-1 rounded-xl border-2 border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50",
   btnPrimary:
@@ -173,8 +173,8 @@ function Toggle({ label, description, checked, onChange }: {
 
 function InlineModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-      <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+    <div className="modal-overlay">
+      <div className="modal-container border border-primary-500 ring-2 ring-primary-200 overflow-hidden">
         <div className="overflow-y-auto flex-1">
           <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
             <h2 className="text-body font-medium text-foreground-900">{title}</h2>
@@ -1005,8 +1005,8 @@ export default function EinstellungenPage() {
 
       {/* ── Bestätigungs-Dialog vor Kontolöschung (Stufe 1) ── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-xl border border-warning-300 ring-2 ring-warning-100 overflow-hidden">
+        <div className="modal-overlay">
+          <div className="modal-container max-w-md border border-warning-300 ring-2 ring-warning-100 overflow-hidden">
             <div className="p-[var(--spacing-m)] space-y-[var(--spacing-m)]">
               <div className="flex items-center gap-[var(--spacing-s)]">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-100">
