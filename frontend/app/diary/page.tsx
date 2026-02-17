@@ -16,6 +16,7 @@ import { de } from "date-fns/locale";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { seizureApi } from "@/lib/api";
 import { toastService } from "@/components/ui";
+import { useRoleText } from "@/lib/hooks/useRoleText";
 
 type DiaryEntry = {
   hasSeizure: boolean;
@@ -218,6 +219,7 @@ function ScrollTimeSelect({
 }
 
 export default function DiaryPage() {
+  const { t } = useRoleText();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [entries, setEntries] = useState<Record<string, DiaryEntry>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -772,7 +774,7 @@ export default function DiaryPage() {
     const hasCustomType = formData.customType.trim() !== "";
 
     if (!hasTypeSelected && !hasCustomType) {
-      setTypeError("Bitte wähle einen Anfallstyp aus der Liste oder gib einen eigenen Typ ein.");
+      setTypeError(t("Bitte wähle einen Anfallstyp aus der Liste oder gib einen eigenen Typ ein."));
       setTimeout(() => {
         typeFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
         const firstInput = typeFieldRef.current?.querySelector("input");
@@ -1064,7 +1066,7 @@ export default function DiaryPage() {
         </div>
 
         <p className="text-body text-foreground-600 text-center px-[var(--spacing-m)] mt-[var(--spacing-s)]">
-          Wähle einen Tag aus dem Kalender aus, um Anfälle einzutragen oder bereits erfasste Anfälle anzuzeigen.
+          {t("Wähle einen Tag aus dem Kalender aus, um Anfälle einzutragen oder bereits erfasste Anfälle anzuzeigen.")}
         </p>
 
         {/* Anfall-Details Cards */}
@@ -1496,7 +1498,7 @@ export default function DiaryPage() {
                   ) : null}
                 </div>
                 <p className="text-body text-foreground-500">
-                  Nutze dieses Feld, wenn dein Anfallstyp nicht in der Liste steht.
+                  {t("Nutze dieses Feld, wenn dein Anfallstyp nicht in der Liste steht.")}
                 </p>
               </div>
 
@@ -1762,7 +1764,7 @@ export default function DiaryPage() {
               {/* Hast du es vorher gespürt? */}
               <div className="space-y-[var(--spacing-xs)]">
                 <label className="text-body font-medium text-foreground-800">
-                  Hast du es vorher gespürt?
+                  {t("Hast du es vorher gespürt?")}
                 </label>
                 <div className="flex gap-[var(--spacing-s)]">
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
@@ -1803,7 +1805,7 @@ export default function DiaryPage() {
               {/* Wie ging es dir danach? */}
               <div className="space-y-[var(--spacing-xs)]">
                 <label className="text-body font-medium text-foreground-800">
-                  Wie ging es dir danach?
+                  {t("Wie ging es dir danach?")}
                 </label>
                 <div className="relative">
                   <input
@@ -2169,7 +2171,7 @@ export default function DiaryPage() {
           <div className="w-full h-auto max-h-[80vh] overflow-y-auto rounded-xl bg-white shadow-xl">
             <div className="sticky top-0 flex items-center justify-between border-b border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
               <h3 className="text-body font-semibold text-foreground-900">
-                Wie ging es dir danach?
+                {t("Wie ging es dir danach?")}
               </h3>
               <button
                 onClick={() => setIsAfterEffectsModalOpen(false)}

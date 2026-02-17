@@ -6,10 +6,12 @@ import { usePathname } from 'next/navigation';
 import { EpiDocLogo } from '@/components/EpiDocLogo';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useRoleText } from '@/lib/hooks/useRoleText';
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
+  const { t } = useRoleText();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -21,7 +23,7 @@ export function Navbar() {
 
   // Navigation-Links nur für eingeloggte Benutzer
   const navLinks = user ? [
-    { href: '/befinden', label: 'Wie geht es dir?' },
+    { href: '/befinden', label: t('Wie geht es dir?') },
     { href: '/diary', label: 'Tagebuch' },
     { href: '/medikamente', label: 'Medikamente' },
     { href: '/verlauf', label: 'Analyse' },

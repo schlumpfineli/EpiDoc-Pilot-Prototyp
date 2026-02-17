@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { profileApi, authApi, UserProfile, feedbackApi, FeedbackData, Seizure, Befinden } from "@/lib/api";
 import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useRoleText } from "@/lib/hooks/useRoleText";
 import { useRouter } from "next/navigation";
 import { format, parseISO, subMonths, eachDayOfInterval, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
@@ -387,6 +388,7 @@ function saveNotificationPrefs(prefs: NotificationPrefs): void {
 
 export default function EinstellungenPage() {
   const { user, logout } = useAuth();
+  const { t } = useRoleText();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -815,8 +817,7 @@ export default function EinstellungenPage() {
             <SectionCard icon={<IconDownload className="w-5 h-5" />} title="Datenexport">
               <div className="space-y-[var(--spacing-s)]">
                 <p className="text-body-small text-foreground-600">
-                  Exportieren Sie alle Ihre Daten (Profil, Anfallstagebuch, Befinden) als PDF-Dokument.
-                  Ideal für Arztbesuche oder zur persönlichen Sicherung.
+                  {t("Exportieren Sie alle Ihre Daten (Profil, Anfallstagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur persönlichen Sicherung.")}
                 </p>
                 <button
                   type="button"
@@ -847,19 +848,19 @@ export default function EinstellungenPage() {
                 </p>
                 <Toggle
                   label="Tagebuch-Erinnerung"
-                  description="Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen"
+                  description={t("Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen")}
                   checked={notifPrefs.diary}
                   onChange={(v) => updateNotifPref("diary", v)}
                 />
                 <Toggle
                   label="Medikamenten-Erinnerung"
-                  description="Erinnerung an die Medikamenten-Einnahme"
+                  description={t("Erinnerung an die Medikamenten-Einnahme")}
                   checked={notifPrefs.medication}
                   onChange={(v) => updateNotifPref("medication", v)}
                 />
                 <Toggle
                   label="Befinden erfassen"
-                  description="Regelmässige Erinnerung, Ihr Befinden zu dokumentieren"
+                  description={t("Regelmässige Erinnerung, Ihr Befinden zu dokumentieren")}
                   checked={notifPrefs.befinden}
                   onChange={(v) => updateNotifPref("befinden", v)}
                 />

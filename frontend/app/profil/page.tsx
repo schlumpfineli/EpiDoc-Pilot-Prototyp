@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { profileApi, authApi, UserProfile } from "@/lib/api";
 import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useRoleText } from "@/lib/hooks/useRoleText";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -319,6 +320,7 @@ function SectionActions({ onEdit, onAdd }: { onEdit: () => void; onAdd?: () => v
 
 export default function ProfilPage() {
   const { user } = useAuth();
+  const { t } = useRoleText();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
@@ -456,7 +458,7 @@ export default function ProfilPage() {
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-2xs)]">
-            <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">Mein Profil</h1>
+            <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">{t("Mein Profil")}</h1>
             <ProfileCompletionBar percentage={completionPercentage} />
           </div>
 

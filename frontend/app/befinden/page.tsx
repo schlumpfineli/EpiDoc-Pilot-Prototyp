@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { befindenApi, Befinden } from "@/lib/api";
 import { toastService } from "@/components/ui";
 import { Calendar } from "@/components/ui/Calendar";
+import { useRoleText } from "@/lib/hooks/useRoleText";
 
 type TimeOfDay = "morning" | "noon" | "evening";
 
@@ -52,6 +53,7 @@ type CustomSymptom = {
 };
 
 export default function BefindenPage() {
+  const { t } = useRoleText();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [expandedTimeSlots, setExpandedTimeSlots] = useState<Record<string, TimeOfDay | 'allDay' | null>>({});
@@ -935,7 +937,7 @@ export default function BefindenPage() {
   // Eigenes Symptom hinzufügen
   const handleAddCustomSymptom = () => {
     if (!newCustomSymptomName.trim()) {
-      toastService.show('Bitte gib einen Namen ein', 'error');
+      toastService.show(t('Bitte gib einen Namen ein'), 'error');
       return;
     }
 
@@ -948,13 +950,13 @@ export default function BefindenPage() {
     setCustomSymptoms((prev) => [...prev, newSymptom]);
     setNewCustomSymptomName('');
     setShowAddCustomSymptom(false);
-    toastService.show('Eigenes Symptom hinzugefügt', 'success');
+    toastService.show(t('Eigenes Symptom hinzugefügt'), 'success');
   };
 
   // Eigenes Symptom entfernen
   const handleRemoveCustomSymptom = (symptomId: string) => {
     setCustomSymptoms((prev) => prev.filter((s) => s.id !== symptomId));
-    toastService.show('Eigenes Symptom entfernt', 'success');
+    toastService.show(t('Eigenes Symptom entfernt'), 'success');
   };
 
   // Favoriten - Items die besonders oft eingetragen wurden (basierend auf allen Daten)
@@ -986,10 +988,10 @@ export default function BefindenPage() {
       <div className="min-h-screen bg-background-50 pb-20">
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
           <h1 className="mb-2 text-center text-h3 font-semibold text-foreground-900">
-            Wie geht es dir?
+            {t("Wie geht es dir?")}
           </h1>
           <p className="mb-6 text-center text-body-small text-foreground-500">
-            Erfasse dein Befinden täglich. Detaillierte Werte und Muster findest du in der Analyse.
+            {t("Erfasse dein Befinden täglich. Detaillierte Werte und Muster findest du in der Analyse.")}
           </p>
 
           {/* Datumsauswahl */}
@@ -1010,7 +1012,7 @@ export default function BefindenPage() {
           {favoriteItems.length > 0 && (
             <div className="mb-6">
               <h2 className="mb-4 mt-2 text-h4 font-semibold text-foreground-900">
-                Deine häufigsten Beschwerden
+                {t("Deine häufigsten Beschwerden")}
               </h2>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {favoriteItems.map((itemId) => {
@@ -1517,7 +1519,7 @@ export default function BefindenPage() {
           <div className="mb-6">
             <div className="mb-4 mt-2 flex items-center justify-between">
               <h2 className="text-h4 font-semibold text-foreground-900">
-                Eigene Symptome
+                {t("Eigene Symptome")}
               </h2>
                                         <button
                                           type="button"
@@ -1712,7 +1714,7 @@ export default function BefindenPage() {
                 onClick={() => setShowCoreItems(true)}
                 className="text-body text-foreground-500 hover:text-foreground-700"
               >
-                Häufige Beschwerden einblenden
+                {t("Häufige Beschwerden einblenden")}
                             </button>
                                                   </div>
                                                 )}

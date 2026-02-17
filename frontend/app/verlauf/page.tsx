@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { seizureApi, befindenApi, Befinden, Seizure } from "@/lib/api";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { toastService } from "@/components/ui";
+import { useRoleText } from "@/lib/hooks/useRoleText";
 
 // Verfügbare Signale aus der Befinden-Seite
 const availableSignals = [
@@ -93,6 +94,7 @@ function toGermanAfterEffect(value: string): string {
 type TimeRange = "7d" | "30d" | "6m" | "1y";
 
 export default function VerlaufPage() {
+  const { t } = useRoleText();
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
   const [selectedSignal, setSelectedSignal] = useState<string>("");
   const [seizures, setSeizures] = useState<Seizure[]>([]);
@@ -911,7 +913,7 @@ export default function VerlaufPage() {
             Analyse
           </h1>
           <p className="mb-6 text-center text-body-small text-foreground-500">
-            Mögliche Zusammenhänge zwischen Anfällen und deinem Befinden erkennen
+            {t("Mögliche Zusammenhänge zwischen Anfällen und deinem Befinden erkennen")}
           </p>
 
           {/* Zeitbereich-Auswahl */}
@@ -948,7 +950,7 @@ export default function VerlaufPage() {
           {/* Signal-Auswahl – relative z-10 damit Dropdown nicht von Grafik überdeckt wird */}
           <div className="relative z-10 mb-8">
             <label className="mb-2 block text-body-small font-medium text-foreground-700">
-              Vergleiche Anfälle mit:
+              {t("Vergleiche Anfälle mit:")}
             </label>
             <select
               value={selectedSignal}
