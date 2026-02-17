@@ -63,8 +63,8 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)] lg:py-[var(--spacing-2xl)] text-foreground-900">
-      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto space-y-[var(--spacing-l)] sm:space-y-[var(--spacing-xl)] md:space-y-[var(--spacing-2xl)]">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background-50 to-white px-[var(--spacing-m)] sm:px-[var(--spacing-l)] md:px-[var(--spacing-xl)] py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)] text-foreground-900">
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto space-y-[var(--spacing-l)] sm:space-y-[var(--spacing-xl)] md:space-y-[var(--spacing-2xl)]">
         <div className="space-y-[var(--spacing-m)] text-center">
           <div className="flex items-center justify-center gap-[var(--spacing-xs)] mb-[var(--spacing-xs)]">
             <EpiDocLogo size={100} />
@@ -73,7 +73,7 @@ function LoginForm() {
           <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
             Anmelden
           </h1>
-          <p className="text-body text-foreground-600">
+          <p className="text-body text-foreground-600 max-w-prose mx-auto">
             Melde dich mit deiner E-Mail und deinem Passwort an.
           </p>
         </div>
@@ -139,8 +139,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)]">
-        <div className="w-full max-w-md mx-auto text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background-50 to-white px-[var(--spacing-m)]">
+        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto text-center">
           <p className="text-body text-foreground-600">Lädt...</p>
         </div>
       </div>
