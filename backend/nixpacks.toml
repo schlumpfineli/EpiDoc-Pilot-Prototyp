@@ -11,9 +11,10 @@ cmds = [
     'php artisan config:cache || true',
     'php artisan route:cache || true',
     'php artisan view:cache || true',
-    'php artisan migrate --force || echo "Migration failed, will retry on startup"'
+    'php artisan migrate --force || echo "Migration failed, will retry on startup"',
+    'php artisan db:seed --class=DatabaseSeeder --force || echo "Seeding skipped"'
 ]
 
 [start]
-cmd = 'php artisan migrate --force || echo "Migration failed" && php artisan db:seed --class=DatabaseSeeder --force || echo "Seeding skipped" && php artisan serve --host=0.0.0.0 --port=$PORT'
+cmd = 'php artisan migrate --force || echo "Migration failed, starting server anyway" && php artisan serve --host=0.0.0.0 --port=$PORT'
 
