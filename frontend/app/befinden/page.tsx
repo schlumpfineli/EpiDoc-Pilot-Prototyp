@@ -60,6 +60,20 @@ type CustomSymptom = {
   createdAt: string;
 };
 
+const COLORS = {
+  bg:        '#F7F8F7',
+  header:    'linear-gradient(180deg, #EEF5F2 0%, #F6F9F8 100%)',
+  title:     '#243B2E',
+  subtitle:  '#5E7468',
+  muted:     '#8A9E93',
+  primary:   '#6FB48F',
+  hover:     '#5EA37E',
+  surface:   '#EBF4EF',
+  surfaceAlt:'#F2F5F3',
+  card:      '#FEFEFE',
+  hoverBg:   '#D6EDDF',
+} as const;
+
 export default function BefindenPage() {
   const { t } = useRoleText();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());

@@ -93,6 +93,18 @@ function toGermanAfterEffect(value: string): string {
 
 type TimeRange = "7d" | "30d" | "6m" | "1y";
 
+const COLORS = {
+  bg:        '#F3F6F4',
+  title:     '#243B2E',
+  subtitle:  '#6F7F75',
+  signal:    '#6FB48F',
+  seizure:   '#6FAED9',
+  peak:      '#E3B86C',
+  border:    '#E3EAE6',
+  activeBg:  '#EAF4EE',
+  hoverBg:   '#F5F7F6',
+} as const;
+
 export default function VerlaufPage() {
   const { t } = useRoleText();
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
