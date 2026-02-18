@@ -967,10 +967,10 @@ export default function DiaryPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:py-[var(--spacing-xl)] text-foreground-900">
+      <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:py-[var(--spacing-xl)] text-foreground-900" style={{ background: "#F3F6F4" }}>
       <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
         <div>
-          <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]">
+          <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]" style={{ color: "#243B2E" }}>
             Anfallstagebuch
           </h1>
         </div>
@@ -1020,7 +1020,7 @@ export default function DiaryPage() {
         </div>
 
         {/* Calendar Grid */}
-        <div className="rounded-2xl bg-white p-[var(--spacing-s)] sm:p-[var(--spacing-m)]">
+        <div className="rounded-2xl p-[var(--spacing-s)] sm:p-[var(--spacing-m)]" style={{ background: "#FFFFFF" }}>
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-[var(--spacing-2xs)] mb-[var(--spacing-xs)]">
             {weekDays.map((day) => (
@@ -1048,10 +1048,10 @@ export default function DiaryPage() {
               const hasSeizure = entry?.hasSeizure;
               const hasEmergency = entry?.hasEmergencyMed;
 
-              let cellClass = "bg-transparent text-foreground-700 hover:bg-primary-50/60";
+              let cellClass = "bg-transparent text-foreground-700 hover:bg-[#EAF4EE]/50";
 
               if (isCurrentDay) {
-                cellClass = "bg-primary-50 text-primary-700 ring-1 ring-primary-200";
+                cellClass = "bg-[#EAF4EE] text-[#243B2E] ring-1 ring-[#6FB48F]";
               }
 
               return (
@@ -1061,7 +1061,7 @@ export default function DiaryPage() {
                   className={`
                     relative aspect-square rounded-xl transition-all duration-200
                     ${cellClass}
-                    hover:ring-1 hover:ring-primary-300/60
+                    hover:ring-1 hover:ring-[#6FB48F]/40
                     ${entry ? "font-medium" : "font-normal"}
                   `}
                 >

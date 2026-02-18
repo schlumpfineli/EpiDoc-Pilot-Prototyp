@@ -71,7 +71,7 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F7F8F7]">
         <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
           <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
             <div className="mx-auto w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
@@ -103,7 +103,7 @@ function ResetPasswordForm() {
 
   if (!token || !email) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F7F8F7]">
         <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
           <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
             <div className="space-y-[var(--spacing-m)]">
@@ -136,7 +136,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
+    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F7F8F7]">
       <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
         <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] space-y-[var(--spacing-l)]">
           <div className="text-center space-y-[var(--spacing-m)]">
@@ -201,7 +201,7 @@ function ResetPasswordForm() {
           </form>
 
           <div className="text-center pt-[var(--spacing-xs)]">
-            <Link href="/login" className="text-body-small text-primary-600 hover:text-primary-700">
+            <Link href="/login" className="text-body-small text-[#6FB48F] hover:text-[#5EA37E]">
               Zurück zum Login
             </Link>
           </div>
@@ -214,7 +214,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-background-50">
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F7F8F7]">
         <div className="max-w-md w-full text-center">
           <p className="text-body text-foreground-600">Lädt...</p>
         </div>

@@ -941,7 +941,7 @@ export default function VerlaufPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-background-50 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center" style={{ background: "#F3F6F4" }}>
           <p className="text-body text-foreground-400">Einen Moment…</p>
         </div>
       </ProtectedRoute>
@@ -960,19 +960,19 @@ export default function VerlaufPage() {
     <>
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-accent-500)" stopOpacity="0.10" />
-          <stop offset="100%" stopColor="var(--color-accent-500)" stopOpacity="0" />
+          <stop offset="0%" stopColor="#6FB48F" stopOpacity="0.10" />
+          <stop offset="100%" stopColor="#6FB48F" stopOpacity="0" />
         </linearGradient>
       </defs>
       {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} className={withTransition ? "transition-all duration-300" : undefined} />}
-      {splinePath && <path d={splinePath} fill="none" stroke="var(--color-accent-500)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" className={withTransition ? "transition-all duration-300" : undefined} />}
+      {splinePath && <path d={splinePath} fill="none" stroke="#6FB48F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" className={withTransition ? "transition-all duration-300" : undefined} />}
       {peakPoints.map((p, i) => (
-        <circle key={`peak-${i}`} cx={p.x} cy={p.y} r={isDesktop ? "3" : "2.5"} fill="var(--color-accent-500)" opacity={isDesktop ? "0.4" : "0.45"} className={withTransition ? "transition-all duration-300" : undefined} />
+        <circle key={`peak-${i}`} cx={p.x} cy={p.y} r={isDesktop ? "3" : "2.5"} fill="#E3B86C" opacity={isDesktop ? "0.5" : "0.55"} className={withTransition ? "transition-all duration-300" : undefined} />
       ))}
       {visualizationData.map((d, i) => {
         if (!d.hasSeizure) return null;
         const x = visualizationData.length > 1 ? (i / (visualizationData.length - 1)) * 1000 : 500;
-        return <line key={`seizure-${d.dateStr}`} x1={x} y1={200} x2={x} y2={0} stroke="var(--color-primary-500)" strokeWidth="1" strokeDasharray="4 4" opacity={isDesktop ? "0.35" : "0.4"} className={withTransition ? "transition-all duration-300" : undefined} />;
+        return <line key={`seizure-${d.dateStr}`} x1={x} y1={200} x2={x} y2={0} stroke="#6FAED9" strokeWidth="1" strokeDasharray="4 4" opacity={isDesktop ? "0.35" : "0.4"} className={withTransition ? "transition-all duration-300" : undefined} />;
       })}
     </>
   );
@@ -1000,14 +1000,14 @@ export default function VerlaufPage() {
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-foreground-300">
       {signalPoints.length > 0 && (
         <div className="flex items-center gap-1.5">
-          <div className="h-[2px] w-3.5 rounded-full bg-accent-500/50" />
+          <div className="h-[2px] w-3.5 rounded-full" style={{ background: "#6FB48F", opacity: 0.7 }} />
           <span>{selectedSignalLabel}</span>
         </div>
       )}
       {seizuresInRange.length > 0 && (
         <div className="flex items-center gap-1.5">
           <svg width="14" height="2" viewBox="0 0 14 2" className="block flex-shrink-0">
-            <line x1="0" y1="1" x2="14" y2="1" stroke="var(--color-primary-500)" strokeWidth="1.5" strokeDasharray="3 2" opacity="0.4" />
+            <line x1="0" y1="1" x2="14" y2="1" stroke="#6FAED9" strokeWidth="1.5" strokeDasharray="3 2" opacity="0.5" />
           </svg>
           <span>Anfall</span>
         </div>
@@ -1042,14 +1042,14 @@ export default function VerlaufPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background-50 pb-20">
+      <div className="min-h-screen pb-20" style={{ background: "#F3F6F4" }}>
         {/* Hero */}
-        <div className="rounded-b-3xl bg-[#FAFCFB] px-4 pt-10 pb-8 sm:px-6 lg:px-8 mb-2">
+        <div className="px-4 pt-10 pb-8 sm:px-6 lg:px-8 mb-2">
           <div className="mx-auto max-w-4xl">
-            <h1 className="mb-1 text-center text-h4 sm:text-h3 font-medium text-foreground-900">
+            <h1 className="mb-1 text-center text-h4 sm:text-h3 font-medium" style={{ color: "#243B2E" }}>
               Was zeigen deine Einträge?
             </h1>
-            <p className="text-center text-[13px] text-foreground-300">
+            <p className="text-center text-[13px]" style={{ color: "#6F7F75" }}>
               Muster in deinen selbst erfassten Daten — übersichtlich dargestellt.
             </p>
           </div>
@@ -1078,8 +1078,8 @@ export default function VerlaufPage() {
                     onClick={() => setTimeRange(range.id)}
                     className={`rounded-full border px-4 py-2 text-body-small font-medium transition-colors ${
                       isActive
-                        ? "border-primary-500/60 bg-primary-50 text-primary-700"
-                        : "border-background-200/60 bg-white text-foreground-700 hover:bg-background-25"
+                        ? "border-[#6FB48F]/50 bg-[#EAF4EE] text-[#243B2E]"
+                        : "border-[#E3EAE6] bg-white text-foreground-700 hover:bg-background-25"
                     }`}
                   >
                     {range.label}
@@ -1099,8 +1099,8 @@ export default function VerlaufPage() {
               onClick={() => setSignalDropdownOpen((prev) => !prev)}
               className={`flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-left transition-all duration-150 ${
                 signalDropdownOpen
-                  ? "border-[#E4F2EC] shadow-sm ring-1 ring-[#E4F2EC]"
-                  : "border-background-200/60 hover:border-[#E4F2EC]"
+                  ? "border-[#E3EAE6] shadow-sm ring-1 ring-[#E3EAE6]"
+                  : "border-[#E3EAE6] hover:border-[#E3EAE6]"
               }`}
             >
               <span className={selectedSignal ? "text-body text-foreground-900" : "text-body text-foreground-400"}>
@@ -1117,7 +1117,7 @@ export default function VerlaufPage() {
             </button>
 
             {signalDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[#E4F2EC] bg-white py-1.5 shadow-md shadow-foreground-900/[0.04] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[#E3EAE6] bg-white py-1.5 shadow-md shadow-foreground-900/[0.04] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
                 <button
                   type="button"
                   onClick={() => { setSelectedSignal(""); setSignalDropdownOpen(false); }}
@@ -1135,7 +1135,7 @@ export default function VerlaufPage() {
                       type="button"
                       onClick={() => { setSelectedSignal(signal.id); setSignalDropdownOpen(false); }}
                       className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-body transition-colors ${
-                        isActive ? "bg-[#E4F2EC]/60 text-[#2D6A4F] font-medium" : "text-foreground-800 hover:bg-[#F7FBF9]"
+                        isActive ? "bg-[#EAF4EE]/60 text-[#243B2E] font-medium" : "text-foreground-800 hover:bg-[#F5F7F6]"
                       }`}
                     >
                       <span>{signal.label}</span>
@@ -1155,7 +1155,7 @@ export default function VerlaufPage() {
           {(isMobile || isTablet) && selectedSignal && (
             <div ref={chartContainerRef}>
               {hasChartData ? (
-                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
+                <div className="mb-6 rounded-2xl border border-[#E3EAE6] bg-white p-6">
                   <p className="mb-2 text-[10px] text-foreground-300">Visuelle Zusammenfassung deiner Einträge</p>
                   <div className="mb-3">{contextChips()}</div>
                   <div className={isMobile ? "overflow-x-auto" : undefined}>
@@ -1169,7 +1169,7 @@ export default function VerlaufPage() {
                   <div className="mt-3">{chartLegend}</div>
                 </div>
               ) : (
-                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
+                <div className="mb-6 rounded-2xl border border-[#E3EAE6] bg-white p-6">
                   {emptyChartState("h-48")}
                 </div>
               )}
@@ -1194,7 +1194,7 @@ export default function VerlaufPage() {
           <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <div ref={chartContainerRef}>
               {hasChartData ? (
-                <div className="rounded-none border-y border-background-200/60 bg-white p-8 lg:px-10">
+                <div className="rounded-none border-y border-[#E3EAE6] bg-white p-8 lg:px-10">
                   <p className="mb-2 text-[10px] text-foreground-300">Visuelle Zusammenfassung deiner Einträge</p>
                   <div className="mb-4">{contextChips("lg")}</div>
                   <div className={`relative h-80 w-full overflow-hidden ${showMonthAxis ? "pb-6" : ""}`}>
@@ -1206,7 +1206,7 @@ export default function VerlaufPage() {
                   <div className="mt-4">{chartLegend}</div>
                 </div>
               ) : (
-                <div className="rounded-none border-y border-background-200/60 bg-white p-8">
+                <div className="rounded-none border-y border-[#E3EAE6] bg-white p-8">
                   {emptyChartState("h-80")}
                 </div>
               )}

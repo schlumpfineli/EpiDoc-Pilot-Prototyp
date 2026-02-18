@@ -13,7 +13,7 @@ import { de } from "date-fns/locale";
 // ─── Shared CSS Classes ──────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full rounded-lg border border-background-200/60 px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small text-foreground-800 placeholder:text-foreground-300 focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200";
+  "w-full rounded-lg border border-background-200/60 px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small text-foreground-800 placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20";
 
 const CSS = {
   input: `${inputBase} transition`,
@@ -22,9 +22,9 @@ const CSS = {
   btnCancel:
     "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-400 transition hover:text-foreground-600",
   btnPrimary:
-    "flex-1 rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
+    "flex-1 rounded-xl bg-[#6FB48F] px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-[#5EA37E] disabled:opacity-60 disabled:cursor-not-allowed",
   btnDanger:
-    "flex-1 rounded-xl bg-warning-500 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-warning-600 disabled:opacity-60 disabled:cursor-not-allowed",
+    "flex-1 rounded-xl bg-[#D96B6B] px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-[#C45A5A] disabled:opacity-60 disabled:cursor-not-allowed",
   btnClose:
     "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
 } as const;
@@ -113,7 +113,7 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
         className="flex w-full items-center justify-between px-1 py-[var(--spacing-xs)] transition-colors cursor-pointer group"
       >
         <div className="flex items-center gap-[var(--spacing-xs)] min-w-0">
-          <span className="text-foreground-300 group-hover:text-primary-400 shrink-0 transition-colors">{icon}</span>
+          <span className="text-foreground-300 group-hover:text-[#6FB48F] shrink-0 transition-colors">{icon}</span>
           <h2 className="text-body font-medium text-foreground-800 truncate">{title}</h2>
         </div>
         <span className={`text-foreground-300 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
@@ -153,8 +153,8 @@ function Toggle({ label, description, checked, onChange }: {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
-          checked ? "bg-primary-400" : "bg-background-300"
+        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:ring-2 focus-visible:ring-[#6FB48F] focus-visible:ring-offset-2 ${
+          checked ? "bg-[#6FB48F]" : "bg-background-300"
         }`}
       >
         <span
@@ -767,7 +767,7 @@ export default function EinstellungenPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen items-center justify-center">
           <div className="flex flex-col items-center gap-[var(--spacing-s)]">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-200 border-t-primary-500" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5ECE8] border-t-[#6FB48F]" />
             <p className="text-body-small text-foreground-500">Einstellungen werden geladen...</p>
           </div>
         </div>
@@ -778,13 +778,13 @@ export default function EinstellungenPage() {
   // ── Page ──
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+      <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F7F8F7" }}>
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
 
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-xs)]">
             <div className="py-[var(--spacing-s)] sm:py-[var(--spacing-m)]">
-              <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center">
+              <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center" style={{ color: "#243B2E" }}>
                 Einstellungen
               </h1>
             </div>
@@ -837,7 +837,7 @@ export default function EinstellungenPage() {
                     <button
                       type="button"
                       onClick={startDeleteFlow}
-                      className="text-[12px] text-foreground-400 transition hover:text-warning-500"
+                      className="text-[12px] text-foreground-400 transition hover:text-[#D96B6B]"
                     >
                       Konto löschen
                     </button>
@@ -854,7 +854,7 @@ export default function EinstellungenPage() {
                     type="button"
                     onClick={handleExport}
                     disabled={isExporting}
-                    className="w-full rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
+                    className="w-full rounded-xl bg-[#6FB48F] px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-[#5EA37E] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
                   >
                     {isExporting ? (
                       <>
@@ -917,7 +917,7 @@ export default function EinstellungenPage() {
                   <button
                     type="button"
                     onClick={openFeedbackModal}
-                    className="text-body-small font-medium text-primary-600 transition hover:text-primary-700"
+                    className="text-body-small font-medium text-[#6FB48F] transition hover:text-[#5EA37E]"
                   >
                     Feedback senden
                   </button>
@@ -944,12 +944,12 @@ export default function EinstellungenPage() {
             <div className="space-y-1 divide-y divide-background-200/40">
               <SectionCard icon={<IconScale className="w-5 h-5" />} title="Datenschutz">
                 <div className="space-y-[var(--spacing-s)]">
-                  <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 p-[var(--spacing-s)]">
+                  <div className="rounded-lg border border-foreground-100/40 bg-background-100/50 p-[var(--spacing-s)]">
                     <div className="flex items-start gap-[var(--spacing-xs)]">
-                      <IconWarning className="w-4 h-4 text-warning-400 shrink-0 mt-0.5" />
+                      <IconWarning className="w-4 h-4 text-foreground-300 shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-body-small font-medium text-warning-700">Kein Medizinprodukt</p>
-                        <p className="text-[11px] text-warning-600 mt-1 leading-relaxed">
+                        <p className="text-body-small font-medium text-foreground-700">Kein Medizinprodukt</p>
+                        <p className="text-[11px] text-foreground-500 mt-1 leading-relaxed">
                           EpiDoc ersetzt keine ärztliche Beratung, Diagnose oder Behandlung.
                           Die App dient der persönlichen Dokumentation und Selbstbeobachtung.
                         </p>
@@ -974,7 +974,7 @@ export default function EinstellungenPage() {
                     <h3 className="text-[12px] font-medium text-foreground-700 mb-1">Impressum</h3>
                     <div className="text-[11px] text-foreground-500 leading-relaxed">
                       <p>EpiDoc – Digitales Epilepsie-Tagebuch (Prototyp/Pilot)</p>
-                      <p>Kontakt: <span className="text-primary-600">epidoc@kontakt.ch</span></p>
+                      <p>Kontakt: <span className="text-[#6FB48F]">epidoc@kontakt.ch</span></p>
                     </div>
                   </div>
                 </div>
@@ -992,7 +992,7 @@ export default function EinstellungenPage() {
           <div className="w-full max-w-md rounded-xl bg-white shadow-lg border border-background-200/60 overflow-hidden">
             <div className="p-[var(--spacing-m)] space-y-[var(--spacing-s)]">
               <div className="flex items-center gap-[var(--spacing-xs)]">
-                <IconWarning className="w-5 h-5 text-warning-500 shrink-0" />
+                <IconWarning className="w-5 h-5 text-[#D96B6B] shrink-0" />
                 <h2 className="text-body font-medium text-foreground-900">Konto wirklich löschen?</h2>
               </div>
               <div className="space-y-1">
@@ -1068,7 +1068,7 @@ export default function EinstellungenPage() {
                     }}
                   />
                 </div>
-                <span className={`text-[11px] tabular-nums transition-colors ${feedbackForm.message.trim().length >= 10 ? "text-primary-500" : "text-foreground-300"}`}>
+                <span className={`text-[11px] tabular-nums transition-colors ${feedbackForm.message.trim().length >= 10 ? "text-[#6FB48F]" : "text-foreground-300"}`}>
                   {feedbackForm.message.trim().length >= 10 ? "✓" : `${feedbackForm.message.trim().length}/10`}
                 </span>
               </div>

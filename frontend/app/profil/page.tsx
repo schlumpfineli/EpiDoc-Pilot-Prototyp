@@ -31,15 +31,15 @@ type ModalType =
 
 const CSS = {
   input:
-    "w-full rounded-lg border border-background-200/60 px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small text-foreground-800 placeholder:text-foreground-300 focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 transition",
+    "w-full rounded-lg border border-background-200/60 px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small text-foreground-800 placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20 transition",
   btnCancel:
     "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-400 transition hover:text-foreground-600",
   btnSave:
-    "flex-1 rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
+    "flex-1 rounded-xl bg-[#6FB48F] px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-[#5EA37E] disabled:opacity-60 disabled:cursor-not-allowed",
   btnEdit:
     "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-500 hover:text-foreground-700 hover:bg-background-100 rounded-xl transition",
   btnAddDashed:
-    "w-full py-[var(--spacing-xs)] text-body-small font-medium text-foreground-400 transition-all hover:text-primary-600 flex items-center justify-center gap-[var(--spacing-2xs)]",
+    "w-full py-[var(--spacing-xs)] text-body-small font-medium text-foreground-400 transition-all hover:text-[#6FB48F] flex items-center justify-center gap-[var(--spacing-2xs)]",
   btnClose:
     "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
   entryCard:
@@ -159,10 +159,10 @@ function ProfileCompletionBar({ percentage }: { percentage: number }) {
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-foreground-500">Profil: {percentage} % ergänzt</span>
       </div>
-      <div className="h-1 bg-background-200 rounded-full overflow-hidden">
+      <div className="h-1 rounded-full overflow-hidden" style={{ background: "#E5ECE8" }}>
         <div
           className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{ width: `${percentage}%`, background: "#B7E4C7" }}
+          style={{ width: `${percentage}%`, background: "#6FB48F" }}
         />
       </div>
     </div>
@@ -171,9 +171,11 @@ function ProfileCompletionBar({ percentage }: { percentage: number }) {
 
 function PrivacyNote() {
   return (
-    <p className="text-[11px] text-foreground-300 text-center py-[var(--spacing-m)]">
-      Deine Angaben bleiben privat und verschlüsselt gespeichert.
-    </p>
+    <div className="rounded-xl px-4 py-3 text-center" style={{ background: "#EAF4EE" }}>
+      <p className="text-[11px]" style={{ color: "#3D6B52" }}>
+        Deine Angaben bleiben privat und verschlüsselt gespeichert.
+      </p>
+    </div>
   );
 }
 
@@ -184,7 +186,7 @@ function EmptyState({ message, onAdd, addLabel }: { message: string; onAdd: () =
       <button
         type="button"
         onClick={onAdd}
-        className="inline-flex items-center gap-1 text-body-small font-medium text-primary-600 transition hover:text-primary-700"
+        className="inline-flex items-center gap-1 text-body-small font-medium text-[#6FB48F] transition hover:text-[#5EA37E]"
       >
         <IconPlus className="w-3.5 h-3.5" />
         {addLabel}
@@ -204,7 +206,7 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
         className="flex w-full items-center justify-between px-1 py-[var(--spacing-xs)] transition-colors cursor-pointer group"
       >
         <div className="flex items-center gap-[var(--spacing-xs)] min-w-0">
-          <span className="text-foreground-300 group-hover:text-primary-400 shrink-0 transition-colors">{icon}</span>
+          <span className="text-foreground-300 group-hover:text-[#6FB48F] shrink-0 transition-colors">{icon}</span>
           <h2 className="text-body font-medium text-foreground-800 truncate">{title}</h2>
         </div>
         <span className={`text-foreground-300 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
@@ -476,7 +478,7 @@ export default function ProfilPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen items-center justify-center">
           <div className="flex flex-col items-center gap-[var(--spacing-s)]">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-200 border-t-primary-500" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5ECE8] border-t-[#6FB48F]" />
             <p className="text-body-small text-foreground-500">Profil wird geladen...</p>
           </div>
         </div>
@@ -487,14 +489,14 @@ export default function ProfilPage() {
   // ── Page ──
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+      <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F7F8F7" }}>
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-xs)]">
             <div className="relative py-[var(--spacing-s)] sm:py-[var(--spacing-m)]">
-              <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center">{t("Mein Profil")}</h1>
+              <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center" style={{ color: "#243B2E" }}>{t("Mein Profil")}</h1>
               {showSaveSuccess && (
-                <div className="absolute top-[var(--spacing-2xs)] right-0 flex items-center gap-1 text-[12px] text-primary-600 animate-in fade-in duration-150">
+                <div className="absolute top-[var(--spacing-2xs)] right-0 flex items-center gap-1 text-[12px] animate-in fade-in duration-150" style={{ color: "#6FB48F" }}>
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
@@ -503,7 +505,7 @@ export default function ProfilPage() {
               )}
             </div>
             <ProfileCompletionBar percentage={completionPercentage} />
-            <p className="text-[11px] text-foreground-400">Du kannst jederzeit weitere Angaben ergänzen.</p>
+            <p className="text-[11px]" style={{ color: "#6F7F75" }}>Du kannst jederzeit weitere Angaben ergänzen.</p>
           </div>
 
           {/* ── Gruppe: Medizinische Angaben ── */}

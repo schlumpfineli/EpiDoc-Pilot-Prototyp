@@ -63,14 +63,14 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background-50 to-white px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
+    <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F7F8F7" }}>
       <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
         <div className="space-y-[var(--spacing-2xs)] sm:space-y-[var(--spacing-2xs)]">
           <div className="flex items-center justify-center gap-[var(--spacing-xs)] mb-[var(--spacing-xs)]">
             <EpiDocLogo size={100} />
-            <p className="text-headline-4 font-bold text-primary-600">EpiDoc</p>
+            <p className="text-headline-4 font-bold text-[#243B2E]">EpiDoc</p>
           </div>
-          <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
+          <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]" style={{ color: "#243B2E" }}>
             Anmelden
           </h1>
           <p className="text-body text-foreground-600 text-center">
@@ -117,7 +117,7 @@ function LoginForm() {
         <div className="flex flex-col gap-[var(--spacing-xs)] text-center">
           <a
             href="/forgot-password"
-            className="text-body-small text-primary-600 hover:text-primary-700 transition"
+            className="text-body-small text-[#6FB48F] hover:text-[#5EA37E] transition"
           >
             Passwort vergessen?
           </a>
@@ -125,7 +125,7 @@ function LoginForm() {
             Noch kein Konto?{" "}
             <a
               href="/register"
-              className="font-medium text-primary-600 hover:text-primary-700 transition"
+              className="font-medium text-[#6FB48F] hover:text-[#5EA37E] transition"
             >
               Jetzt registrieren
             </a>
