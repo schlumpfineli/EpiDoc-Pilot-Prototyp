@@ -19,15 +19,15 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const paddingClasses = {
     none: '',
-    sm: 'p-[var(--spacing-s)]',
-    md: 'p-[var(--spacing-m)]',
-    lg: 'p-[var(--spacing-l)]',
+    sm: 'p-3',
+    md: 'p-4',
+    lg: 'p-6',
   };
 
   const variantClasses = {
-    default: 'bg-white border border-background-200/60',
-    outlined: 'bg-white border border-background-300',
-    elevated: 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]',
+    default: 'bg-white border border-[#DDE7E2]',
+    outlined: 'bg-white border border-[#DDE7E2]',
+    elevated: 'bg-white shadow-[0_1px_2px_rgba(30,63,52,0.05)]',
   };
 
   return (

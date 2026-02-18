@@ -236,11 +236,11 @@ export default function MedikamentePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F5F7F6" }}>
+      <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F2F6F4" }}>
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* Header */}
           <div className="space-y-[var(--spacing-s)]">
-            <h1 className="text-headline-4 sm:text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]" style={{ color: "#243B2E" }}>
+            <h1 className="text-headline-4 sm:text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]" style={{ color: "#1E3F34" }}>
               Medikamente
             </h1>
 
@@ -251,7 +251,7 @@ export default function MedikamentePage() {
                 onClick={() => setTab("active")}
                 className={`flex-1 rounded-xl py-[var(--spacing-2xs)] text-body-small font-medium transition ${
                   tab === "active"
-                    ? "bg-[#6FB48F] text-white"
+                    ? "bg-[#3E7C67] text-white"
                     : "text-foreground-400 hover:text-foreground-700"
                 }`}
               >
@@ -262,7 +262,7 @@ export default function MedikamentePage() {
                 onClick={() => setTab("inactive")}
                 className={`flex-1 rounded-xl py-[var(--spacing-2xs)] text-body-small font-medium transition ${
                   tab === "inactive"
-                    ? "bg-[#6FB48F] text-white"
+                    ? "bg-[#3E7C67] text-white"
                     : "text-foreground-400 hover:text-foreground-700"
                 }`}
               >
@@ -279,7 +279,7 @@ export default function MedikamentePage() {
                 <button
                   type="button"
                   onClick={openAddForm}
-                  className="flex items-center gap-[3px] text-[13px] text-[#6FB48F] hover:text-[#5EA37E] transition"
+                  className="flex items-center gap-[3px] text-[13px] text-[#3E7C67] hover:text-[#346B59] transition"
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
@@ -329,7 +329,7 @@ export default function MedikamentePage() {
                           <button
                             type="button"
                             onClick={() => openEditForm(med)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-[#5EA37E] hover:bg-[#EAF4EE]"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-[#346B59] hover:bg-[#D6EAE2]"
                             aria-label="Bearbeiten"
                             title="Bearbeiten"
                           >
@@ -406,7 +406,7 @@ export default function MedikamentePage() {
                             type="button"
                             onClick={() => handleReactivate(med.id)}
                             disabled={isSaving}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-[#5EA37E] hover:bg-[#EAF4EE] disabled:opacity-50"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:text-[#346B59] hover:bg-[#D6EAE2] disabled:opacity-50"
                             aria-label="Reaktivieren"
                             title="Reaktivieren"
                           >
@@ -466,7 +466,7 @@ export default function MedikamentePage() {
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="z.B. Levetiracetam"
-                      className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20"
+                      className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     />
                   </div>
                   <div className="flex-1">
@@ -478,7 +478,7 @@ export default function MedikamentePage() {
                       value={form.dose}
                       onChange={(e) => setForm({ ...form, dose: e.target.value })}
                       placeholder="500mg"
-                      className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20"
+                      className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     />
                   </div>
                 </div>
@@ -496,8 +496,8 @@ export default function MedikamentePage() {
                         onClick={() => toggleTimeOfDay(opt.value)}
                         className={`rounded-full px-[var(--spacing-xs)] py-[var(--spacing-3xs)] text-body-small font-medium transition ${
                           form.time_of_day.includes(opt.value)
-                            ? "bg-[#EAF4EE] text-[#243B2E] font-medium"
-                            : "bg-[#F2F5F3] text-foreground-500 hover:bg-[#EAF4EE]/50"
+                            ? "bg-[#D6EAE2] text-[#1E3F34] font-medium"
+                            : "bg-[#E4F2EC] text-foreground-500 hover:bg-[#D6EAE2]/50"
                         }`}
                       >
                         {opt.label}
@@ -517,7 +517,7 @@ export default function MedikamentePage() {
                     onChange={(e) =>
                       setForm({ ...form, prescribed_since: e.target.value })
                     }
-                    className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                   />
                 </div>
 
@@ -531,7 +531,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={3}
                     placeholder="Optionale Notizen..."
-                    className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20 resize-none"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none"
                   />
                 </div>
 
@@ -540,7 +540,7 @@ export default function MedikamentePage() {
                   <button
                     type="button"
                     onClick={closeForm}
-                    className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-600 transition hover:bg-background-50"
+                    className="flex-1 rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]"
                   >
                     Abbrechen
                   </button>
@@ -548,7 +548,7 @@ export default function MedikamentePage() {
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex-1 rounded-xl bg-[#6FB48F] px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-white transition hover:bg-[#5EA37E] disabled:opacity-50"
+                    className="flex-1 rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-50"
                   >
                     {isSaving
                       ? "Speichert..."
@@ -596,7 +596,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setDiscontinuationReason(e.target.value)}
                     rows={3}
                     placeholder="z.B. Nebenwirkungen, Umstellung..."
-                    className="w-full rounded-xl border border-[#E6EFEB] bg-white px-[var(--spacing-m)] py-[var(--spacing-xs)] text-body placeholder:text-foreground-300 focus:border-[#6FB48F]/60 focus:outline-none focus:ring-1 focus:ring-[#6FB48F]/20 resize-none"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none"
                   />
                 </div>
                 <div className="flex gap-[var(--spacing-m)] pt-[var(--spacing-s)]">
@@ -606,7 +606,7 @@ export default function MedikamentePage() {
                       setShowDiscontinueModal(null);
                       setDiscontinuationReason("");
                     }}
-                    className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-600 transition hover:bg-background-50"
+                    className="flex-1 rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]"
                   >
                     Abbrechen
                   </button>
@@ -650,7 +650,7 @@ export default function MedikamentePage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(null)}
-                    className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-600 transition hover:bg-background-50"
+                    className="flex-1 rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]"
                   >
                     Abbrechen
                   </button>

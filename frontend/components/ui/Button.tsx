@@ -20,17 +20,17 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'text-body rounded-xl font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+  const baseClasses = 'text-body rounded-2xl font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
   
   const variantClasses = {
-    primary: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus-visible:outline-primary-500',
-    secondary: 'border border-background-300 bg-white text-foreground-800 hover:border-primary-300 hover:bg-primary-50 focus-visible:outline-primary-500',
+    primary: 'bg-[#3E7C67] text-white hover:bg-[#346B59] active:bg-[#2D5C4D] focus-visible:outline-[#3E7C67]',
+    secondary: 'border border-[#9FB8AE] bg-transparent text-[#1E3F34] hover:bg-[#EEF4F1] focus-visible:outline-[#3E7C67]',
   };
 
   const sizeClasses = {
-    sm: 'px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small',
-    md: 'px-[var(--spacing-m)] py-[var(--spacing-s)]',
-    lg: 'px-[var(--spacing-l)] py-[var(--spacing-m)] text-h5',
+    sm: 'px-4 py-2 text-body-small',
+    md: 'px-5 py-3.5',
+    lg: 'px-6 py-4 text-h5',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';

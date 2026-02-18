@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F7F8F7]">
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F2F6F4]">
         <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
           <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
             <div className="mx-auto w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
@@ -74,13 +74,13 @@ export default function ForgotPasswordPage() {
                       In der Produktion würde der Reset-Link per E-Mail versendet werden.
                     </p>
                   </div>
-                  <div className="p-[var(--spacing-m)] bg-[#F7F8F7] rounded-lg border border-background-200/60">
+                  <div className="p-[var(--spacing-m)] bg-[#F2F6F4] rounded-lg border border-background-200/60">
                     <p className="text-body-small text-foreground-600 mb-[var(--spacing-s)] font-medium">
                       Reset-Link:
                     </p>
                     <a 
                       href={resetUrl} 
-                      className="text-[#6FB48F] hover:text-[#5EA37E] text-body-small underline break-all block"
+                      className="text-[#3E7C67] hover:text-[#346B59] text-body-small underline break-all block"
                     >
                       {resetUrl}
                     </a>
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F7F8F7]">
+    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)] bg-[#F2F6F4]">
       <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
         <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] space-y-[var(--spacing-l)]">
           <div className="text-center space-y-[var(--spacing-m)]">
@@ -145,7 +145,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           <div className="text-center pt-[var(--spacing-xs)]">
-            <Link href="/login" className="text-body-small text-[#6FB48F] hover:text-[#5EA37E]">
+            <Link href="/login" className="text-body-small text-[#3E7C67] hover:text-[#346B59]">
               Zurück zum Login
             </Link>
           </div>

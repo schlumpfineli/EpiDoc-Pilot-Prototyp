@@ -46,7 +46,7 @@ export default function KontaktPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] py-[var(--spacing-s)] md:py-[var(--spacing-m)] text-foreground-900" style={{ background: "#F7F8F7" }}>
+      <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] py-[var(--spacing-s)] md:py-[var(--spacing-m)] text-foreground-900" style={{ background: "#F2F6F4" }}>
         <div className="mx-auto max-w-xl">
           <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)]">
             Kontakt
@@ -72,7 +72,7 @@ export default function KontaktPage() {
                 value={form.message}
                 onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
                 placeholder="Beschreiben Sie Ihr Anliegen (mind. 10 Zeichen)..."
-                className="w-full rounded-lg border border-background-200 px-[var(--spacing-s)] py-[var(--spacing-s)] text-body text-foreground-900 placeholder:text-foreground-400 focus:border-[#6FB48F]/60 focus:ring-2 focus:ring-[#6FB48F]/20 focus:outline-none"
+                className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none"
               />
               <p className="text-body-small text-foreground-500 mt-[var(--spacing-2xs)]">
                 {form.message.length} / 2000 Zeichen
@@ -82,7 +82,7 @@ export default function KontaktPage() {
             <button
               type="submit"
               disabled={isSubmitting || (form.message || "").trim().length < 10}
-              className="w-full rounded-lg bg-[#6FB48F] px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white shadow-sm transition hover:bg-[#5EA37E] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Wird gesendet…" : "Nachricht senden"}
             </button>

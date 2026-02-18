@@ -172,7 +172,7 @@ function ScrollTimeSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
-        className={`w-full rounded-lg border border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body text-left shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 cursor-pointer flex items-center justify-between ${isOpen ? "border-primary-500 ring-2 ring-primary-200" : ""}`}
+        className={`w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] text-left focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 cursor-pointer flex items-center justify-between ${isOpen ? "border-[#3E7C67] ring-1 ring-[#3E7C67]/20" : ""}`}
       >
         <span>{value}</span>
         <svg className={`h-4 w-4 text-foreground-500 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -967,10 +967,10 @@ export default function DiaryPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:py-[var(--spacing-xl)] text-foreground-900" style={{ background: "#F3F6F4" }}>
+      <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:py-[var(--spacing-xl)] text-foreground-900" style={{ background: "#F2F6F4" }}>
       <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
         <div>
-          <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]" style={{ color: "#243B2E" }}>
+          <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]" style={{ color: "#1E3F34" }}>
             Anfallstagebuch
           </h1>
         </div>
@@ -1048,10 +1048,10 @@ export default function DiaryPage() {
               const hasSeizure = entry?.hasSeizure;
               const hasEmergency = entry?.hasEmergencyMed;
 
-              let cellClass = "bg-transparent text-foreground-700 hover:bg-[#EAF4EE]/50";
+              let cellClass = "bg-transparent text-foreground-700 hover:bg-[#D6EAE2]/50";
 
               if (isCurrentDay) {
-                cellClass = "bg-[#EAF4EE] text-[#243B2E] ring-1 ring-[#6FB48F]";
+                cellClass = "bg-[#D6EAE2] text-[#1E3F34] ring-1 ring-[#3E7C67]";
               }
 
               return (
@@ -1061,7 +1061,7 @@ export default function DiaryPage() {
                   className={`
                     relative aspect-square rounded-xl transition-all duration-200
                     ${cellClass}
-                    hover:ring-1 hover:ring-[#6FB48F]/40
+                    hover:ring-1 hover:ring-[#3E7C67]/40
                     ${entry ? "font-medium" : "font-normal"}
                   `}
                 >
@@ -1069,8 +1069,8 @@ export default function DiaryPage() {
                     <span className="text-body sm:text-h5">{format(day, "d")}</span>
                     {(hasSeizure || hasEmergency) && (
                       <div className="flex items-center justify-center gap-[3px] mt-[1px]">
-                        {hasSeizure && <span className="block w-[5px] h-[5px] rounded-full bg-[#5FAF87]" />}
-                        {hasEmergency && <span className="block w-[5px] h-[5px] rounded-full bg-[#3E8FB8]" />}
+                        {hasSeizure && <span className="block w-[5px] h-[5px] rounded-full bg-[#3E7C67]" />}
+                        {hasEmergency && <span className="block w-[5px] h-[5px] rounded-full bg-[#4C7A8A]" />}
                       </div>
                     )}
                   </div>
@@ -1428,10 +1428,10 @@ export default function DiaryPage() {
                         ? formData.type.join(", ")
                         : "Bitte auswählen"
                     }
-                    className={`w-full cursor-pointer rounded-xl border px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:outline-none transition ${
+                    className={`w-full cursor-pointer rounded-xl border bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:outline-none transition ${
                       typeError 
                         ? "border-warning-400 focus:border-warning-400 focus:ring-1 focus:ring-warning-200" 
-                        : "border-background-200/60 focus:border-primary-400 focus:ring-1 focus:ring-primary-200"
+                        : "border-[#DDE7E2] focus:border-[#3E7C67] focus:ring-1 focus:ring-[#3E7C67]/20"
                     }`}
                     placeholder="Bitte auswählen"
                   />
@@ -1566,7 +1566,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Min"
-                            className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationMinutes && (
                             <button
@@ -1608,7 +1608,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Sek"
-                            className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationSeconds && (
                             <button
@@ -1691,7 +1691,7 @@ export default function DiaryPage() {
                                 seizureCount: e.target.value,
                               }))
                             }
-                            className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="Anzahl"
                           />
                           {formData.seizureCount && formData.seizureCount !== "1" && (
@@ -1791,7 +1791,7 @@ export default function DiaryPage() {
                         ? formData.afterEffects.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0 && (
@@ -1838,7 +1838,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Weitere Auffälligkeiten eintragen"
-                    className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                   />
                   {formData.customAfterEffects && (
                     <button
@@ -1882,7 +1882,7 @@ export default function DiaryPage() {
                         ? formData.triggers.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
+                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.triggers) && formData.triggers.length > 0 && (
@@ -1929,7 +1929,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Andere Auslöser eintragen"
-                    className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                   />
                   {formData.customTriggers && (
                     <button
@@ -2009,7 +2009,7 @@ export default function DiaryPage() {
                         }))
                       }
                       placeholder="Name des Notfallmedikaments"
-                      className="w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] pr-10 py-[var(--spacing-xs)] text-body focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200"
+                      className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     />
                     {formData.emergencyMedName && (
                       <button
@@ -2063,14 +2063,14 @@ export default function DiaryPage() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="flex-1 rounded-xl border border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-600 transition hover:bg-background-50"
+                  className="flex-1 rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]"
                 >
                   Abbrechen
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex-1 rounded-xl bg-primary-500 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSaving ? "Wird gespeichert…" : "Speichern"}
                 </button>

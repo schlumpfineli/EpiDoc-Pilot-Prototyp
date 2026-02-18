@@ -68,9 +68,9 @@ export const Modal: React.FC<ModalProps> = ({
         className={`modal-container ${sizeClasses[size]}`}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-background-200/60 bg-white px-5 py-4 rounded-t-2xl shrink-0">
+          <div className="flex items-center justify-between border-b border-[#DDE7E2] bg-white px-5 py-4 rounded-t-2xl shrink-0">
             {title && (
-              <h2 id="modal-title" className="text-body font-medium text-foreground-900">
+              <h2 id="modal-title" className="text-body font-medium text-[#1E3F34]">
                 {title}
               </h2>
             )}

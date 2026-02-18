@@ -11,17 +11,18 @@ import { useRoleText } from '@/lib/hooks/useRoleText';
 // ─── Design Tokens ──────────────────────────────────────────────────────────
 
 const C = {
-  bg:          '#F6F8F7',
-  border:      '#E3EAE6',
-  brand:       '#243B2E',
-  active:      '#2F6B55',
-  emotional:   '#3E7C67',
-  inactive:    '#9BAFA6',
-  secondary:   '#6F7F75',
-  activeBg:    '#E4F2EC',
-  indicator:   '#7BC4A5',
-  skeleton:    '#E5ECE8',
-  emotionalGradient: 'linear-gradient(180deg, #E9F4EF 0%, #F6FAF8 100%)',
+  bg:          '#FFFFFF',
+  border:      '#DDE7E2',
+  brand:       '#1E3F34',
+  iconActive:  '#3E7C67',
+  labelActive: '#1E3F34',
+  emotional:   '#1E3F34',
+  inactive:    '#5A7368',
+  secondary:   '#3F5F54',
+  activeBg:    '#D6EAE2',
+  indicator:   '#3E7C67',
+  skeleton:    '#DDE7E2',
+  emotionalGradient: 'linear-gradient(180deg, #E4F2EC 0%, #F2F6F4 100%)',
 } as const;
 
 const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password'];
@@ -118,8 +119,10 @@ export function Navbar() {
   const handleLogout = () => { setMenuOpen(false); logout(); };
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
-  const tabColor = (active: boolean, emotional: boolean) =>
-    active ? (emotional ? C.emotional : C.active) : C.inactive;
+  const tabIconColor = (active: boolean, emotional: boolean) =>
+    active ? (emotional ? C.emotional : C.iconActive) : C.inactive;
+  const tabLabelColor = (active: boolean) =>
+    active ? C.labelActive : C.inactive;
 
   const desktopLinks = [
     ...TAB_DEFS.map(tab => ({ href: tab.href, label: t(tab.label) })),
@@ -147,8 +150,8 @@ export function Navbar() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all duration-150"
-                      style={{ color: active ? C.active : C.inactive, background: active ? C.activeBg : 'transparent' }}
+                      className="rounded-lg px-3 py-1.5 text-[13px] font-medium"
+                      style={{ color: active ? C.labelActive : C.inactive, background: active ? C.activeBg : 'transparent', transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                     >
                       {link.label}
                     </Link>
@@ -211,7 +214,7 @@ export function Navbar() {
                 href="/einstellungen"
                 onClick={() => setMenuOpen(false)}
                 className="block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors"
-                style={{ color: isActive('/einstellungen') ? C.active : C.secondary }}
+                style={{ color: isActive('/einstellungen') ? C.labelActive : C.secondary }}
               >
                 {t('Einstellungen')}
               </Link>
@@ -242,7 +245,8 @@ export function Navbar() {
             {TAB_DEFS.map((tab) => {
               const active = isActive(tab.href);
               const emotional = tab.type === 'emotional';
-              const color = tabColor(active, emotional);
+              const iconColor = tabIconColor(active, emotional);
+              const labelColor = tabLabelColor(active);
 
               return (
                 <Link
@@ -254,28 +258,28 @@ export function Navbar() {
                 >
                   {active && (
                     <div
-                      className="absolute inset-x-1 top-1 bottom-1.5 rounded-2xl transition-all duration-150"
-                      style={{ background: emotional ? C.emotionalGradient : C.activeBg }}
+                      className="absolute inset-x-1 top-1 bottom-1.5 rounded-2xl"
+                      style={{ background: emotional ? C.emotionalGradient : C.activeBg, transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                     />
                   )}
 
                   <div
-                    className="relative z-10 transition-transform duration-[120ms] ease-out"
-                    style={{ color, transform: active ? 'scale(1.08)' : 'scale(1)' }}
+                    className="relative z-10"
+                    style={{ color: iconColor, transform: active ? 'scale(1.08)' : 'scale(1)', transition: 'transform 120ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   >
                     <tab.icon active={active} />
                   </div>
 
                   <span
-                    className="relative z-10 text-[11px] font-medium transition-colors duration-[120ms] ease-out"
-                    style={{ color }}
+                    className="relative z-10 text-[11px] font-medium"
+                    style={{ color: labelColor, transition: 'color 120ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   >
                     {tab.label}
                   </span>
 
                   <div
-                    className="absolute bottom-[5px] left-1/2 -translate-x-1/2 rounded-[3px] transition-all duration-[120ms] ease-out"
-                    style={{ width: active ? 18 : 0, height: 3, background: C.indicator, opacity: active ? 1 : 0 }}
+                    className="absolute bottom-[5px] left-1/2 -translate-x-1/2 rounded-[3px]"
+                    style={{ width: active ? 18 : 0, height: 3, background: C.indicator, opacity: active ? 1 : 0, transition: 'all 120ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   />
                 </Link>
               );

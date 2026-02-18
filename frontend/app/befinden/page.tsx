@@ -61,17 +61,17 @@ type CustomSymptom = {
 };
 
 const COLORS = {
-  bg:        '#F7F8F7',
-  header:    'linear-gradient(180deg, #EEF5F2 0%, #F6F9F8 100%)',
-  title:     '#243B2E',
-  subtitle:  '#5E7468',
-  muted:     '#8A9E93',
-  primary:   '#6FB48F',
-  hover:     '#5EA37E',
-  surface:   '#EBF4EF',
-  surfaceAlt:'#F2F5F3',
-  card:      '#FEFEFE',
-  hoverBg:   '#D6EDDF',
+  bg:        '#F2F6F4',
+  header:    'linear-gradient(180deg, #E4F2EC 0%, #F2F6F4 100%)',
+  title:     '#1E3F34',
+  subtitle:  '#3F5F54',
+  muted:     '#6E847A',
+  primary:   '#3E7C67',
+  hover:     '#346B59',
+  surface:   '#D6EAE2',
+  surfaceAlt:'#E4F2EC',
+  card:      '#FFFFFF',
+  border:    '#DDE7E2',
 } as const;
 
 export default function BefindenPage() {
@@ -597,8 +597,8 @@ export default function BefindenPage() {
   };
 
   const getRatingTextClass = (rating: number): string => {
-    if (rating <= 4) return 'text-[#243B2E]';
-    return 'text-[#243B2E]/80';
+    if (rating <= 4) return 'text-[#1E3F34]';
+    return 'text-[#1E3F34]/80';
   };
 
   const getSliderStyle = (rating: number | null): React.CSSProperties => {
@@ -697,8 +697,8 @@ export default function BefindenPage() {
                 disabled={isSaving}
                 className={`flex-1 rounded-lg py-1.5 text-body-small font-medium transition-colors duration-150 ease-out ${
                   isActive
-                    ? 'bg-[#EBF4EF] text-[#243B2E]'
-                    : 'bg-[#F2F5F3] text-foreground-400 hover:bg-[#EBF4EF]/50'
+                    ? 'bg-[#D6EAE2] text-[#1E3F34]'
+                    : 'bg-[#E4F2EC] text-foreground-400 hover:bg-[#D6EAE2]/50'
                 }`}
               >
                 {value}
@@ -777,7 +777,7 @@ export default function BefindenPage() {
                     setMedicationName((prev) => ({ ...prev, [medicationKey]: e.target.value }));
                   }}
                   placeholder="z.B. Lamotrigin"
-                  className="w-full rounded-xl border border-[#EBF4EF] bg-[#FEFEFE] px-4 py-2 text-body text-foreground-900 placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100"
+                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                 />
               </div>
               <div>
@@ -791,7 +791,7 @@ export default function BefindenPage() {
                     setMedicationReason((prev) => ({ ...prev, [medicationKey]: e.target.value }));
                   }}
                   placeholder="z.B. Vergessen, Nebenwirkungen"
-                  className="w-full rounded-xl border border-[#EBF4EF] bg-[#FEFEFE] px-4 py-2 text-body text-foreground-900 placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100"
+                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                 />
               </div>
             </div>
@@ -823,7 +823,7 @@ export default function BefindenPage() {
                   saveChanges(itemId, selectedTimeSlot);
                 }}
                 disabled={isSaving}
-                className="w-full rounded-xl bg-[#6FB48F] px-5 py-2.5 text-body-small font-medium text-white transition-colors hover:bg-[#5EA37E] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition-colors hover:bg-[#346B59] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Speichern
               </button>
@@ -844,7 +844,7 @@ export default function BefindenPage() {
         })()}
 
         {deleteConf && ((isAllDay && deleteConf.timeOfDay === 'allDay') || (!isAllDay && deleteConf.timeOfDay === timeOfDay)) && (
-          <div className="mt-3 rounded-xl border border-[#EBF4EF] bg-[#F2F5F3] p-3">
+          <div className="mt-3 rounded-xl border border-[#D6EAE2] bg-[#E4F2EC] p-3">
             <p className="mb-2 text-body-small text-foreground-700">
               {isAllDay ? 'Möchtest du alle Einträge für diesen Tag entfernen?' : 'Möchtest du diesen Eintrag entfernen?'}
             </p>
@@ -948,27 +948,27 @@ export default function BefindenPage() {
   const getChipClass = (isSelected: boolean): string =>
     `flex flex-col w-full min-h-12 items-center justify-center gap-1 rounded-xl px-3 py-2 text-body-small transition-all duration-200 border ${
       isSelected
-        ? 'bg-[#EBF4EF] border-[#EBF4EF] text-[#243B2E]'
-        : 'bg-[#F2F5F3] border-transparent text-foreground-400 hover:bg-[#EBF4EF]/50 hover:text-foreground-500'
+        ? 'bg-[#D6EAE2] border-[#D6EAE2] text-[#1E3F34]'
+        : 'bg-[#E4F2EC] border-transparent text-foreground-400 hover:bg-[#D6EAE2]/50 hover:text-foreground-500'
     }`;
 
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pb-20 xl:pb-0" style={{ background: "#F7F8F7" }}>
+      <div className="min-h-screen pb-20 xl:pb-0" style={{ background: "#F2F6F4" }}>
         <div className="mx-auto max-w-4xl px-4 pt-0 pb-6 sm:px-6 lg:px-8">
           {/* Hero */}
           <div
             className="rounded-b-3xl px-4 pt-10 pb-8 -mx-4 sm:-mx-6 lg:-mx-8 sm:px-6 lg:px-8 mb-8"
-            style={{ background: "linear-gradient(180deg, #EEF5F2 0%, #F6F9F8 100%)" }}
+            style={{ background: "linear-gradient(180deg, #E4F2EC 0%, #F2F6F4 100%)" }}
           >
-            <h1 className="text-center text-h4 sm:text-h3 font-medium" style={{ color: "#243B2E" }}>
+            <h1 className="text-center text-h4 sm:text-h3 font-medium" style={{ color: "#1E3F34" }}>
               {t("Wie geht es dir heute?")}
             </h1>
-            <p className="mt-1 text-center text-body-small" style={{ color: "#5E7468" }}>
+            <p className="mt-1 text-center text-body-small" style={{ color: "#3F5F54" }}>
               {format(selectedDate, 'd. MMMM yyyy', { locale: de })}
             </p>
-            <p className="mt-3 text-center text-[13px]" style={{ color: "#8A9E93" }}>
+            <p className="mt-3 text-center text-[13px]" style={{ color: "#6E847A" }}>
               Ein kurzer Check-in hilft dir, Muster zu erkennen.
             </p>
           </div>
@@ -994,7 +994,7 @@ export default function BefindenPage() {
             <p className="text-[13px] text-foreground-300 mb-4">
               Symptome, die du regelmäßig erfasst.
             </p>
-            <div className="rounded-2xl bg-[#FEFEFE] divide-y divide-background-200/40">
+            <div className="rounded-2xl bg-[#FFFFFF] divide-y divide-background-200/40">
               {personalItemIds.map((itemId) => {
                 const item = allItems.find((i) => i.id === itemId) || coreItems.find((i) => i.id === itemId);
                 if (!item) return null;
@@ -1005,13 +1005,13 @@ export default function BefindenPage() {
                   <div key={itemId} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
                     {isRecentlySaved(itemId) && (
                       <div className="absolute top-2.5 right-3 z-10 animate-in fade-in duration-150">
-                        <svg className="h-3.5 w-3.5 text-[#243B2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        <svg className="h-3.5 w-3.5 text-[#1E3F34]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       </div>
                     )}
                     <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
                       <span className="text-body font-normal text-foreground-800">{item.label}</span>
                       <div className="flex items-center gap-2">
-                        {hasEntry && <span className="rounded-full bg-[#EBF4EF] px-2 py-0.5 text-[10px] font-medium text-[#243B2E]">Heute</span>}
+                        {hasEntry && <span className="rounded-full bg-[#D6EAE2] px-2 py-0.5 text-[10px] font-medium text-[#1E3F34]">Heute</span>}
                         {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-foreground-500">Ø {avgRating}</span>}
                         <svg className={`h-3.5 w-3.5 text-foreground-300 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                       </div>
@@ -1045,7 +1045,7 @@ export default function BefindenPage() {
               <h2 className="text-[13px] font-medium text-foreground-400 mb-4">
                 Weitere Symptome
               </h2>
-              <div className="rounded-2xl bg-[#FEFEFE] divide-y divide-background-200/40">
+              <div className="rounded-2xl bg-[#FFFFFF] divide-y divide-background-200/40">
                 {(showAllWeitere ? weitereItems : weitereItems.slice(0, WEITERE_INITIAL_COUNT)).map((item) => {
                   const { avgRating } = getItemStats(item.id);
                   const isExpanded = expandedItems[item.id];
@@ -1054,7 +1054,7 @@ export default function BefindenPage() {
                     <div key={item.id} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
                       {isRecentlySaved(item.id) && (
                         <div className="absolute top-2.5 right-3 z-10 animate-in fade-in duration-150">
-                          <svg className="h-3.5 w-3.5 text-[#243B2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          <svg className="h-3.5 w-3.5 text-[#1E3F34]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         </div>
                       )}
                       <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
@@ -1094,7 +1094,7 @@ export default function BefindenPage() {
                     <div key={item.id} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
                       {isRecentlySaved(item.id) && (
                         <div className="absolute top-2.5 right-14 z-10 animate-in fade-in duration-150">
-                          <svg className="h-3.5 w-3.5 text-[#243B2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          <svg className="h-3.5 w-3.5 text-[#1E3F34]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         </div>
                       )}
                       <div className="flex w-full items-center">
@@ -1137,10 +1137,10 @@ export default function BefindenPage() {
                     <div className="flex items-center gap-2">
                       <input ref={newSymptomInputRef} type="text" value={newCustomSymptomName} onChange={(e) => setNewCustomSymptomName(e.target.value)}
                         placeholder="Name eingeben…" autoComplete="off"
-                        className="min-w-0 flex-1 rounded-xl border border-[#EBF4EF] bg-[#FEFEFE] px-3 py-2 text-body text-foreground-900 placeholder:text-foreground-300 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-100"
+                        className="min-w-0 flex-1 rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddCustomSymptom(); if (e.key === 'Escape') { setNewCustomSymptomName(''); setShowAddCustomSymptom(false); } }}
                       />
-                      <button type="button" onClick={handleAddCustomSymptom} className="rounded-xl bg-[#6FB48F] px-3 py-2 text-body-small font-medium text-white hover:bg-[#5EA37E] transition">Speichern</button>
+                      <button type="button" onClick={handleAddCustomSymptom} className="rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white hover:bg-[#346B59] transition">Speichern</button>
                       <button type="button" onClick={() => { setNewCustomSymptomName(''); setShowAddCustomSymptom(false); }} className="text-[12px] text-foreground-300 hover:text-foreground-500 transition">Abbrechen</button>
                     </div>
                   ) : (
@@ -1172,7 +1172,7 @@ export default function BefindenPage() {
       {/* Snackbar für Undo nach Löschen */}
       {undoState && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="flex items-center gap-3 rounded-xl bg-[#FEFEFE] px-4 py-3 border border-[#EBF4EF]">
+          <div className="flex items-center gap-3 rounded-xl bg-[#FFFFFF] px-4 py-3 border border-[#D6EAE2]">
             <span className="text-body-small text-foreground-600">Eintrag gelöscht</span>
             <button type="button" onClick={undoDelete} className="text-body-small font-medium text-primary-500 hover:text-primary-600 transition-colors">
               Rückgängig

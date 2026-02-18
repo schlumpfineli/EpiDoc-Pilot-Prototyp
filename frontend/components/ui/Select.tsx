@@ -37,11 +37,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   const selectId = useMemo(() => id || generatedId, [id, generatedId]);
   const hasError = !!error;
 
-  const baseClasses = 'text-body rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition appearance-none bg-white';
+  const baseClasses = 'text-body rounded-xl border bg-white text-[#1E3F34] placeholder:text-[#6E847A] focus:outline-none focus:ring-1 transition appearance-none';
   const stateClasses = hasError
     ? 'border-warning-500 focus:border-warning-500 focus:ring-warning-200'
-    : 'border-background-200 focus:border-primary-500 focus:ring-primary-200';
-  const sizeClasses = 'px-[var(--spacing-m)] py-[var(--spacing-s)]';
+    : 'border-[#DDE7E2] focus:border-[#3E7C67] focus:ring-[#3E7C67]/20';
+  const sizeClasses = 'px-4 py-2.5';
   const widthClass = fullWidth ? 'w-full' : '';
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -55,7 +55,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
       {label && (
         <label
           htmlFor={selectId}
-          className="text-body block font-medium text-foreground-800"
+          className="text-body block font-medium text-[#1E3F34]"
         >
           {label}
           {props.required && <span className="text-foreground-800 ml-1">*</span>}

@@ -18,8 +18,9 @@
      * Font mapping
      * Maps the font added to the HTML body to tailwind variable
      */
-    --font-general-sans: var(--font-general-sans);
-    --font-cabinet-grotesk: var(--font-cabinet-grotesk);
+    --font-inter: var(--font-inter);
+    --font-general-sans: var(--font-inter);
+    --font-cabinet-grotesk: var(--font-inter);
 
     /*
      * Semantic color mappings — Neues Farbschema
@@ -182,15 +183,31 @@
      * 
      * Usage: p-s, m-l, gap-m, space-y-s, etc.
      */
-    --spacing-3xs: clamp(0.1875rem, 0.1658rem + 0.1087vw, 0.25rem); /* 3px - 4px */
-    --spacing-2xs: clamp(0.375rem, 0.3533rem + 0.1087vw, 0.4375rem); /* 6px - 7px */
-    --spacing-xs: clamp(0.5625rem, 0.519rem + 0.2174vw, 0.6875rem); /* 9px - 11px */
-    --spacing-s: clamp(0.75rem, 0.7065rem + 0.2174vw, 0.875rem); /* 12px - 14px */
-    --spacing-m: clamp(1.125rem, 1.0598rem + 0.3261vw, 1.3125rem); /* 18px - 21px */
-    --spacing-l: clamp(1.5rem, 1.413rem + 0.4348vw, 1.75rem); /* 24px - 28px */
-    --spacing-xl: clamp(2.25rem, 2.1196rem + 0.6522vw, 2.625rem); /* 36px - 42px */
-    --spacing-2xl: clamp(3rem, 2.8261rem + 0.8696vw, 3.5rem); /* 48px - 56px */
-    --spacing-3xl: clamp(4.5rem, 4.2391rem + 1.3043vw, 5.25rem); /* 72px - 84px */
+    --spacing-3xs: 0.125rem;  /*  2px */
+    --spacing-2xs: 0.25rem;   /*  4px  — xs */
+    --spacing-xs:  0.5rem;    /*  8px  — sm */
+    --spacing-s:   0.75rem;   /* 12px */
+    --spacing-m:   1rem;      /* 16px  — md */
+    --spacing-l:   1.5rem;    /* 24px  — lg */
+    --spacing-xl:  2rem;      /* 32px  — xl */
+    --spacing-2xl: 3rem;      /* 48px  — 2xl */
+    --spacing-3xl: 4rem;      /* 64px */
+
+    /*
+     * Border Radius Scale
+     */
+    --radius-sm:   0.5rem;    /*  8px */
+    --radius-md:   0.75rem;   /* 12px */
+    --radius-lg:   1rem;      /* 16px */
+    --radius-xl:   1.25rem;   /* 20px */
+    --radius-pill: 999px;
+
+    /*
+     * Shadow Scale (medical-calm, use sparingly)
+     */
+    --shadow-sm: 0 1px 2px rgba(30, 63, 52, 0.05);
+    --shadow-md: 0 4px 12px rgba(30, 63, 52, 0.08);
+    --shadow-lg: 0 8px 24px rgba(30, 63, 52, 0.10);
 
     /*
      * Responsive Typography Scale
@@ -228,42 +245,13 @@
      * Ensures optimal readability across all viewport sizes
      * Generally follows 1.5x font size for body text, tighter for headlines
      */
-    --leading-body-small: clamp(
-        1.125rem,
-        1rem + 0.625vw,
-        1.375rem
-    ); /* 18px - 22px */
-    --leading-body: clamp(1.375rem, 1.25rem + 0.625vw, 1.625rem); /* 22px - 26px */
-    --leading-h5: clamp(
-        1.08rem,
-        0.9991rem +
-        0.4043vw,
-        1.3125rem
-    ); /* 17.28px - 21px */
-    --leading-h4: clamp(
-        1.29625rem,
-        1.1762rem +
-        0.6vw,
-        1.64125rem
-    ); /* 20.74px - 26.26px */
-    --leading-h3: clamp(
-        1.555625rem,
-        1.3835rem +
-        0.8609vw,
-        2.050625rem
-    ); /* 24.89px - 32.81px */
-    --leading-h2: clamp(
-        1.86625rem,
-        1.6236rem +
-        1.213vw,
-        2.56375rem
-    ); /* 29.86px - 41.02px */
-    --leading-h1: clamp(
-        2.239375rem,
-        1.9039rem +
-        1.6772vw,
-        3.20375rem
-    ); /* 35.83px - 51.26px */
+    --leading-body-small: 1.5; /* 14px × 1.5 = 21px */
+    --leading-body: 1.5; /* 16px × 1.5 = 24px */
+    --leading-h5: 1.3;
+    --leading-h4: 1.3;
+    --leading-h3: 1.3;
+    --leading-h2: 1.3;
+    --leading-h1: 1.3;
     
     /* Legacy support */
     --text-body-small--line-height: var(--leading-body-small);
@@ -274,41 +262,11 @@
     --text-headline-2--line-height: var(--leading-h2);
     --text-headline-1--line-height: var(--leading-h1);
 
- /*
- * Animation Easing Functions
- *
- * Custom cubic-bezier curves for smooth, natural animations
- * Provides variety beyond Tailwind's default easing options
- *
- * Usage in Tailwind classes:
- * - ease-[--ease-out-quart] → transition-timing-function: var(--ease-out-quart);
- * - ease-[--ease-in-cubic] → transition-timing-function: var(--ease-in-cubic);
- *
- * Example: transition-all duration-300 ease-[--ease-out-quart]
- */
-    /* Ease In - Slow start, fast finish */
-    --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* Gentle acceleration */
-    --ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19); /* Medium acceleration */
-    --ease-in-quart: cubic-bezier(0.895, 0.03, 0.685, 0.22); /* Strong acceleration */
-    --ease-in-quint: cubic-bezier(0.755, 0.05, 0.855, 0.06); /* Very strong acceleration */
-    --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035); /* Exponential acceleration */
-    --ease-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.335); /* Circular acceleration */
-
-    /* Ease Out - Fast start, slow finish */
-    --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Gentle deceleration */
-    --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1); /* Medium deceleration */
-    --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1); /* Strong deceleration (popular) */
-    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1); /* Very strong deceleration */
-    --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1); /* Exponential deceleration */
-    --ease-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1); /* Circular deceleration */
-
-    /* Ease In Out - Slow start and finish, fast middle */
-    --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955); /* Gentle S-curve */
-    --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1); /* Medium S-curve */
-    --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1); /* Strong S-curve */
-    --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1); /* Very strong S-curve */
-    --ease-in-out-expo: cubic-bezier(1, 0, 0, 1); /* Exponential S-curve */
-    --ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Circular S-curve */
+    /* ── Motion Tokens ── */
+    --motion-fast:     120ms;
+    --motion-normal:   200ms;
+    --motion-slow:     300ms;
+    --ease-standard:   cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /*
@@ -319,8 +277,6 @@
     :root {
         --font-size-body-small: clamp(1rem, 1rem + 0.2vw, 1.125rem); /* 16px - 18px */
         --font-size-body: clamp(1.125rem, 1.125rem + 0.2vw, 1.25rem); /* 18px - 20px */
-        --leading-body-small: clamp(1.5rem, 1.5rem + 0.3vw, 1.75rem);
-        --leading-body: clamp(1.75rem, 1.75rem + 0.3vw, 2rem);
     }
 }
 
@@ -335,12 +291,13 @@ html {
 }
 
 body {
+    font-family: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
     font-size: var(--font-size-body);
     line-height: var(--leading-body);
     overflow-x: hidden;
     overflow-y: auto;
     min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile devices */
+    min-height: 100dvh;
 }
 
 /**
@@ -394,7 +351,7 @@ body {
 
 .react-datepicker__input-container input {
     width: 100%;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-background-200);
     padding: var(--spacing-2xs) var(--spacing-m);
     font-size: var(--font-size-body);
@@ -408,9 +365,9 @@ body {
 }
 
 .react-datepicker {
-    font-family: var(--font-general-sans);
+    font-family: var(--font-inter), Inter, system-ui, sans-serif;
     border: 1px solid var(--color-background-200);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-md);
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     font-size: var(--font-size-body);
 }
@@ -442,7 +399,7 @@ body {
 .react-datepicker__header {
     background-color: var(--color-background-50);
     border-bottom: 1px solid var(--color-background-200);
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
     padding-top: 0.75rem;
 }
 
@@ -519,10 +476,10 @@ body {
   border-radius: 2px;
   background: linear-gradient(
     to right,
-    #EBF4EF 0%,
-    #6FB48F var(--slider-fill-percentage, 50%),
-    #EEF3F0 var(--slider-fill-percentage, 50%),
-    #EEF3F0 100%
+    #D6EAE2 0%,
+    #3E7C67 var(--slider-fill-percentage, 50%),
+    #DDE7E2 var(--slider-fill-percentage, 50%),
+    #DDE7E2 100%
   );
 }
 
@@ -533,7 +490,7 @@ body {
   height: 1.125rem;
   border-radius: 50%;
   background: #fff;
-  border: 2px solid #6FB48F;
+  border: 2px solid #3E7C67;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all 150ms ease-out;
@@ -541,8 +498,8 @@ body {
 }
 
 .rating-slider::-webkit-slider-thumb:hover {
-  border-color: #5EA37E;
-  box-shadow: 0 0 0 4px rgba(111, 180, 143, 0.15), 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-color: #346B59;
+  box-shadow: 0 0 0 4px rgba(62, 124, 103, 0.15), 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .rating-slider:disabled::-webkit-slider-thumb {
@@ -557,10 +514,10 @@ body {
   border-radius: 2px;
   background: linear-gradient(
     to right,
-    #EBF4EF 0%,
-    #6FB48F var(--slider-fill-percentage, 50%),
-    #EEF3F0 var(--slider-fill-percentage, 50%),
-    #EEF3F0 100%
+    #D6EAE2 0%,
+    #3E7C67 var(--slider-fill-percentage, 50%),
+    #DDE7E2 var(--slider-fill-percentage, 50%),
+    #DDE7E2 100%
   );
   border: none;
 }
@@ -570,15 +527,15 @@ body {
   height: 1.125rem;
   border-radius: 50%;
   background: #fff;
-  border: 2px solid #6FB48F;
+  border: 2px solid #3E7C67;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all 150ms ease-out;
 }
 
 .rating-slider::-moz-range-thumb:hover {
-  border-color: #5EA37E;
-  box-shadow: 0 0 0 4px rgba(111, 180, 143, 0.15), 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-color: #346B59;
+  box-shadow: 0 0 0 4px rgba(62, 124, 103, 0.15), 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .rating-slider:disabled::-moz-range-thumb {
@@ -651,9 +608,21 @@ div.react-datepicker__year-option {
 .modal-overlay {
     @apply fixed inset-0 z-50 flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px];
     padding: var(--spacing-s);
+    animation: modal-fade-in var(--motion-normal) var(--ease-standard) both;
 }
 
 .modal-container {
     @apply w-full max-h-[90vh] rounded-2xl bg-white flex flex-col;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    animation: modal-slide-up var(--motion-slow) var(--ease-standard) both;
+}
+
+@keyframes modal-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
