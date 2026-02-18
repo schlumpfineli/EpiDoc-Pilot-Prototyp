@@ -543,6 +543,27 @@ body {
   cursor: not-allowed;
 }
 
+/* Befinden: Bewertet + Aktiv Bearbeitung – Slider-Varianten */
+.rating-slider--editing-saved::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #3F7A63 0%,
+    #3F7A63 var(--slider-fill-percentage, 50%),
+    #BFD8CF var(--slider-fill-percentage, 50%),
+    #BFD8CF 100%
+  );
+}
+
+.rating-slider--editing-saved::-moz-range-track {
+  background: linear-gradient(
+    to right,
+    #3F7A63 0%,
+    #3F7A63 var(--slider-fill-percentage, 50%),
+    #BFD8CF var(--slider-fill-percentage, 50%),
+    #BFD8CF 100%
+  );
+}
+
 /* Begrenze die Höhe der Jahresauswahl auf 3 sichtbare Jahre */
 .react-datepicker__year-dropdown,
 .react-datepicker__year-dropdown-container,

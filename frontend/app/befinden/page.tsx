@@ -74,6 +74,37 @@ const COLORS = {
   border:    '#DDE7E2',
 } as const;
 
+// Befinden-Card States (visuelle Rückmeldung)
+const BEFINDEN_CARD = {
+  default: {
+    bg: '#FFFFFF',
+    border: '1px solid #D6E3DD',
+    title: '#2F4F43',
+    chevron: '#5F7D72',
+    shadow: '0 2px 6px rgba(47,79,67,0.06)',
+  },
+  hover: { bg: '#F4F7F5', border: '1px solid #C8DBD3' },
+  expanded: {
+    bg: '#F9FBFA',
+    border: '1px solid #CFE2DB',
+    chevron: '#3F7A63',
+    topAccent: '3px solid #3F7A63',
+  },
+  bewertet: {
+    bg: '#E6F1EC',
+    border: '1.5px solid #3F7A63',
+    title: '#2F4F43',
+    valueText: '#2E6F57',
+    checkIcon: '#3F7A63',
+  },
+  bewertetEdit: {
+    bg: '#DFF2E8',
+    border: '2px solid #2E6F57',
+    sliderActive: '#3F7A63',
+    sliderInactive: '#BFD8CF',
+  },
+} as const;
+
 export default function BefindenPage() {
   const { t } = useRoleText();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -84,7 +115,9 @@ export default function BefindenPage() {
   const isRecentlySaved = (itemId: string) => Object.keys(savedConfirmations).some(k => k.startsWith(itemId));
   const [deleteConfirmations, setDeleteConfirmations] = useState<Record<string, { date: string; timeOfDay: TimeOfDay | 'allDay' } | null>>({});
   const [history, setHistory] = useState<Befinden[]>([]);
-  const [allHistory, setAllHistory] = useState<Befinden[]>([]); // Alle Daten für Übersicht
+  const [optimisticEntries, setOptimisticEntries] = useState<Befinden[]>([]);
+  const [, setForceRender] = useState(0); // Erzwingt Re-Render nach localStorage-Schreibzugriff
+  const [allHistory, setAllHistory] = useState<Befinden[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   
@@ -161,8 +194,11 @@ export default function BefindenPage() {
       
   // Lade Historie
   useEffect(() => {
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    setOptimisticEntries([]);
+    if (typeof window !== 'undefined') localStorage.removeItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`);
     loadHistory();
-    loadAllHistory(); // Lade auch alle Daten für Übersicht
+    loadAllHistory();
   }, [selectedDate]);
 
   // Fokus auf Eingabefeld, wenn „Hinzufügen“ geöffnet wird
@@ -243,37 +279,89 @@ export default function BefindenPage() {
     }));
   };
 
+  const BEFINDEN_OPTIMISTIC_KEY = 'befinden-optimistic';
+
+  const getLocalOptimisticEntries = (): Befinden[] => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const raw = localStorage.getItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const setLocalOptimisticEntries = (entries: Befinden[]) => {
+    if (typeof window === 'undefined') return;
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    localStorage.setItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`, JSON.stringify(entries));
+  };
+
+  // Hilfsfunktion: Optimistisches Update + Card schließen
+  const applyOptimisticSave = (symptomId: string, timeOfDay: TimeOfDay | 'allDay', ratingValue: number) => {
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    const isAllDay = timeOfDay === 'allDay';
+    const timeSlots: TimeOfDay[] = isAllDay ? ['morning', 'noon', 'evening'] : [timeOfDay as TimeOfDay];
+
+    const newEntries: Befinden[] = timeSlots.map((slot) => ({
+      id: -1,
+      user_id: 0,
+      date: dateStr,
+      category_id: null,
+      symptom_id: symptomId,
+      time_of_day: slot,
+      rating: ratingValue,
+      questions: undefined,
+      observation: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+
+    setOptimisticEntries((prev) => {
+      const withoutThis = prev.filter((h) => !(h.date === dateStr && h.symptom_id === symptomId));
+      return [...withoutThis, ...newEntries];
+    });
+    setHistory((prev) => {
+      const withoutThis = prev.filter((h) => !(h.date === dateStr && h.symptom_id === symptomId));
+      return [...withoutThis, ...newEntries];
+    });
+    if (typeof window !== 'undefined') {
+      const stored = getLocalOptimisticEntries();
+      const withoutThis = stored.filter((h) => !(h.date === dateStr && h.symptom_id === symptomId));
+      setLocalOptimisticEntries([...withoutThis, ...newEntries]);
+      setForceRender((n) => n + 1);
+    }
+    setExpandedItems((prev) => { const n = { ...prev }; delete n[symptomId]; return n; });
+    setExpandedTimeSlots((prev) => { const n = { ...prev }; delete n[symptomId]; return n; });
+  };
+
   // Änderungen speichern
   const saveChanges = async (symptomId: string, timeOfDay: TimeOfDay | 'allDay') => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
     const isAllDay = timeOfDay === 'allDay';
     const timeSlots: TimeOfDay[] = isAllDay ? ['morning', 'noon', 'evening'] : [timeOfDay as TimeOfDay];
-    
+    const ratingToShow = isAllDay ? tempRatings[symptomId]?.allDay : tempRatings[symptomId]?.[timeOfDay as TimeOfDay];
+
     setSaving((prev) => ({ ...prev, [symptomId]: true }));
 
+    // Sofort UI aktualisieren (vor API), damit Gespeichert-Zustand sichtbar wird
+    if (ratingToShow != null) {
+      applyOptimisticSave(symptomId, timeOfDay, ratingToShow);
+    }
+
+    let apiSuccess = false;
     try {
       for (const slot of timeSlots) {
-        const rating = isAllDay 
-          ? tempRatings[symptomId]?.allDay 
-          : tempRatings[symptomId]?.[slot];
-        
+        const rating = isAllDay ? tempRatings[symptomId]?.allDay : tempRatings[symptomId]?.[slot];
         if (rating === null || rating === undefined) continue;
 
-        // Bestehenden Eintrag finden
-        const existing = history.find(
-          (h) =>
-            h.date === dateStr &&
-            h.symptom_id === symptomId &&
-            h.time_of_day === slot
-        );
-        
-        // Für "Medikamente weggelassen?" zusätzliche Fragen speichern
+        const existing = history.find((h) => h.date === dateStr && h.symptom_id === symptomId && h.time_of_day === slot);
         const medicationKey = `${symptomId}:${slot}:${dateStr}`;
         const medicationData = symptomId === 'medication-adherence' ? {
           medicationName: medicationName[medicationKey] || '',
           reason: medicationReason[medicationKey] || '',
         } : undefined;
-
         const item = allItems.find((i) => i.id === symptomId);
         const payload = {
           date: dateStr,
@@ -281,56 +369,35 @@ export default function BefindenPage() {
           symptom_id: symptomId,
           ...(item?.type === 'custom' && item?.label ? { symptom_label: item.label } : {}),
           time_of_day: slot,
-          rating: rating,
+          rating,
           questions: medicationData ? { medicationName: medicationData.medicationName, reason: medicationData.reason } : undefined,
           observation: null,
         };
-      
         if (existing) {
           await befindenApi.update(existing.id, payload);
         } else {
           await befindenApi.create(payload);
         }
       }
-
-      // Bestätigung anzeigen
-      const key = isAllDay ? `${symptomId}:allDay` : `${symptomId}:${timeOfDay}`;
-      setSavedConfirmations((prev) => ({ ...prev, [key]: true }));
-      setTimeout(() => {
-        setSavedConfirmations((prev) => {
-          const next = { ...prev };
-          delete next[key];
-          return next;
-        });
-      }, 1500);
-
-      // History aktualisieren
-      await loadHistory();
-      await loadAllHistory(); // Aktualisiere auch Übersicht
-      
-      // Card automatisch schließen nach erfolgreichem Speichern
-      setExpandedItems((prev) => {
-        const next = { ...prev };
-        delete next[symptomId];
-        return next;
-      });
-      setExpandedTimeSlots((prev) => {
-        const next = { ...prev };
-        delete next[symptomId];
-        return next;
-      });
-      
-      // Temp-Ratings für gespeicherte Einträge beibehalten (für Anzeige)
-      // Nur unsaved tempRatings entfernen
+      apiSuccess = true;
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
       toastService.show('Fehler beim Speichern', 'error');
     } finally {
-      setSaving((prev) => {
-        const next = { ...prev };
-        delete next[symptomId];
-        return next;
-      });
+      setSaving((prev) => { const n = { ...prev }; delete n[symptomId]; return n; });
+    }
+
+    if (apiSuccess) {
+      const key = isAllDay ? `${symptomId}:allDay` : `${symptomId}:${timeOfDay}`;
+      setSavedConfirmations((prev) => ({ ...prev, [key]: true }));
+      setTimeout(() => setSavedConfirmations((prev) => { const n = { ...prev }; delete n[key]; return n; }), 1500);
+      loadHistory()
+        .then(() => {
+          setOptimisticEntries((prev) => prev.filter((e) => e.date !== dateStr));
+          if (typeof window !== 'undefined') localStorage.removeItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`);
+        })
+        .catch(() => {});
+      loadAllHistory().catch(() => {});
     }
   };
 
@@ -596,7 +663,8 @@ export default function BefindenPage() {
     }
   };
 
-  const getRatingTextClass = (rating: number): string => {
+  const getRatingTextClass = (rating: number, isEditingSaved: boolean = false): string => {
+    if (isEditingSaved) return ''; // use inline style for bewertet value
     if (rating <= 4) return 'text-[#1F352D]';
     return 'text-[#4F6B63]';
   };
@@ -731,12 +799,12 @@ export default function BefindenPage() {
           }}
           disabled={isSaving}
           style={getSliderStyle(tempRating)}
-          className="rating-slider"
+          className={`rating-slider ${existingRating !== null ? 'rating-slider--editing-saved' : ''}`}
         />
 
         {tempRating !== null && (
           <div className="flex flex-col items-center gap-0.5 pt-2 transition-opacity duration-150 ease-out">
-            <span className={`text-[2.5rem] font-semibold leading-none tracking-tight ${getRatingTextClass(tempRating)}`}>{tempRating}</span>
+            <span className={`text-[2.5rem] font-semibold leading-none tracking-tight ${getRatingTextClass(tempRating, existingRating !== null)}`} style={existingRating !== null ? { color: BEFINDEN_CARD.bewertet.valueText } : undefined}>{tempRating}</span>
             <p className="text-[12px] text-[#7A9088] mt-1">
               {getScaleDescription(tempRating)}
             </p>
@@ -938,11 +1006,18 @@ export default function BefindenPage() {
 
   const getItemStats = (itemId: string) => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    const entries = history.filter((h) => h.date === dateStr && h.symptom_id === itemId);
-    const avgRating = entries.length === 0
-      ? null
-      : Math.round(entries.reduce((acc, e) => acc + (e.rating || 0), 0) / entries.length);
-    return { dateStr, entries, hasEntry: entries.length > 0, avgRating };
+    const isExpanded = expandedItems[itemId];
+    const fromLocal = getLocalOptimisticEntries().filter((h) => h.date === dateStr && h.symptom_id === itemId);
+    const fromOptimistic = optimisticEntries.filter((h) => h.date === dateStr && h.symptom_id === itemId);
+    const fromHistory = history.filter((h) => h.date === dateStr && h.symptom_id === itemId);
+    const entries = fromLocal.length > 0 ? fromLocal : fromOptimistic.length > 0 ? fromOptimistic : fromHistory;
+    const tr = tempRatings[itemId];
+    const tempVal = tr?.allDay ?? tr?.morning ?? tr?.noon ?? tr?.evening ?? null;
+    const hasEntry = entries.length > 0 || (!isExpanded && tempVal != null);
+    const avgRating = entries.length > 0
+      ? Math.round(entries.reduce((acc, e) => acc + (e.rating || 0), 0) / entries.length)
+      : tempVal;
+    return { dateStr, entries, hasEntry, avgRating };
   };
 
   const getChipClass = (isSelected: boolean): string =>
@@ -951,6 +1026,31 @@ export default function BefindenPage() {
         ? 'bg-[#B7D9C8] border-[#9FC5B2] text-[#1F352D] font-semibold'
         : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
     }`;
+
+  // Hat Nutzer eine Bewertung ausgewählt (noch nicht gespeichert)?
+  const hasSelection = (itemId: string): boolean => {
+    const slot = expandedTimeSlots[itemId];
+    if (!expandedItems[itemId] || !slot) return false;
+    if (slot === 'allDay') return tempRatings[itemId]?.allDay != null;
+    return tempRatings[itemId]?.[slot] != null;
+  };
+
+  // Befinden-Card: 3 Zustände – Default | Auswahl (leicht färben) | Gespeichert (farbig + Häkchen + Wert)
+  const getBefindenCardStyle = (hasEntry: boolean, isExpanded: boolean, itemId: string): React.CSSProperties => {
+    const shadow = "0 2px 6px rgba(47,79,67,0.06)";
+    if (hasEntry) {
+      return { background: "#E6F1EC", border: "1.5px solid #3F7A63", boxShadow: shadow };
+    }
+    if (hasSelection(itemId)) {
+      return { background: "#F4F7F5", border: "1px solid #C8DBD3", boxShadow: shadow };
+    }
+    return { background: "#FFFFFF", border: "1px solid #D6E3DD", boxShadow: shadow };
+  };
+
+  const getBefindenCardHoverClass = (hasEntry: boolean, isExpanded: boolean, itemId: string): string => {
+    if (hasEntry || isExpanded || hasSelection(itemId)) return "";
+    return "hover:!bg-[#F4F7F5] hover:!border-[#C8DBD3]";
+  };
 
 
   return (
@@ -994,7 +1094,7 @@ export default function BefindenPage() {
             <p className="text-[13px] text-[#7A9088] mb-4">
               Symptome, die du regelmäßig erfasst.
             </p>
-            <div className="rounded-2xl bg-[#FFFFFF] divide-y divide-background-200/40">
+            <div className="flex flex-col gap-3">
               {personalItemIds.map((itemId) => {
                 const item = allItems.find((i) => i.id === itemId) || coreItems.find((i) => i.id === itemId);
                 if (!item) return null;
@@ -1002,18 +1102,17 @@ export default function BefindenPage() {
                 const isExpanded = expandedItems[itemId];
                 const selectedTimeSlot = expandedTimeSlots[itemId];
                 return (
-                  <div key={itemId} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
-                    {isRecentlySaved(itemId) && (
-                      <div className="absolute top-2.5 right-3 z-10 animate-in fade-in duration-150">
-                        <svg className="h-3.5 w-3.5 text-[#1F352D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                      </div>
-                    )}
-                    <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
-                      <span className="text-body font-normal text-[#1F352D]">{item.label}</span>
+                  <div key={itemId} className={`relative overflow-hidden rounded-xl transition-all duration-200 ${getBefindenCardHoverClass(hasEntry, isExpanded, itemId)}`} style={getBefindenCardStyle(hasEntry, isExpanded, itemId)}>
+                    <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
+                      <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                       <div className="flex items-center gap-2">
-                        {hasEntry && <span className="rounded-full bg-[#D6EAE2] px-2 py-0.5 text-[10px] font-medium text-[#1F352D]">Heute</span>}
-                        {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-[#4F6B63]">Ø {avgRating}</span>}
-                        <svg className={`h-3.5 w-3.5 text-[#7A9088] flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                        {hasEntry && (
+                          <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
+                            <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            {avgRating !== null ? avgRating : '✓'}
+                          </span>
+                        )}
+                        <svg className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                       </div>
                     </button>
                     {isExpanded && (
@@ -1045,23 +1144,23 @@ export default function BefindenPage() {
               <h2 className="text-[13px] font-medium text-[#6B8078] mb-4">
                 Weitere Symptome
               </h2>
-              <div className="rounded-2xl bg-[#FFFFFF] divide-y divide-background-200/40">
+              <div className="flex flex-col gap-3">
                 {(showAllWeitere ? weitereItems : weitereItems.slice(0, WEITERE_INITIAL_COUNT)).map((item) => {
-                  const { avgRating } = getItemStats(item.id);
+                  const { hasEntry, avgRating } = getItemStats(item.id);
                   const isExpanded = expandedItems[item.id];
                   const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
-                      {isRecentlySaved(item.id) && (
-                        <div className="absolute top-2.5 right-3 z-10 animate-in fade-in duration-150">
-                          <svg className="h-3.5 w-3.5 text-[#1F352D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                        </div>
-                      )}
-                      <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
-                        <span className="text-body font-normal text-[#1F352D]">{item.label}</span>
+                    <div key={item.id} className={`relative overflow-hidden rounded-xl transition-all duration-200 ${getBefindenCardHoverClass(hasEntry, isExpanded, item.id)}`} style={getBefindenCardStyle(hasEntry, isExpanded, item.id)}>
+                      <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
+                        <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                         <div className="flex items-center gap-2">
-                          {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-[#4F6B63]">Ø {avgRating}</span>}
-                          <svg className={`h-3.5 w-3.5 text-[#7A9088] flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                          {hasEntry && (
+                            <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
+                              <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                              {avgRating !== null ? avgRating : '✓'}
+                            </span>
+                          )}
+                          <svg className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                         </div>
                       </button>
                       {isExpanded && (
@@ -1087,22 +1186,22 @@ export default function BefindenPage() {
 
                 {/* Eigene Symptome inline */}
                 {customSymptoms.map((item) => {
-                  const { avgRating } = getItemStats(item.id);
+                  const { hasEntry, avgRating } = getItemStats(item.id);
                   const isExpanded = expandedItems[item.id];
                   const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
-                      {isRecentlySaved(item.id) && (
-                        <div className="absolute top-2.5 right-14 z-10 animate-in fade-in duration-150">
-                          <svg className="h-3.5 w-3.5 text-[#1F352D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                        </div>
-                      )}
+                    <div key={item.id} className={`relative overflow-hidden rounded-xl transition-all duration-200 ${getBefindenCardHoverClass(hasEntry, isExpanded, item.id)}`} style={getBefindenCardStyle(hasEntry, isExpanded, item.id)}>
                       <div className="flex w-full items-center">
-                        <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
-                          <span className={`text-body font-normal text-[#1F352D] ${isExpanded ? '' : 'truncate'}`}>{item.label}</span>
+                        <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors">
+                          <span className={`text-body font-normal ${isExpanded ? '' : 'truncate'}`} style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-[#4F6B63]">Ø {avgRating}</span>}
-                            <svg className={`h-3.5 w-3.5 text-[#7A9088] transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                            {hasEntry && (
+                              <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
+                                <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                {avgRating !== null ? avgRating : '✓'}
+                              </span>
+                            )}
+                            <svg className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                           </div>
                         </button>
                         <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveCustomSymptom(item.id); }}

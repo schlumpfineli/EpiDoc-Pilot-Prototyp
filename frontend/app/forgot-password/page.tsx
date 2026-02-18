@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Input, Button } from "@/components/ui";
 import { authApi } from "@/lib/api";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations";
+import { AUTH_GRADIENT, AUTH_LINK_CLASS_SMALL } from "@/lib/auth-constants";
+import { extractApiError } from "@/lib/errorUtils";
+import { AuthSuccessIcon } from "@/components/auth/AuthSuccessIcon";
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [resetUrl, setResetUrl] = useState<string | null>(null);
@@ -38,8 +39,8 @@ export default function ForgotPasswordPage() {
       if (response.reset_url) {
         setResetUrl(response.reset_url);
       }
-    } catch (err: any) {
-      setApiError(err.message || 'Fehler beim Anfordern des Passwort-Resets. Bitte versuchen Sie es erneut.');
+    } catch (err) {
+      setApiError(extractApiError(err, "Fehler beim Anfordern des Passwort-Resets. Bitte versuchen Sie es erneut."));
     } finally {
       setIsLoading(false);
     }
@@ -47,14 +48,10 @@ export default function ForgotPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: AUTH_GRADIENT }}>
         <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
           <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
-            <div className="mx-auto w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+            <AuthSuccessIcon />
             <div className="space-y-[var(--spacing-m)]">
               <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900">
                 E-Mail gesendet
@@ -103,7 +100,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: AUTH_GRADIENT }}>
       <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
         <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] space-y-[var(--spacing-l)]">
           <div className="text-center space-y-[var(--spacing-m)]">
@@ -145,7 +142,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           <div className="text-center pt-[var(--spacing-xs)]">
-            <Link href="/login" className="text-body-small font-medium text-[#2E6F57] hover:text-[#25634A] underline underline-offset-2">
+            <Link href="/login" className={AUTH_LINK_CLASS_SMALL}>
               Zurück zum Login
             </Link>
           </div>

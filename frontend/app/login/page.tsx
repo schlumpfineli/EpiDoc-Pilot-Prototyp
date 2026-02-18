@@ -8,6 +8,8 @@ import { Input, Button } from "@/components/ui";
 import { authApi, apiClient } from "@/lib/api";
 import { loginSchema, type LoginInput } from "@/lib/validations";
 import { EpiDocLogo } from "@/components/EpiDocLogo";
+import { AUTH_GRADIENT, AUTH_LINK_CLASS, AUTH_LINK_CLASS_SMALL, AUTH_BRAND_COLOR } from "@/lib/auth-constants";
+import { extractApiError } from "@/lib/errorUtils";
 
 function LoginForm() {
   const router = useRouter();
@@ -45,32 +47,21 @@ function LoginForm() {
         window.dispatchEvent(new Event("auth-changed"));
       }
       
-      // Weiterleitung basierend auf Rolle
-      if (response.user.role === 'patient') {
-        router.push('/diary');
-      } else {
-        router.push('/diary');
-      }
-    } catch (err: any) {
-      if (err.errors) {
-        // Laravel Validation Errors
-        const firstError = Object.values(err.errors)[0];
-        setApiError(Array.isArray(firstError) ? firstError[0] : String(firstError));
-      } else {
-        setApiError(err.message || 'Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.');
-      }
+      router.push('/diary');
+    } catch (err) {
+      setApiError(extractApiError(err, "Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten."));
     }
   };
 
   return (
-    <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+    <div className="min-h-screen px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: AUTH_GRADIENT }}>
       <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
         <div className="space-y-[var(--spacing-s)] sm:space-y-[var(--spacing-m)]">
           <div className="flex items-center justify-center gap-[var(--spacing-xs)] mb-[var(--spacing-xs)]">
             <EpiDocLogo size={100} />
-            <p className="text-headline-4 font-bold text-[#1E3F34]">EpiDoc</p>
+            <p className="text-headline-4 font-bold" style={{ color: AUTH_BRAND_COLOR }}>EpiDoc</p>
           </div>
-          <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]" style={{ color: "#1E3F34" }}>
+          <h1 className="text-headline-3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]" style={{ color: AUTH_BRAND_COLOR }}>
             Anmelden
           </h1>
           <p className="text-body-small text-foreground-600 text-center leading-relaxed">
@@ -115,18 +106,12 @@ function LoginForm() {
         </form>
 
         <div className="flex flex-col gap-[var(--spacing-xs)] text-center">
-          <a
-            href="/forgot-password"
-            className="text-body-small font-medium text-[#2E6F57] hover:text-[#25634A] underline underline-offset-2 transition"
-          >
+          <a href="/forgot-password" className={AUTH_LINK_CLASS_SMALL}>
             Passwort vergessen?
           </a>
           <p className="text-body text-foreground-600">
             Noch kein Konto?{" "}
-            <a
-              href="/register"
-              className="font-medium text-[#2E6F57] hover:text-[#25634A] underline underline-offset-2 transition"
-            >
+            <a href="/register" className={AUTH_LINK_CLASS}>
               Jetzt registrieren
             </a>
           </p>

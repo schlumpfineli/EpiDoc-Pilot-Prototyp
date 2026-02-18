@@ -8,6 +8,9 @@ import Link from "next/link";
 import { Input, Button } from "@/components/ui";
 import { authApi } from "@/lib/api";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations";
+import { AUTH_GRADIENT, AUTH_LINK_CLASS_SMALL } from "@/lib/auth-constants";
+import { extractApiError } from "@/lib/errorUtils";
+import { AuthSuccessIcon } from "@/components/auth/AuthSuccessIcon";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -56,14 +59,8 @@ function ResetPasswordForm() {
       setTimeout(() => {
         router.push('/login?password-reset=success');
       }, 3000);
-    } catch (err: any) {
-      if (err.errors) {
-        // Laravel Validation Errors
-        const firstError = Object.values(err.errors)[0];
-        setApiError(Array.isArray(firstError) ? firstError[0] : String(firstError));
-      } else {
-        setApiError(err.message || 'Fehler beim Zurücksetzen des Passworts. Bitte versuchen Sie es erneut.');
-      }
+    } catch (err) {
+      setApiError(extractApiError(err, "Fehler beim Zurücksetzen des Passworts. Bitte versuchen Sie es erneut."));
     } finally {
       setIsLoading(false);
     }
@@ -71,14 +68,10 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: AUTH_GRADIENT }}>
         <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
           <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
-            <div className="mx-auto w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+            <AuthSuccessIcon />
             <div className="space-y-[var(--spacing-m)]">
               <h1 className="text-h4 sm:text-h3 font-semibold text-foreground-900">
                 Passwort erfolgreich zurückgesetzt
@@ -103,7 +96,7 @@ function ResetPasswordForm() {
 
   if (!token || !email) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: AUTH_GRADIENT }}>
         <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
           <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] text-center space-y-[var(--spacing-l)]">
             <div className="space-y-[var(--spacing-m)]">
@@ -136,7 +129,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+    <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: AUTH_GRADIENT }}>
       <div className="max-w-md w-full space-y-[var(--spacing-xl)]">
         <div className="rounded-2xl bg-white border border-background-200/60 p-[var(--spacing-xl)] space-y-[var(--spacing-l)]">
           <div className="text-center space-y-[var(--spacing-m)]">
@@ -201,7 +194,7 @@ function ResetPasswordForm() {
           </form>
 
           <div className="text-center pt-[var(--spacing-xs)]">
-            <Link href="/login" className="text-body-small text-[#3E7C67] hover:text-[#346B59]">
+            <Link href="/login" className={AUTH_LINK_CLASS_SMALL}>
               Zurück zum Login
             </Link>
           </div>
@@ -214,7 +207,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: "linear-gradient(180deg, #EAF4F1 0%, #F6FAF8 100%)" }}>
+      <div className="flex min-h-screen items-center justify-center px-[var(--spacing-m)]" style={{ background: AUTH_GRADIENT }}>
         <div className="max-w-md w-full text-center">
           <p className="text-body text-foreground-600">Lädt...</p>
         </div>
