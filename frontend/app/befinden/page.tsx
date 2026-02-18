@@ -111,12 +111,8 @@ export default function BefindenPage() {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [expandedTimeSlots, setExpandedTimeSlots] = useState<Record<string, TimeOfDay | 'allDay' | null>>({});
   const [tempRatings, setTempRatings] = useState<Record<string, Partial<Record<TimeOfDay, number | null>> & { allDay?: number | null }>>({});
-  const [savedConfirmations, setSavedConfirmations] = useState<Record<string, boolean>>({});
-  const isRecentlySaved = (itemId: string) => Object.keys(savedConfirmations).some(k => k.startsWith(itemId));
   const [deleteConfirmations, setDeleteConfirmations] = useState<Record<string, { date: string; timeOfDay: TimeOfDay | 'allDay' } | null>>({});
   const [history, setHistory] = useState<Befinden[]>([]);
-  const [optimisticEntries, setOptimisticEntries] = useState<Befinden[]>([]);
-  const [, setForceRender] = useState(0); // Erzwingt Re-Render nach localStorage-Schreibzugriff
   const [allHistory, setAllHistory] = useState<Befinden[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
@@ -194,9 +190,6 @@ export default function BefindenPage() {
       
   // Lade Historie
   useEffect(() => {
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    setOptimisticEntries([]);
-    if (typeof window !== 'undefined') localStorage.removeItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`);
     loadHistory();
     loadAllHistory();
   }, [selectedDate]);
@@ -279,59 +272,8 @@ export default function BefindenPage() {
     }));
   };
 
-  const BEFINDEN_OPTIMISTIC_KEY = 'befinden-optimistic';
-
-  const getLocalOptimisticEntries = (): Befinden[] => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const raw = localStorage.getItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const setLocalOptimisticEntries = (entries: Befinden[]) => {
-    if (typeof window === 'undefined') return;
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    localStorage.setItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`, JSON.stringify(entries));
-  };
-
-  // Hilfsfunktion: Optimistisches Update + Card schließen
-  const applyOptimisticSave = (symptomId: string, timeOfDay: TimeOfDay | 'allDay', ratingValue: number) => {
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    const isAllDay = timeOfDay === 'allDay';
-    const timeSlots: TimeOfDay[] = isAllDay ? ['morning', 'noon', 'evening'] : [timeOfDay as TimeOfDay];
-
-    const newEntries: Befinden[] = timeSlots.map((slot) => ({
-      id: -1,
-      user_id: 0,
-      date: dateStr,
-      category_id: null,
-      symptom_id: symptomId,
-      time_of_day: slot,
-      rating: ratingValue,
-      questions: undefined,
-      observation: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }));
-
-    setOptimisticEntries((prev) => {
-      const withoutThis = prev.filter((h) => !(h.date === dateStr && h.symptom_id === symptomId));
-      return [...withoutThis, ...newEntries];
-    });
-    setHistory((prev) => {
-      const withoutThis = prev.filter((h) => !(h.date === dateStr && h.symptom_id === symptomId));
-      return [...withoutThis, ...newEntries];
-    });
-    if (typeof window !== 'undefined') {
-      const stored = getLocalOptimisticEntries();
-      const withoutThis = stored.filter((h) => !(h.date === dateStr && h.symptom_id === symptomId));
-      setLocalOptimisticEntries([...withoutThis, ...newEntries]);
-      setForceRender((n) => n + 1);
-    }
+  // Card schließen nach Speichern (tempRatings bleibt → Gespeichert-Zustand sichtbar)
+  const closeCardAfterSave = (symptomId: string) => {
     setExpandedItems((prev) => { const n = { ...prev }; delete n[symptomId]; return n; });
     setExpandedTimeSlots((prev) => { const n = { ...prev }; delete n[symptomId]; return n; });
   };
@@ -345,9 +287,9 @@ export default function BefindenPage() {
 
     setSaving((prev) => ({ ...prev, [symptomId]: true }));
 
-    // Sofort UI aktualisieren (vor API), damit Gespeichert-Zustand sichtbar wird
+    // Sofort Card schließen (tempRatings bleibt → Gespeichert-Zustand sichtbar)
     if (ratingToShow != null) {
-      applyOptimisticSave(symptomId, timeOfDay, ratingToShow);
+      closeCardAfterSave(symptomId);
     }
 
     let apiSuccess = false;
@@ -388,15 +330,7 @@ export default function BefindenPage() {
     }
 
     if (apiSuccess) {
-      const key = isAllDay ? `${symptomId}:allDay` : `${symptomId}:${timeOfDay}`;
-      setSavedConfirmations((prev) => ({ ...prev, [key]: true }));
-      setTimeout(() => setSavedConfirmations((prev) => { const n = { ...prev }; delete n[key]; return n; }), 1500);
-      loadHistory()
-        .then(() => {
-          setOptimisticEntries((prev) => prev.filter((e) => e.date !== dateStr));
-          if (typeof window !== 'undefined') localStorage.removeItem(`${BEFINDEN_OPTIMISTIC_KEY}-${dateStr}`);
-        })
-        .catch(() => {});
+      loadHistory().catch(() => {});
       loadAllHistory().catch(() => {});
     }
   };
@@ -1007,10 +941,7 @@ export default function BefindenPage() {
   const getItemStats = (itemId: string) => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
     const isExpanded = expandedItems[itemId];
-    const fromLocal = getLocalOptimisticEntries().filter((h) => h.date === dateStr && h.symptom_id === itemId);
-    const fromOptimistic = optimisticEntries.filter((h) => h.date === dateStr && h.symptom_id === itemId);
-    const fromHistory = history.filter((h) => h.date === dateStr && h.symptom_id === itemId);
-    const entries = fromLocal.length > 0 ? fromLocal : fromOptimistic.length > 0 ? fromOptimistic : fromHistory;
+    const entries = history.filter((h) => h.date === dateStr && h.symptom_id === itemId);
     const tr = tempRatings[itemId];
     const tempVal = tr?.allDay ?? tr?.morning ?? tr?.noon ?? tr?.evening ?? null;
     const hasEntry = entries.length > 0 || (!isExpanded && tempVal != null);
