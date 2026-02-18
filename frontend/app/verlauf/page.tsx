@@ -244,8 +244,8 @@ export default function VerlaufPage() {
     strength: "weak" | "moderate" | "strong";
   }
 
-  const MIN_SEIZURES_FOR_INSIGHT = 20;
-  const MIN_EFFECT_THRESHOLD = 1.5;
+  const MIN_SEIZURES_FOR_INSIGHT = 15;
+  const MIN_EFFECT_THRESHOLD = 1.0;
 
   // Insights: nur bei ≥20 Anfällen und statistisch relevanter Differenz
   const insights = useMemo(() => {
@@ -257,7 +257,7 @@ export default function VerlaufPage() {
     if (seizuresInRange.length < MIN_SEIZURES_FOR_INSIGHT) {
       insightsList.push({
         type: "none",
-        text: "Für eine aussagekräftige Darstellung werden mindestens 20 dokumentierte Anfälle benötigt. Mit weiteren Einträgen können mögliche Muster klarer erkennbar werden.",
+        text: "Für eine aussagekräftige Darstellung werden mindestens 15 dokumentierte Anfälle benötigt. Mit weiteren Einträgen können mögliche Muster klarer erkennbar werden.",
         strength: "weak",
       });
       return insightsList;
@@ -293,7 +293,7 @@ export default function VerlaufPage() {
       const avgVal = avg(values);
       const diff = avgVal - avgOverall;
       if (Math.abs(diff) < MIN_EFFECT_THRESHOLD) return;
-      const strength = Math.abs(diff) > 2.5 ? "strong" : Math.abs(diff) > 2 ? "moderate" : "weak";
+      const strength = Math.abs(diff) > 2.0 ? "strong" : Math.abs(diff) > 1.5 ? "moderate" : "weak";
       insightsList.push({
         type,
         text: type === "on"
