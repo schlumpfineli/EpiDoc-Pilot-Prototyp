@@ -13,22 +13,20 @@ import { de } from "date-fns/locale";
 // ─── Shared CSS Classes ──────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200";
+  "w-full rounded-lg border border-background-200/60 px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small text-foreground-800 placeholder:text-foreground-300 focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200";
 
 const CSS = {
   input: `${inputBase} transition`,
-  select: inputBase,
-  textarea: `${inputBase} resize-none`,
+  select: `${inputBase} transition`,
+  textarea: `${inputBase} resize-none transition`,
   btnCancel:
-    "flex-1 rounded-xl border-2 border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50",
+    "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-400 transition hover:text-foreground-600",
   btnPrimary:
     "flex-1 rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
   btnDanger:
     "flex-1 rounded-xl bg-warning-500 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-warning-600 disabled:opacity-60 disabled:cursor-not-allowed",
   btnClose:
     "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
-  actionBtn:
-    "w-full rounded-xl border border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50 text-left",
 } as const;
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
@@ -36,56 +34,56 @@ const CSS = {
 interface IconProps { className?: string }
 
 const IconUser = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
   </svg>
 );
 
 const IconDownload = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
   </svg>
 );
 
 const IconBell = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
   </svg>
 );
 
 const IconChat = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
   </svg>
 );
 
 const IconScale = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z" />
   </svg>
 );
 
 const IconInfo = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
   </svg>
 );
 
 const IconCog = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </svg>
 );
 
 const IconWarning = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
   </svg>
 );
 
 const IconLogout = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
   </svg>
 );
@@ -108,24 +106,22 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
+    <div>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-[var(--spacing-m)] py-[var(--spacing-s)] bg-white transition-colors hover:bg-background-100 cursor-pointer"
+        className="flex w-full items-center justify-between px-1 py-[var(--spacing-xs)] transition-colors cursor-pointer group"
       >
         <div className="flex items-center gap-[var(--spacing-xs)] min-w-0">
-          <span className="text-primary-400 shrink-0">{icon}</span>
-          <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
+          <span className="text-foreground-300 group-hover:text-primary-400 shrink-0 transition-colors">{icon}</span>
+          <h2 className="text-body font-medium text-foreground-800 truncate">{title}</h2>
         </div>
         <span className={`text-foreground-300 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
           <IconChevronDown className="w-4 h-4" />
         </span>
       </button>
       {isOpen && (
-        <div className="border-t border-background-100">
-          <div className="px-[var(--spacing-m)] py-[var(--spacing-m)]">{children}</div>
-        </div>
+        <div className="pt-[var(--spacing-xs)] pb-[var(--spacing-2xs)] px-1">{children}</div>
       )}
     </div>
   );
@@ -157,13 +153,13 @@ function Toggle({ label, description, checked, onChange }: {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
-          checked ? "bg-primary-500" : "bg-background-300"
+        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
+          checked ? "bg-primary-400" : "bg-background-300"
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-            checked ? "translate-x-5" : "translate-x-0"
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+            checked ? "translate-x-4" : "translate-x-0"
           }`}
         />
       </button>
@@ -174,10 +170,10 @@ function Toggle({ label, description, checked, onChange }: {
 function InlineModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="modal-overlay">
-      <div className="modal-container border border-primary-500 ring-2 ring-primary-200 overflow-hidden">
+      <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-lg border border-background-200/60 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
-          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-            <h2 className="text-body font-medium text-foreground-900">{title}</h2>
+          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-s)] py-[var(--spacing-s)] z-10">
+            <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
             <button type="button" onClick={onClose} className={CSS.btnClose} aria-label="Schließen">
               <CloseIcon />
             </button>
@@ -189,18 +185,19 @@ function InlineModal({ title, onClose, children }: { title: string; onClose: () 
   );
 }
 
-function FormField({ label, type = "text", value, onChange, required, hint }: {
+function FormField({ label, type = "text", value, onChange, required, optional, hint }: {
   label: string;
   type?: string;
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  optional?: boolean;
   hint?: string;
 }) {
   return (
-    <div className="space-y-[var(--spacing-xs)]">
-      <label className="text-body font-medium text-foreground-800">
-        {label} {required && <span className="text-foreground-800">*</span>}
+    <div className="space-y-1">
+      <label className="text-[12px] font-medium text-foreground-600">
+        {label}{optional ? <span className="text-foreground-300 font-normal ml-1">(optional)</span> : <span className="text-foreground-300 ml-0.5">*</span>}
       </label>
       <input
         type={type}
@@ -209,7 +206,7 @@ function FormField({ label, type = "text", value, onChange, required, hint }: {
         required={required}
         className={CSS.input}
       />
-      {hint && <p className="text-body-small text-foreground-600">{hint}</p>}
+      {hint && <p className="text-[11px] text-foreground-400">{hint}</p>}
     </div>
   );
 }
@@ -224,16 +221,16 @@ function ModalActions({ onCancel, onSave, isSaving, saveLabel = "Speichern", sav
   disabled?: boolean;
 }) {
   return (
-    <div className="flex gap-[var(--spacing-m)] pt-[var(--spacing-s)]">
-      <button type="button" onClick={onCancel} className={CSS.btnCancel}>Abbrechen</button>
+    <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-s)]">
       <button
         type="button"
         onClick={onSave}
         disabled={isSaving || disabled}
-        className={variant === "danger" ? CSS.btnDanger : CSS.btnPrimary}
+        className={`${variant === "danger" ? CSS.btnDanger : CSS.btnPrimary} w-full`}
       >
         {isSaving ? savingLabel : saveLabel}
       </button>
+      <button type="button" onClick={onCancel} className={`${CSS.btnCancel} w-full text-center`}>Abbrechen</button>
     </div>
   );
 }
@@ -782,252 +779,236 @@ export default function EinstellungenPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
+        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
 
           {/* ── Header ── */}
-          <div className="space-y-[var(--spacing-2xs)]">
-            <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
-              Einstellungen
-            </h1>
+          <div className="space-y-[var(--spacing-xs)]">
+            <div className="py-[var(--spacing-s)] sm:py-[var(--spacing-m)]">
+              <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center">
+                Einstellungen
+              </h1>
+            </div>
           </div>
 
+          {/* ── Gruppe: Konto ── */}
           <div className="space-y-[var(--spacing-s)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Konto</p>
+            <div className="space-y-1 divide-y divide-background-200/40">
+              {profileData && (
+                <SectionCard icon={<IconUser className="w-5 h-5" />} title="Konto-Informationen">
+                  <div className="space-y-[var(--spacing-xs)]">
+                    <InfoRow label="User-ID" value={profileData.display_name || `User-${profileData.id}`} />
+                    <InfoRow label="E-Mail" value={profileData.email || "—"} />
+                    <InfoRow label="Konto erstellt" value={profileData.created_at ? new Date(profileData.created_at).toLocaleDateString("de-CH") : "—"} />
+                    {profileData.last_login_at && (
+                      <InfoRow
+                        label="Letzte Anmeldung"
+                        value={new Date(profileData.last_login_at).toLocaleDateString("de-CH", {
+                          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
+                        })}
+                      />
+                    )}
+                    <InfoRow label="Rolle" value={profileData.role === "patient" ? "Patient" : "Angehöriger"} />
+                  </div>
+                </SectionCard>
+              )}
 
-            {/* ── 1. Konto-Informationen ── */}
-            {profileData && (
-              <SectionCard icon={<IconUser className="w-5 h-5" />} title="Konto-Informationen">
-                <div className="space-y-[var(--spacing-xs)]">
-                  <InfoRow label="User-ID" value={profileData.display_name || `User-${profileData.id}`} />
-                  <InfoRow label="E-Mail" value={profileData.email || "—"} />
-                  <InfoRow label="Konto erstellt" value={profileData.created_at ? new Date(profileData.created_at).toLocaleDateString("de-CH") : "—"} />
-                  {profileData.last_login_at && (
-                    <InfoRow
-                      label="Letzte Anmeldung"
-                      value={new Date(profileData.last_login_at).toLocaleDateString("de-CH", {
-                        day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-                      })}
-                    />
-                  )}
-                  <InfoRow label="Rolle" value={profileData.role === "patient" ? "Patient" : "Angehöriger"} />
+              <SectionCard icon={<IconCog className="w-5 h-5" />} title="Sicherheit & Konto">
+                <div className="space-y-[var(--spacing-s)]">
+                  <p className="text-[11px] text-foreground-400 leading-relaxed">Deine Angaben bleiben privat und verschlüsselt gespeichert.</p>
+                  <button
+                    type="button"
+                    onClick={openPasswordModal}
+                    className="text-body-small font-medium text-foreground-600 transition hover:text-foreground-800"
+                  >
+                    Passwort ändern
+                  </button>
+                  <div className="border-t border-background-200/40 pt-[var(--spacing-s)]">
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex items-center gap-[var(--spacing-2xs)] text-body-small font-medium text-foreground-500 transition hover:text-foreground-700"
+                    >
+                      <IconLogout className="w-4 h-4" />
+                      Abmelden
+                    </button>
+                  </div>
+                  <div className="border-t border-background-200/40 pt-[var(--spacing-s)]">
+                    <button
+                      type="button"
+                      onClick={startDeleteFlow}
+                      className="text-[12px] text-foreground-400 transition hover:text-warning-500"
+                    >
+                      Konto löschen
+                    </button>
+                  </div>
                 </div>
               </SectionCard>
-            )}
 
-            {/* ── 2. Datenexport ── */}
-            <SectionCard icon={<IconDownload className="w-5 h-5" />} title="Datenexport">
-              <div className="space-y-[var(--spacing-s)]">
-                <p className="text-body-small text-foreground-600">
-                  {t("Exportieren Sie alle Ihre Daten (Profil, Anfallstagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur persönlichen Sicherung.")}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleExport}
-                  disabled={isExporting}
-                  className="w-full rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
-                >
-                  {isExporting ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Erstellt PDF...
-                    </>
-                  ) : (
-                    <>
-                      <IconDownload className="w-4 h-4" />
-                      Als PDF herunterladen
-                    </>
-                  )}
-                </button>
-              </div>
-            </SectionCard>
+              <SectionCard icon={<IconDownload className="w-5 h-5" />} title="Datenexport">
+                <div className="space-y-[var(--spacing-s)]">
+                  <p className="text-body-small text-foreground-500">
+                    Alle Daten (Profil, Tagebuch, Befinden) als PDF exportieren – z. B. für Arztbesuche.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    disabled={isExporting}
+                    className="w-full rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
+                  >
+                    {isExporting ? (
+                      <>
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Erstellt PDF...
+                      </>
+                    ) : (
+                      <>
+                        <IconDownload className="w-4 h-4" />
+                        Als PDF herunterladen
+                      </>
+                    )}
+                  </button>
+                </div>
+              </SectionCard>
+            </div>
+          </div>
 
-            {/* ── 3. Benachrichtigungen ── */}
-            <SectionCard icon={<IconBell className="w-5 h-5" />} title="Erinnerungen">
-              <div className="space-y-[var(--spacing-m)]">
-                <p className="text-body-small text-foreground-500">
-                  Aktivieren Sie Erinnerungen, um regelmässig an wichtige Einträge erinnert zu werden.
-                </p>
-                <Toggle
-                  label="Tagebuch-Erinnerung"
-                  description="Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen"
-                  checked={notifPrefs.diary}
-                  onChange={(v) => updateNotifPref("diary", v)}
-                />
-                <Toggle
-                  label="Medikamenten-Erinnerung"
-                  description="Erinnerung an die Medikamenten-Einnahme"
-                  checked={notifPrefs.medication}
-                  onChange={(v) => updateNotifPref("medication", v)}
-                />
-                <Toggle
-                  label="Befinden erfassen"
-                  description={t("Regelmässige Erinnerung, Ihr Befinden zu dokumentieren")}
-                  checked={notifPrefs.befinden}
-                  onChange={(v) => updateNotifPref("befinden", v)}
-                />
-                <p className="text-body-small text-foreground-400 italic">
-                  Hinweis: Erinnerungen werden derzeit als Einstellung gespeichert. Push-Benachrichtigungen folgen in einer zukünftigen Version.
-                </p>
-              </div>
-            </SectionCard>
+          {/* ── Gruppe: Erinnerungen ── */}
+          <div className="space-y-[var(--spacing-s)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Erinnerungen</p>
+            <div className="space-y-1 divide-y divide-background-200/40">
+              <SectionCard icon={<IconBell className="w-5 h-5" />} title="Erinnerungen verwalten">
+                <div className="space-y-[var(--spacing-m)]">
+                  <Toggle
+                    label="Tagebuch"
+                    description="Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen"
+                    checked={notifPrefs.diary}
+                    onChange={(v) => updateNotifPref("diary", v)}
+                  />
+                  <Toggle
+                    label="Medikamente"
+                    description="Erinnerung an die Medikamenten-Einnahme"
+                    checked={notifPrefs.medication}
+                    onChange={(v) => updateNotifPref("medication", v)}
+                  />
+                  <Toggle
+                    label="Befinden"
+                    description="Regelmässige Erinnerung, dein Befinden zu dokumentieren"
+                    checked={notifPrefs.befinden}
+                    onChange={(v) => updateNotifPref("befinden", v)}
+                  />
+                  <p className="text-[11px] text-foreground-300">
+                    Push-Benachrichtigungen folgen in einer zukünftigen Version.
+                  </p>
+                </div>
+              </SectionCard>
+            </div>
+          </div>
 
-            {/* ── 4. Feedback & Support ── */}
-            <SectionCard icon={<IconChat className="w-5 h-5" />} title="Feedback & Support">
-              <div className="space-y-[var(--spacing-s)]">
-                <p className="text-body-small text-foreground-600">
-                  Haben Sie Feedback, Fragen oder Verbesserungsvorschläge? Wir freuen uns über Ihre Rückmeldung!
-                </p>
-                <button
-                  type="button"
-                  onClick={openFeedbackModal}
-                  className="w-full rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 text-left"
-                >
-                  Feedback senden
-                </button>
-              </div>
-            </SectionCard>
+          {/* ── Gruppe: Support ── */}
+          <div className="space-y-[var(--spacing-s)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Support</p>
+            <div className="space-y-1 divide-y divide-background-200/40">
+              <SectionCard icon={<IconChat className="w-5 h-5" />} title="Feedback">
+                <div className="space-y-[var(--spacing-s)]">
+                  <p className="text-body-small text-foreground-500">
+                    Feedback, Fragen oder Verbesserungsvorschläge? Wir freuen uns über deine Rückmeldung.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={openFeedbackModal}
+                    className="text-body-small font-medium text-primary-600 transition hover:text-primary-700"
+                  >
+                    Feedback senden
+                  </button>
+                </div>
+              </SectionCard>
 
-            {/* ── 5. Rechtliches ── */}
-            <SectionCard icon={<IconScale className="w-5 h-5" />} title="Rechtliches">
-              <div className="space-y-[var(--spacing-m)]">
+              <SectionCard icon={<IconInfo className="w-5 h-5" />} title="Über EpiDoc">
+                <div className="space-y-[var(--spacing-xs)]">
+                  <div className="space-y-[var(--spacing-2xs)]">
+                    <InfoRow label="Version" value="0.1.0 (Pilot)" />
+                    <InfoRow label="Status" value="Prototyp / Pilotphase" />
+                  </div>
+                  <p className="text-[11px] text-foreground-400 leading-relaxed">
+                    EpiDoc unterstützt Menschen mit Epilepsie dabei, Anfälle, Medikamente und ihr Befinden zu dokumentieren.
+                  </p>
+                </div>
+              </SectionCard>
+            </div>
+          </div>
 
-                {/* Kein Medizinprodukt */}
-                <div className="rounded-xl border border-warning-200 bg-warning-50 p-[var(--spacing-s)]">
-                  <div className="flex items-start gap-[var(--spacing-xs)]">
-                    <IconWarning className="w-5 h-5 text-warning-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-body font-medium text-warning-800">Kein Medizinprodukt</p>
-                      <p className="text-body-small text-warning-700 mt-[var(--spacing-3xs)]">
-                        EpiDoc ist kein Medizinprodukt und ersetzt keine ärztliche Beratung, Diagnose oder Behandlung.
-                        Die App dient ausschliesslich der persönlichen Dokumentation und Selbstbeobachtung. Bei medizinischen
-                        Fragen wenden Sie sich bitte an Ihre behandelnde Ärztin oder Ihren behandelnden Arzt.
-                      </p>
+          {/* ── Gruppe: Rechtliches ── */}
+          <div className="space-y-[var(--spacing-s)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Rechtliches</p>
+            <div className="space-y-1 divide-y divide-background-200/40">
+              <SectionCard icon={<IconScale className="w-5 h-5" />} title="Datenschutz">
+                <div className="space-y-[var(--spacing-s)]">
+                  <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 p-[var(--spacing-s)]">
+                    <div className="flex items-start gap-[var(--spacing-xs)]">
+                      <IconWarning className="w-4 h-4 text-warning-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-body-small font-medium text-warning-700">Kein Medizinprodukt</p>
+                        <p className="text-[11px] text-warning-600 mt-1 leading-relaxed">
+                          EpiDoc ersetzt keine ärztliche Beratung, Diagnose oder Behandlung.
+                          Die App dient der persönlichen Dokumentation und Selbstbeobachtung.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-foreground-500 space-y-1 leading-relaxed">
+                    <p>Deine Daten werden vertraulich behandelt und ausschliesslich für die Funktionalität der App verwendet. Es findet keine Weitergabe an Dritte statt.</p>
+                    <p>Alle Gesundheitsdaten werden verschlüsselt gespeichert und sind nur mit deinem Login zugänglich. Du kannst deine Daten jederzeit exportieren oder dein Konto vollständig löschen.</p>
+                    <p>Die Datenverarbeitung erfolgt in Übereinstimmung mit dem Schweizer Datenschutzgesetz (DSG) und der DSGVO.</p>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard icon={<IconScale className="w-5 h-5" />} title="Nutzungsbedingungen">
+                <div className="space-y-[var(--spacing-s)]">
+                  <div className="text-[11px] text-foreground-500 space-y-1 leading-relaxed">
+                    <p>Die Nutzung von EpiDoc ist freiwillig und kostenlos. Die App befindet sich im Pilotstadium und kann jederzeit weiterentwickelt werden.</p>
+                    <p>Für die Richtigkeit der eingegebenen Daten bist du selbst verantwortlich. Die Betreiber übernehmen keine Haftung für Schäden aus der Nutzung der App.</p>
+                  </div>
+                  <div className="border-t border-background-200/40 pt-[var(--spacing-xs)]">
+                    <h3 className="text-[12px] font-medium text-foreground-700 mb-1">Impressum</h3>
+                    <div className="text-[11px] text-foreground-500 leading-relaxed">
+                      <p>EpiDoc – Digitales Epilepsie-Tagebuch (Prototyp/Pilot)</p>
+                      <p>Kontakt: <span className="text-primary-600">epidoc@kontakt.ch</span></p>
                     </div>
                   </div>
                 </div>
-
-                {/* Datenschutz */}
-                <div>
-                  <h3 className="text-body font-medium text-foreground-900 mb-[var(--spacing-2xs)]">Datenschutzerklärung</h3>
-                  <div className="text-body-small text-foreground-600 space-y-[var(--spacing-2xs)]">
-                    <p>
-                      Ihre Daten werden vertraulich behandelt und ausschliesslich für die Funktionalität der App verwendet.
-                      Es findet keine Weitergabe an Dritte statt.
-                    </p>
-                    <p>
-                      Alle Gesundheitsdaten werden verschlüsselt auf dem Server gespeichert und sind nur mit Ihrem persönlichen
-                      Login zugänglich. Sie können Ihre Daten jederzeit exportieren oder Ihr Konto vollständig löschen.
-                    </p>
-                    <p>
-                      Die Datenverarbeitung erfolgt in Übereinstimmung mit dem Schweizer Datenschutzgesetz (DSG)
-                      und der Europäischen Datenschutz-Grundverordnung (DSGVO).
-                    </p>
-                  </div>
-                </div>
-
-                {/* Nutzungsbedingungen */}
-                <div>
-                  <h3 className="text-body font-medium text-foreground-900 mb-[var(--spacing-2xs)]">Nutzungsbedingungen</h3>
-                  <div className="text-body-small text-foreground-600 space-y-[var(--spacing-2xs)]">
-                    <p>
-                      Die Nutzung von EpiDoc ist freiwillig und kostenlos. Die App befindet sich im Pilotstadium
-                      und kann jederzeit weiterentwickelt oder angepasst werden.
-                    </p>
-                    <p>
-                      Für die Richtigkeit und Vollständigkeit der eingegebenen Daten sind die Nutzerinnen und Nutzer
-                      selbst verantwortlich. Die Betreiber übernehmen keine Haftung für Schäden, die aus der
-                      Nutzung der App entstehen.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Impressum */}
-                <div>
-                  <h3 className="text-body font-medium text-foreground-900 mb-[var(--spacing-2xs)]">Impressum</h3>
-                  <div className="text-body-small text-foreground-600 space-y-[var(--spacing-2xs)]">
-                    <p>
-                      EpiDoc – Digitales Epilepsie-Tagebuch (Prototyp/Pilot)
-                    </p>
-                    <p>
-                      Entwickelt im Rahmen eines Pilotprojekts.
-                      <br />
-                      Kontakt: <span className="text-primary-600">epidoc@kontakt.ch</span>
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-            </SectionCard>
-
-            {/* ── 6. App-Info ── */}
-            <SectionCard icon={<IconInfo className="w-5 h-5" />} title="Über EpiDoc">
-              <div className="space-y-[var(--spacing-s)]">
-                <div className="space-y-[var(--spacing-xs)]">
-                  <InfoRow label="App" value="EpiDoc" />
-                  <InfoRow label="Version" value="0.1.0 (Pilot)" />
-                  <InfoRow label="Status" value="Prototyp / Pilotphase" />
-                </div>
-                <p className="text-body-small text-foreground-500">
-                  EpiDoc ist ein digitales Epilepsie-Tagebuch, das Menschen mit Epilepsie dabei unterstützt,
-                  Anfälle, Medikamente und ihr Befinden zu dokumentieren – einfach, sicher und übersichtlich.
-                </p>
-              </div>
-            </SectionCard>
-
-            {/* ── 7. Konto-Verwaltung (ganz unten) ── */}
-            <SectionCard icon={<IconCog className="w-5 h-5" />} title="Konto-Verwaltung">
-              <div className="space-y-[var(--spacing-s)]">
-                <button type="button" onClick={openPasswordModal} className={CSS.actionBtn}>
-                  Passwort ändern
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="w-full rounded-xl border border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50 text-left flex items-center gap-[var(--spacing-xs)]"
-                >
-                  <IconLogout className="w-4 h-4" />
-                  Abmelden
-                </button>
-                <div className="border-t border-background-200/60 pt-[var(--spacing-s)]">
-                  <button
-                    type="button"
-                    onClick={startDeleteFlow}
-                    className="w-full rounded-xl border border-warning-200 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-warning-600 transition hover:bg-warning-50 text-left"
-                  >
-                    Konto löschen
-                  </button>
-                </div>
-              </div>
-            </SectionCard>
-
+              </SectionCard>
+            </div>
           </div>
+
+          <div className="h-[var(--spacing-s)]" />
         </div>
       </div>
 
       {/* ── Bestätigungs-Dialog vor Kontolöschung (Stufe 1) ── */}
       {showDeleteConfirm && (
         <div className="modal-overlay">
-          <div className="modal-container max-w-md border border-warning-300 ring-2 ring-warning-100 overflow-hidden">
-            <div className="p-[var(--spacing-m)] space-y-[var(--spacing-m)]">
-              <div className="flex items-center gap-[var(--spacing-s)]">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-100">
-                  <IconWarning className="w-5 h-5 text-warning-600" />
-                </div>
+          <div className="w-full max-w-md rounded-xl bg-white shadow-lg border border-background-200/60 overflow-hidden">
+            <div className="p-[var(--spacing-m)] space-y-[var(--spacing-s)]">
+              <div className="flex items-center gap-[var(--spacing-xs)]">
+                <IconWarning className="w-5 h-5 text-warning-500 shrink-0" />
                 <h2 className="text-body font-medium text-foreground-900">Konto wirklich löschen?</h2>
               </div>
-              <div className="space-y-[var(--spacing-xs)]">
-                <p className="text-body text-foreground-700">
+              <div className="space-y-1">
+                <p className="text-body-small text-foreground-700">
                   Diese Aktion kann <strong>nicht rückgängig</strong> gemacht werden.
                 </p>
-                <p className="text-body-small text-foreground-500">
-                  Alle Ihre Daten – einschliesslich Profildaten, Anfallstagebuch, Medikamente und Befinden-Einträge – werden unwiderruflich gelöscht.
+                <p className="text-[11px] text-foreground-400">
+                  Alle Daten – Profil, Tagebuch, Medikamente und Befinden – werden unwiderruflich gelöscht.
                 </p>
               </div>
-              <div className="flex gap-[var(--spacing-m)]">
-                <button type="button" onClick={cancelDelete} className={CSS.btnCancel}>
-                  Abbrechen
+              <div className="space-y-[var(--spacing-xs)]">
+                <button type="button" onClick={confirmDelete} className={`${CSS.btnDanger} w-full`}>
+                  Konto dauerhaft löschen
                 </button>
-                <button type="button" onClick={confirmDelete} className={CSS.btnDanger}>
-                  Ja, Konto löschen
+                <button type="button" onClick={cancelDelete} className={`${CSS.btnCancel} w-full text-center`}>
+                  Abbrechen
                 </button>
               </div>
             </div>
@@ -1049,9 +1030,9 @@ export default function EinstellungenPage() {
       {/* ── Feedback Modal ── */}
       {showFeedbackModal && (
         <InlineModal title="Feedback senden" onClose={closeFeedbackModal}>
-          <div className="space-y-[var(--spacing-xs)]">
-            <label className="text-body font-medium text-foreground-800">
-              Feedback-Typ <span className="text-foreground-800">*</span>
+          <div className="space-y-1">
+            <label className="text-[12px] font-medium text-foreground-600">
+              Feedback-Typ <span className="text-foreground-300 ml-0.5">*</span>
             </label>
             <select
               value={feedbackForm.type}
@@ -1063,22 +1044,36 @@ export default function EinstellungenPage() {
               <option value="other">Sonstiges</option>
             </select>
           </div>
-          <div className="space-y-[var(--spacing-xs)]">
-            <label className="text-body font-medium text-foreground-800">
-              Nachricht <span className="text-foreground-800">*</span>
+          <div className="space-y-1">
+            <label className="text-[12px] font-medium text-foreground-600">
+              Nachricht <span className="text-foreground-300 ml-0.5">*</span>
             </label>
             <textarea
               value={feedbackForm.message}
               onChange={(e) => setFeedbackForm({ ...feedbackForm, message: e.target.value })}
               required
               minLength={10}
-              rows={6}
-              placeholder="Beschreiben Sie Ihr Feedback, Ihre Frage oder Ihren Vorschlag..."
+              rows={5}
+              placeholder="Beschreibe dein Feedback, deine Frage oder deinen Vorschlag..."
               className={CSS.textarea}
             />
-            <p className="text-body-small text-foreground-600">
-              Mindestens 10 Zeichen ({feedbackForm.message.trim().length}/10)
-            </p>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1 bg-background-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-300 ease-out"
+                    style={{
+                      width: `${Math.min((feedbackForm.message.trim().length / 10) * 100, 100)}%`,
+                      background: feedbackForm.message.trim().length >= 10 ? "#B7E4C7" : "#E2E8E5",
+                    }}
+                  />
+                </div>
+                <span className={`text-[11px] tabular-nums transition-colors ${feedbackForm.message.trim().length >= 10 ? "text-primary-500" : "text-foreground-300"}`}>
+                  {feedbackForm.message.trim().length >= 10 ? "✓" : `${feedbackForm.message.trim().length}/10`}
+                </span>
+              </div>
+              <p className="text-[11px] text-foreground-300">Wir lesen jedes Feedback persönlich.</p>
+            </div>
           </div>
           <ModalActions onCancel={closeFeedbackModal} onSave={handleSendFeedback} isSaving={isSaving} saveLabel="Feedback senden" savingLabel="Sendet..." disabled={feedbackForm.message.trim().length < 10} />
         </InlineModal>
