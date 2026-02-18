@@ -422,7 +422,9 @@ export default function VerlaufPage() {
     });
   }, [timeRangeData.days, seizuresInRange, signalByDay]);
 
-  // Berechne Signal-Punkte für die Linie (nur Tage mit Daten)
+  type SignalPoint = { x: number; y: number; value: number; dayIndex: number };
+
+  // Berechne Signal-Punkte für die Linie (nur Tage mit Daten, mit Day-Index für Lückenerkennung)
   const signalPoints = useMemo(() => {
     return visualizationData
       .map((d, i) => {
@@ -435,15 +437,30 @@ export default function VerlaufPage() {
                 160 +
               20
             : 100;
-        return { x, y: 200 - normalizedValue, value: d.signalValue };
+        return { x, y: 200 - normalizedValue, value: d.signalValue, dayIndex: i };
       })
-      .filter((p) => p !== null) as Array<{ x: number; y: number; value: number }>;
+      .filter((p) => p !== null) as SignalPoint[];
   }, [visualizationData, signalMinMax]);
 
-  // Smooth Catmull-Rom Spline → SVG cubic bezier path
-  const splinePath = useMemo(() => {
-    if (signalPoints.length < 2) return "";
-    const pts = signalPoints;
+  // Punkte in Segmente aufteilen: Linie bricht bei Lücken (>1 Tag ohne Daten)
+  const signalSegments = useMemo(() => {
+    if (signalPoints.length === 0) return [];
+    const segments: SignalPoint[][] = [];
+    let current: SignalPoint[] = [signalPoints[0]];
+    for (let i = 1; i < signalPoints.length; i++) {
+      if (signalPoints[i].dayIndex - signalPoints[i - 1].dayIndex > 2) {
+        segments.push(current);
+        current = [];
+      }
+      current.push(signalPoints[i]);
+    }
+    segments.push(current);
+    return segments;
+  }, [signalPoints]);
+
+  // Catmull-Rom Spline für ein einzelnes Segment
+  const segmentToSpline = (pts: SignalPoint[]): string => {
+    if (pts.length < 2) return "";
     const tension = 0.3;
     let d = `M${pts[0].x},${pts[0].y}`;
     for (let i = 0; i < pts.length - 1; i++) {
@@ -458,31 +475,48 @@ export default function VerlaufPage() {
       d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
     }
     return d;
-  }, [signalPoints]);
+  };
 
-  // Area-Fill path (gleiche Spline + Boden schließen)
+  // Alle Segmente als unterbrochener SVG-Pfad
+  const splinePath = useMemo(() => {
+    return signalSegments
+      .map((seg) => segmentToSpline(seg))
+      .filter(Boolean)
+      .join(" ");
+  }, [signalSegments]);
+
+  // Area-Fill: jedes Segment einzeln schliessen
   const areaPath = useMemo(() => {
-    if (!splinePath || signalPoints.length < 2) return "";
-    const first = signalPoints[0];
-    const last = signalPoints[signalPoints.length - 1];
-    return `${splinePath} L${last.x},200 L${first.x},200 Z`;
-  }, [splinePath, signalPoints]);
+    return signalSegments
+      .filter((seg) => seg.length >= 2)
+      .map((seg) => {
+        const segPath = segmentToSpline(seg);
+        if (!segPath) return "";
+        const first = seg[0];
+        const last = seg[seg.length - 1];
+        return `${segPath} L${last.x},200 L${first.x},200 Z`;
+      })
+      .filter(Boolean)
+      .join(" ");
+  }, [signalSegments]);
 
-  // Peaks: lokale Maxima mit Mindestabstand
+  // Peaks: lokale Maxima mit Mindestabstand (segmentweise)
   const peakPoints = useMemo(() => {
-    if (signalPoints.length < 3) return [];
     const peaks: Array<{ x: number; y: number; value: number }> = [];
-    for (let i = 1; i < signalPoints.length - 1; i++) {
-      const prev = signalPoints[i - 1];
-      const curr = signalPoints[i];
-      const next = signalPoints[i + 1];
-      if (curr.y < prev.y && curr.y < next.y && curr.value >= 5) {
-        const tooClose = peaks.some((p) => Math.abs(p.x - curr.x) < 60);
-        if (!tooClose) peaks.push(curr);
+    for (const seg of signalSegments) {
+      if (seg.length < 3) continue;
+      for (let i = 1; i < seg.length - 1; i++) {
+        const prev = seg[i - 1];
+        const curr = seg[i];
+        const next = seg[i + 1];
+        if (curr.y < prev.y && curr.y < next.y && curr.value >= 5) {
+          const tooClose = peaks.some((p) => Math.abs(p.x - curr.x) < 60);
+          if (!tooClose) peaks.push(curr);
+        }
       }
     }
     return peaks;
-  }, [signalPoints]);
+  }, [signalSegments]);
 
   // Monats-Markierungen für X-Achse (nur 6m / 1y), schlicht
   const monthTicks = useMemo(() => {
@@ -545,20 +579,34 @@ export default function VerlaufPage() {
           signalMinMax.max > signalMinMax.min
             ? ((d.signalValue - signalMinMax.min) / (signalMinMax.max - signalMinMax.min)) * 160 + 20
             : 100;
-        return { x, y: 200 - normalized };
+        return { x, y: 200 - normalized, dayIndex: i };
       })
-      .filter((p) => p !== null) as Array<{ x: number; y: number }>;
-    return { signalByDay, visualizationData: visData, signalPoints: points, signalMinMax };
+      .filter((p) => p !== null) as Array<{ x: number; y: number; dayIndex: number }>;
+    // Punkte in Segmente aufteilen (Lücke >2 Tage = Bruch)
+    const segments: Array<Array<{ x: number; y: number }>> = [];
+    let seg: Array<{ x: number; y: number }> = [];
+    for (let i = 0; i < points.length; i++) {
+      if (i > 0 && points[i].dayIndex - points[i - 1].dayIndex > 2) {
+        if (seg.length > 0) segments.push(seg);
+        seg = [];
+      }
+      seg.push({ x: points[i].x, y: points[i].y });
+    }
+    if (seg.length > 0) segments.push(seg);
+    return { signalByDay, visualizationData: visData, signalPoints: points, signalMinMax, signalSegments: segments };
   };
 
   // SVG aus Chart-Daten bauen (Hex-Farben für PDF)
   const buildChartSvg = (
     signalPoints: Array<{ x: number; y: number }>,
-    visualizationData: Array<{ dateStr: string; hasSeizure: boolean; signalValue?: number }>
+    visualizationData: Array<{ dateStr: string; hasSeizure: boolean; signalValue?: number }>,
+    segments?: Array<Array<{ x: number; y: number }>>
   ) => {
     const accentHex = "#9ed2be";
     const primaryHex = "#1f2a44";
-    const polylinePoints = signalPoints.length > 1 ? signalPoints.map((p) => `${p.x},${p.y}`).join(" ") : "";
+    const polylineSegments = segments && segments.length > 0
+      ? segments.filter((s) => s.length > 1).map((s) => s.map((p) => `${p.x},${p.y}`).join(" "))
+      : signalPoints.length > 1 ? [signalPoints.map((p) => `${p.x},${p.y}`).join(" ")] : [];
     const seizureLines = visualizationData
       .map((d, i) => {
         if (!d.hasSeizure) return "";
@@ -566,9 +614,12 @@ export default function VerlaufPage() {
         return `<line x1="${x}" y1="200" x2="${x}" y2="0" stroke="${primaryHex}" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>`;
       })
       .join("");
+    const polylineSvg = polylineSegments.map((pts) =>
+      `<polyline points="${pts}" fill="none" stroke="${accentHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>`
+    ).join("\n  ");
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" width="1000" height="200">
-  ${polylinePoints ? `<polyline points="${polylinePoints}" fill="none" stroke="${accentHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>` : ""}
+  ${polylineSvg}
   ${seizureLines}
 </svg>`;
   };
@@ -673,8 +724,8 @@ export default function VerlaufPage() {
         pdf.text(signal.label, margin, y);
         y += labelH + 2;
 
-        const { signalPoints: points, visualizationData: visData } = getChartDataForSignal(signal.id);
-        const svg = buildChartSvg(points, visData);
+        const { signalPoints: points, visualizationData: visData, signalSegments: segs } = getChartDataForSignal(signal.id);
+        const svg = buildChartSvg(points, visData, segs);
         const canvas = await svgToCanvas(svg);
         const imgData = canvas.toDataURL("image/png");
         pdf.addImage(imgData, "PNG", margin, y, imgW, chartHeightMm);
