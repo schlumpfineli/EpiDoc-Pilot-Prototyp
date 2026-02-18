@@ -1042,7 +1042,7 @@ export default function VerlaufPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pb-20" style={{ background: "#F3F6F4" }}>
+      <div className="min-h-screen pb-20 xl:pb-0" style={{ background: "#F3F6F4" }}>
         {/* Hero */}
         <div className="px-4 pt-10 pb-8 sm:px-6 lg:px-8 mb-2">
           <div className="mx-auto max-w-4xl">
