@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { format, parseISO, subDays, subMonths, eachDayOfInterval, isSameDay, differenceInDays } from "date-fns";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { format, parseISO, subDays, subMonths, eachDayOfInterval, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { seizureApi, befindenApi, Befinden, Seizure } from "@/lib/api";
@@ -103,7 +103,23 @@ export default function VerlaufPage() {
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isExportingSeizurePdf, setIsExportingSeizurePdf] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [signalDropdownOpen, setSignalDropdownOpen] = useState(false);
+  const signalDropdownRef = useRef<HTMLDivElement>(null);
   const breakpoint = useBreakpoint();
+
+  // Click-Outside schließt Dropdown
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (signalDropdownRef.current && !signalDropdownRef.current.contains(e.target as Node)) {
+      setSignalDropdownOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (signalDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [signalDropdownOpen, handleClickOutside]);
 
   // Setze Zeitraum zurück, wenn auf Mobile ein nicht verfügbarer Zeitraum ausgewählt ist
   useEffect(() => {
@@ -220,162 +236,138 @@ export default function VerlaufPage() {
   }, [signalDataInRange]);
 
   // Strukturierte Insight-Daten
-  type InsightType = "before" | "on" | "after" | "none";
+  type InsightType = "before" | "on" | "none";
   
   interface StructuredInsight {
     type: InsightType;
     text: string;
     strength: "weak" | "moderate" | "strong";
-    dataPoints: number;
-    avgValue: number;
-    avgOverall: number;
   }
 
-  // Verbesserte Insights-Logik: Analysiere Tage vor/nach Anfällen
+  const MIN_SEIZURES_FOR_INSIGHT = 20;
+  const MIN_EFFECT_THRESHOLD = 1.5;
+
+  // Insights: nur bei ≥20 Anfällen und statistisch relevanter Differenz
   const insights = useMemo(() => {
-    if (seizuresInRange.length === 0 || !selectedSignal) {
-      return [];
-    }
+    if (!selectedSignal || seizuresInRange.length === 0) return [];
 
     const insightsList: StructuredInsight[] = [];
     const signalLabel = availableSignals.find((s) => s.id === selectedSignal)?.label || selectedSignal;
-    const seizureDates = seizuresInRange.map((s) => parseISO(s.date));
-    const daysWithSignal = Object.keys(signalByDay).map((d) => parseISO(d));
 
-    if (daysWithSignal.length === 0) {
-      return [];
+    if (seizuresInRange.length < MIN_SEIZURES_FOR_INSIGHT) {
+      insightsList.push({
+        type: "none",
+        text: "Für eine aussagekräftige Darstellung werden mindestens 20 dokumentierte Anfälle benötigt. Mit weiteren Einträgen können mögliche Muster klarer erkennbar werden.",
+        strength: "weak",
+      });
+      return insightsList;
     }
 
-    // Analysiere Tage vor Anfällen (2-4 Tage vorher)
-    const daysBeforeSeizure: number[] = [];
-    seizureDates.forEach((seizureDate) => {
-      for (let daysBack = 2; daysBack <= 4; daysBack++) {
-        const checkDate = subDays(seizureDate, daysBack);
-        const checkDateStr = format(checkDate, "yyyy-MM-dd");
-        if (signalByDay[checkDateStr] !== undefined) {
-          daysBeforeSeizure.push(signalByDay[checkDateStr]);
-        }
-      }
-    });
+    const seizureDates = seizuresInRange.map((s) => parseISO(s.date));
+    const daysWithSignal = Object.keys(signalByDay);
+    if (daysWithSignal.length === 0) return [];
 
-    // Analysiere Tage mit Anfällen
-    const daysWithSeizure: number[] = [];
-    seizureDates.forEach((seizureDate) => {
-      const seizureDateStr = format(seizureDate, "yyyy-MM-dd");
-      if (signalByDay[seizureDateStr] !== undefined) {
-        daysWithSeizure.push(signalByDay[seizureDateStr]);
-      }
-    });
+    const avg = (arr: number[]) => arr.reduce((s, v) => s + v, 0) / arr.length;
 
-    // Analysiere Tage nach Anfällen (1-3 Tage danach)
-    const daysAfterSeizure: number[] = [];
-    seizureDates.forEach((seizureDate) => {
-      for (let daysForward = 1; daysForward <= 3; daysForward++) {
-        const checkDate = subDays(seizureDate, -daysForward);
-        const checkDateStr = format(checkDate, "yyyy-MM-dd");
-        if (signalByDay[checkDateStr] !== undefined) {
-          daysAfterSeizure.push(signalByDay[checkDateStr]);
-        }
-      }
-    });
-
-    // Berechne Durchschnitte
-    const allSignalValues = Object.values(signalByDay);
-    const avgSignalOverall =
-      allSignalValues.length > 0
-        ? allSignalValues.reduce((sum, v) => sum + v, 0) / allSignalValues.length
-        : null;
-
-    const avgBeforeSeizure =
-      daysBeforeSeizure.length > 0
-        ? daysBeforeSeizure.reduce((sum, v) => sum + v, 0) / daysBeforeSeizure.length
-        : null;
-
-    const avgOnSeizureDay =
-      daysWithSeizure.length > 0
-        ? daysWithSeizure.reduce((sum, v) => sum + v, 0) / daysWithSeizure.length
-        : null;
-
-    const avgAfterSeizure =
-      daysAfterSeizure.length > 0
-        ? daysAfterSeizure.reduce((sum, v) => sum + v, 0) / daysAfterSeizure.length
-        : null;
-
-    // Generiere strukturierte Insights basierend auf Mustern
-    if (avgSignalOverall !== null) {
-      // Muster: Erhöhtes Signal vor Anfällen
-      if (avgBeforeSeizure !== null && daysBeforeSeizure.length > 0) {
-        const diff = avgBeforeSeizure - avgSignalOverall;
-        if (diff > 1.5) {
-          const strength = diff > 2.5 ? "strong" : diff > 2 ? "moderate" : "weak";
-          insightsList.push({
-            type: "before",
-            text: `${signalLabel} scheint 2-4 Tage vor Anfällen häufiger erhöht zu sein.`,
-            strength,
-            dataPoints: daysBeforeSeizure.length,
-            avgValue: avgBeforeSeizure,
-            avgOverall: avgSignalOverall,
-          });
-        } else if (diff < -1.5) {
-          const strength = Math.abs(diff) > 2.5 ? "strong" : Math.abs(diff) > 2 ? "moderate" : "weak";
-          insightsList.push({
-            type: "before",
-            text: `${signalLabel} scheint 2-4 Tage vor Anfällen häufiger niedriger zu sein.`,
-            strength,
-            dataPoints: daysBeforeSeizure.length,
-            avgValue: avgBeforeSeizure,
-            avgOverall: avgSignalOverall,
-          });
-        }
-      }
-
-      // Muster: Signal an Tagen mit Anfällen
-      if (avgOnSeizureDay !== null && daysWithSeizure.length > 0) {
-        const diff = avgOnSeizureDay - avgSignalOverall;
-        if (Math.abs(diff) > 1.5) {
-          const strength = Math.abs(diff) > 2.5 ? "strong" : Math.abs(diff) > 2 ? "moderate" : "weak";
-          insightsList.push({
-            type: "on",
-            text: `An Tagen mit Anfällen war ${signalLabel.toLowerCase()} ${diff > 0 ? "tendenziell erhöht" : "tendenziell niedriger"}.`,
-            strength,
-            dataPoints: daysWithSeizure.length,
-            avgValue: avgOnSeizureDay,
-            avgOverall: avgSignalOverall,
-          });
-        }
-      }
-
-      // Muster: Signal nach Anfällen
-      if (avgAfterSeizure !== null && daysAfterSeizure.length > 0) {
-        const diff = avgAfterSeizure - avgSignalOverall;
-        if (diff > 1.5) {
-          const strength = diff > 2.5 ? "strong" : diff > 2 ? "moderate" : "weak";
-          insightsList.push({
-            type: "after",
-            text: `${signalLabel} scheint 1-3 Tage nach Anfällen häufiger erhöht zu sein.`,
-            strength,
-            dataPoints: daysAfterSeizure.length,
-            avgValue: avgAfterSeizure,
-            avgOverall: avgSignalOverall,
-          });
-        }
-      }
-
-      // Fallback: Kein klares Muster
-      if (insightsList.length === 0) {
-        insightsList.push({
-          type: "none",
-          text: "Kein klares Muster erkennbar.",
-          strength: "weak",
-          dataPoints: 0,
-          avgValue: 0,
-          avgOverall: avgSignalOverall,
+    const collectValues = (dateFn: (seizureDate: Date) => Date[]) => {
+      const values: number[] = [];
+      seizureDates.forEach((sd) => {
+        dateFn(sd).forEach((d) => {
+          const k = format(d, "yyyy-MM-dd");
+          if (signalByDay[k] !== undefined) values.push(signalByDay[k]);
         });
-      }
+      });
+      return values;
+    };
+
+    const daysBeforeValues = collectValues((sd) => [2, 3, 4].map((n) => subDays(sd, n)));
+    const daysOnValues = collectValues((sd) => [sd]);
+    const daysAfterValues = collectValues((sd) => [1, 2, 3].map((n) => subDays(sd, -n)));
+
+    const allSignalValues = Object.values(signalByDay);
+    const avgOverall = allSignalValues.length > 0 ? avg(allSignalValues) : null;
+    if (avgOverall === null) return [];
+
+    const checkPattern = (values: number[], type: InsightType) => {
+      if (values.length === 0) return;
+      const avgVal = avg(values);
+      const diff = avgVal - avgOverall;
+      if (Math.abs(diff) < MIN_EFFECT_THRESHOLD) return;
+      const strength = Math.abs(diff) > 2.5 ? "strong" : Math.abs(diff) > 2 ? "moderate" : "weak";
+      insightsList.push({
+        type,
+        text: type === "on"
+          ? `In deinen bisherigen Einträgen zeigen sich Unterschiede zwischen Tagen mit und ohne dokumentierte Anfälle. Die Darstellung beschreibt ausschließlich deine selbst erfassten Angaben und erlaubt keine medizinische Bewertung.`
+          : `In zeitlicher Nähe zu dokumentierten Anfällen weichen die erfassten Werte teilweise vom Durchschnitt anderer Tage ab. Die Darstellung beschreibt ausschließlich deine selbst erfassten Angaben und erlaubt keine medizinische Bewertung.`,
+        strength,
+      });
+    };
+
+    checkPattern(daysBeforeValues, "before");
+    checkPattern(daysOnValues, "on");
+    checkPattern(daysAfterValues, "before");
+
+    if (insightsList.length === 0) {
+      insightsList.push({
+        type: "none",
+        text: `Im gewählten Zeitraum zeigen sich bei ${signalLabel} keine auffälligen Unterschiede zwischen Tagen mit und ohne dokumentierte Anfälle.`,
+        strength: "weak",
+      });
     }
 
     return insightsList;
-  }, [seizuresInRange, selectedSignal, signalByDay]);
+  }, [seizuresInRange, selectedSignal, signalByDay, availableSignals]);
+
+  const summaryInsight = selectedSignal ? (insights[0]?.text ?? null) : null;
+
+  const [showMethodInfo, setShowMethodInfo] = useState(false);
+  const [showInsightDetail, setShowInsightDetail] = useState(false);
+
+  const insightBanner = selectedSignal ? (
+    <div className="mt-4 space-y-2">
+      {summaryInsight && (
+        <button
+          type="button"
+          onClick={() => setShowInsightDetail((prev) => !prev)}
+          className="flex w-full items-center gap-2 px-1 text-left group"
+        >
+          <svg className="h-3.5 w-3.5 flex-shrink-0 text-foreground-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-[12px] text-foreground-400 group-hover:text-foreground-600 transition-colors">
+            Muster anzeigen
+          </span>
+          <svg className={`h-3 w-3 flex-shrink-0 text-foreground-300 transition-transform duration-200 ${showInsightDetail ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
+      {showInsightDetail && summaryInsight && (
+        <div className="px-1 pt-1 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+          <p className="text-[12px] text-foreground-500 leading-[1.7]">{summaryInsight}</p>
+          <p className="text-[10px] text-foreground-300 leading-[1.7]">Die Darstellung beschreibt ausschließlich deine selbst erfassten Angaben.</p>
+          <div className="flex items-center gap-3 pt-1 text-[10px] text-foreground-300">
+            <span>Persönliche Übersicht · keine medizinische Bewertung</span>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMethodInfo((prev) => !prev); }}
+              className="inline-flex items-center gap-1 flex-shrink-0 underline decoration-foreground-200 underline-offset-2 hover:text-foreground-500 transition-colors"
+            >
+              <svg className="h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01" />
+              </svg>
+              Methodik
+            </button>
+          </div>
+          {showMethodInfo && (
+            <div className="text-[10px] text-foreground-300 leading-[1.7] space-y-1 animate-in fade-in duration-150">
+              <p>Die Darstellung vergleicht Durchschnittswerte an Tagen mit dokumentierten Anfällen mit anderen Tagen im gewählten Zeitraum. Es wird kein medizinischer Zusammenhang geprüft, sondern lediglich eine Gegenüberstellung deiner Einträge vorgenommen.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  ) : null;
 
   // Berechne Min/Max für Signal-Normalisierung
   const signalMinMax = useMemo(() => {
@@ -386,6 +378,18 @@ export default function VerlaufPage() {
       max: Math.max(...values),
     };
   }, [signalByDay]);
+
+  const chartContext = useMemo(() => {
+    const rangeLabels: Record<TimeRange, string> = { "7d": "7 Tage", "30d": "30 Tage", "6m": "6 Monate", "1y": "1 Jahr" };
+    const totalDays = timeRangeData.days.length;
+    const daysWithEntries = Object.keys(signalByDay).length;
+    return {
+      range: rangeLabels[timeRange],
+      seizures: seizuresInRange.length,
+      totalDays,
+      daysWithEntries,
+    };
+  }, [timeRange, seizuresInRange, timeRangeData.days, signalByDay]);
 
   // Berechne Visualisierungsdaten
   const visualizationData = useMemo(() => {
@@ -418,10 +422,54 @@ export default function VerlaufPage() {
                 160 +
               20
             : 100;
-        return { x, y: 200 - normalizedValue };
+        return { x, y: 200 - normalizedValue, value: d.signalValue };
       })
-      .filter((p) => p !== null) as Array<{ x: number; y: number }>;
+      .filter((p) => p !== null) as Array<{ x: number; y: number; value: number }>;
   }, [visualizationData, signalMinMax]);
+
+  // Smooth Catmull-Rom Spline → SVG cubic bezier path
+  const splinePath = useMemo(() => {
+    if (signalPoints.length < 2) return "";
+    const pts = signalPoints;
+    const tension = 0.3;
+    let d = `M${pts[0].x},${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(i - 1, 0)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(i + 2, pts.length - 1)];
+      const cp1x = p1.x + ((p2.x - p0.x) * tension);
+      const cp1y = p1.y + ((p2.y - p0.y) * tension);
+      const cp2x = p2.x - ((p3.x - p1.x) * tension);
+      const cp2y = p2.y - ((p3.y - p1.y) * tension);
+      d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return d;
+  }, [signalPoints]);
+
+  // Area-Fill path (gleiche Spline + Boden schließen)
+  const areaPath = useMemo(() => {
+    if (!splinePath || signalPoints.length < 2) return "";
+    const first = signalPoints[0];
+    const last = signalPoints[signalPoints.length - 1];
+    return `${splinePath} L${last.x},200 L${first.x},200 Z`;
+  }, [splinePath, signalPoints]);
+
+  // Peaks: lokale Maxima mit Mindestabstand
+  const peakPoints = useMemo(() => {
+    if (signalPoints.length < 3) return [];
+    const peaks: Array<{ x: number; y: number; value: number }> = [];
+    for (let i = 1; i < signalPoints.length - 1; i++) {
+      const prev = signalPoints[i - 1];
+      const curr = signalPoints[i];
+      const next = signalPoints[i + 1];
+      if (curr.y < prev.y && curr.y < next.y && curr.value >= 5) {
+        const tooClose = peaks.some((p) => Math.abs(p.x - curr.x) < 60);
+        if (!tooClose) peaks.push(curr);
+      }
+    }
+    return peaks;
+  }, [signalPoints]);
 
   // Monats-Markierungen für X-Achse (nur 6m / 1y), schlicht
   const monthTicks = useMemo(() => {
@@ -894,7 +942,7 @@ export default function VerlaufPage() {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-background-50 flex items-center justify-center">
-          <p className="text-body text-foreground-600">Lädt...</p>
+          <p className="text-body text-foreground-400">Einen Moment…</p>
         </div>
       </ProtectedRoute>
     );
@@ -904,17 +952,111 @@ export default function VerlaufPage() {
   const isTablet = breakpoint === "tablet";
   const isDesktop = breakpoint === "desktop";
 
+  const selectedSignalLabel = availableSignals.find((s) => s.id === selectedSignal)?.label;
+  const hasChartData = signalPoints.length > 0 || seizuresInRange.length > 0;
+  const showMonthAxis = (timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0;
+
+  const chartSvgContent = (gradientId: string, withTransition = false) => (
+    <>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--color-accent-500)" stopOpacity="0.10" />
+          <stop offset="100%" stopColor="var(--color-accent-500)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} className={withTransition ? "transition-all duration-300" : undefined} />}
+      {splinePath && <path d={splinePath} fill="none" stroke="var(--color-accent-500)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" className={withTransition ? "transition-all duration-300" : undefined} />}
+      {peakPoints.map((p, i) => (
+        <circle key={`peak-${i}`} cx={p.x} cy={p.y} r={isDesktop ? "3" : "2.5"} fill="var(--color-accent-500)" opacity={isDesktop ? "0.4" : "0.45"} className={withTransition ? "transition-all duration-300" : undefined} />
+      ))}
+      {visualizationData.map((d, i) => {
+        if (!d.hasSeizure) return null;
+        const x = visualizationData.length > 1 ? (i / (visualizationData.length - 1)) * 1000 : 500;
+        return <line key={`seizure-${d.dateStr}`} x1={x} y1={200} x2={x} y2={0} stroke="var(--color-primary-500)" strokeWidth="1" strokeDasharray="4 4" opacity={isDesktop ? "0.35" : "0.4"} className={withTransition ? "transition-all duration-300" : undefined} />;
+      })}
+    </>
+  );
+
+  const monthAxisOverlay = showMonthAxis ? (
+    <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
+      <div className="h-px w-full bg-foreground-200" />
+      {monthTicks.map((t) => (
+        <div
+          key={`${t.label}-${t.position}`}
+          className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
+          style={{ left: `${t.position}%` }}
+        >
+          <div className="w-px h-1 bg-foreground-300" />
+          <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-300 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
+            {t.label}
+          </span>
+        </div>
+      ))}
+      <div className="absolute top-0 right-0 w-px h-1 bg-foreground-300" aria-hidden />
+    </div>
+  ) : null;
+
+  const chartLegend = (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-foreground-300">
+      {signalPoints.length > 0 && (
+        <div className="flex items-center gap-1.5">
+          <div className="h-[2px] w-3.5 rounded-full bg-accent-500/50" />
+          <span>{selectedSignalLabel}</span>
+        </div>
+      )}
+      {seizuresInRange.length > 0 && (
+        <div className="flex items-center gap-1.5">
+          <svg width="14" height="2" viewBox="0 0 14 2" className="block flex-shrink-0">
+            <line x1="0" y1="1" x2="14" y2="1" stroke="var(--color-primary-500)" strokeWidth="1.5" strokeDasharray="3 2" opacity="0.4" />
+          </svg>
+          <span>Anfall</span>
+        </div>
+      )}
+    </div>
+  );
+
+  const contextChips = (size: "sm" | "lg" = "sm") => {
+    const px = size === "lg" ? "px-3" : "px-2.5";
+    const textSize = size === "lg" ? "text-[12px]" : "text-[11px]";
+    const gap = size === "lg" ? "gap-2" : "gap-1.5";
+    return (
+      <div className={`flex flex-wrap items-center ${gap} ${textSize}`}>
+        <span className={`rounded-full bg-[#F3F7F5] ${px} py-0.5 text-foreground-400`}>{chartContext.range}</span>
+        <span className="text-foreground-200">·</span>
+        <span className={`rounded-full bg-[#F3F7F5] ${px} py-0.5 text-foreground-400`}>{chartContext.seizures} {chartContext.seizures === 1 ? "Anfall" : "Anfälle"}</span>
+        {selectedSignal && <>
+          <span className="text-foreground-200">·</span>
+          <span className={`rounded-full bg-[#F3F7F5] ${px} py-0.5 text-foreground-400`}>{chartContext.daysWithEntries} / {chartContext.totalDays} Tage erfasst</span>
+        </>}
+      </div>
+    );
+  };
+
+  const emptyChartState = (height: string) => (
+    <div className={`${height} flex items-center justify-center`}>
+      <p className="text-body text-foreground-500">
+        Für diesen Zeitraum liegen noch nicht genügend Einträge für eine Darstellung vor.
+      </p>
+    </div>
+  );
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background-50 pb-20">
-        {/* Titel, Filter und Grafik (Mobile/Tablet) – zentriert */}
-        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="mb-2 text-center text-h4 sm:text-h3 font-medium text-foreground-900">
-            Analyse
-          </h1>
-          <p className="mb-6 text-center text-body-small text-foreground-500">
-            {t("Mögliche Zusammenhänge zwischen Anfällen und deinem Befinden erkennen")}
-          </p>
+        {/* Hero */}
+        <div className="rounded-b-3xl bg-[#FAFCFB] px-4 pt-10 pb-8 sm:px-6 lg:px-8 mb-2">
+          <div className="mx-auto max-w-4xl">
+            <h1 className="mb-1 text-center text-h4 sm:text-h3 font-medium text-foreground-900">
+              Was zeigen deine Einträge?
+            </h1>
+            <p className="text-center text-[13px] text-foreground-300">
+              Muster in deinen selbst erfassten Daten — übersichtlich dargestellt.
+            </p>
+          </div>
+        </div>
+
+        {/* Filter und Grafik (Mobile/Tablet) – zentriert */}
+        <div className="mx-auto max-w-4xl px-4 pt-4 pb-6 sm:px-6 lg:px-8">
 
           {/* Zeitbereich-Auswahl */}
           <div className="mb-6">
@@ -947,233 +1089,101 @@ export default function VerlaufPage() {
             </div>
           </div>
 
-          {/* Signal-Auswahl – relative z-10 damit Dropdown nicht von Grafik überdeckt wird */}
-          <div className="relative z-10 mb-8">
-            <label className="mb-2 block text-body-small text-foreground-400 uppercase tracking-wide">
-              {t("Vergleiche Anfälle mit:")}
+          {/* Signal-Auswahl */}
+          <div className="relative z-20 mb-8" ref={signalDropdownRef}>
+            <label className="mb-2 block text-[13px] text-foreground-400">
+              Was möchtest du mit deinen Anfällen vergleichen?
             </label>
-            <select
-              value={selectedSignal}
-              onChange={(e) => setSelectedSignal(e.target.value)}
-              className="w-full rounded-lg border border-background-200/60 bg-white px-4 py-2.5 text-body text-foreground-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            <button
+              type="button"
+              onClick={() => setSignalDropdownOpen((prev) => !prev)}
+              className={`flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-left transition-all duration-150 ${
+                signalDropdownOpen
+                  ? "border-[#E4F2EC] shadow-sm ring-1 ring-[#E4F2EC]"
+                  : "border-background-200/60 hover:border-[#E4F2EC]"
+              }`}
             >
-              <option value="">Bitte wählen...</option>
-              {availableSignalsInRange.map((signal) => (
-                <option key={signal.id} value={signal.id}>
-                  {signal.label}
-                </option>
-              ))}
-            </select>
+              <span className={selectedSignal ? "text-body text-foreground-900" : "text-body text-foreground-400"}>
+                {selectedSignal
+                  ? availableSignalsInRange.find((s) => s.id === selectedSignal)?.label || "Bitte auswählen"
+                  : "Bitte auswählen"}
+              </span>
+              <svg
+                className={`h-4 w-4 flex-shrink-0 text-foreground-400 transition-transform duration-200 ${signalDropdownOpen ? "rotate-180" : ""}`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {signalDropdownOpen && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[#E4F2EC] bg-white py-1.5 shadow-md shadow-foreground-900/[0.04] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                <button
+                  type="button"
+                  onClick={() => { setSelectedSignal(""); setSignalDropdownOpen(false); }}
+                  className={`flex w-full items-center px-4 py-2.5 text-left text-body transition-colors ${
+                    !selectedSignal ? "bg-[#F3F7F5] text-foreground-700 font-medium" : "text-foreground-500 hover:bg-[#F7FBF9]"
+                  }`}
+                >
+                  Auswahl zurücksetzen
+                </button>
+                {availableSignalsInRange.map((signal) => {
+                  const isActive = selectedSignal === signal.id;
+                  return (
+                    <button
+                      key={signal.id}
+                      type="button"
+                      onClick={() => { setSelectedSignal(signal.id); setSignalDropdownOpen(false); }}
+                      className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-body transition-colors ${
+                        isActive ? "bg-[#E4F2EC]/60 text-[#2D6A4F] font-medium" : "text-foreground-800 hover:bg-[#F7FBF9]"
+                      }`}
+                    >
+                      <span>{signal.label}</span>
+                      {isActive && (
+                        <svg className="h-4 w-4 flex-shrink-0 text-[#5FAF87]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* MOBILE VIEW: Grafik mit horizontalem Scroll + Erkenntnisse */}
-          {isMobile && selectedSignal && (
+          {/* MOBILE / TABLET VIEW */}
+          {(isMobile || isTablet) && selectedSignal && (
             <div ref={chartContainerRef}>
-              {/* Horizontal scrollbare Visualisierung */}
-              {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
+              {hasChartData ? (
                 <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
-                  <div className="overflow-x-auto">
-                    <div className={`relative h-48 min-w-[600px] ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
-                      <svg
-                        className="h-full w-full"
-                        viewBox="0 0 1000 200"
-                        preserveAspectRatio="none"
-                      >
-                        {/* Signal-Linie */}
-                        {signalPoints.length > 1 && (
-                          <polyline
-                            points={signalPoints.map((p) => `${p.x},${p.y}`).join(" ")}
-                            fill="none"
-                            stroke="var(--color-accent-500)"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            opacity="0.75"
-                          />
-                        )}
-
-                        {/* Anfall-Marker - gestrichelte vertikale Linien */}
-                        {visualizationData.map((d, i) => {
-                          if (!d.hasSeizure) return null;
-                          const x =
-                            visualizationData.length > 1
-                              ? (i / (visualizationData.length - 1)) * 1000
-                              : 500;
-                          return (
-                            <line
-                              key={`seizure-${d.dateStr}`}
-                              x1={x}
-                              y1={200}
-                              x2={x}
-                              y2={0}
-                              stroke="var(--color-primary-500)"
-                              strokeWidth="1"
-                              strokeDasharray="4 4"
-                              opacity="0.6"
-                            />
-                          );
-                        })}
+                  <p className="mb-2 text-[10px] text-foreground-300">Visuelle Zusammenfassung deiner Einträge</p>
+                  <div className="mb-3">{contextChips()}</div>
+                  <div className={isMobile ? "overflow-x-auto" : undefined}>
+                    <div className={`relative ${isMobile ? "h-48 min-w-[600px]" : "h-48 w-full overflow-hidden"} ${showMonthAxis ? "pb-6" : ""}`}>
+                      <svg className="h-full w-full" viewBox="0 0 1000 200" preserveAspectRatio="none">
+                        {chartSvgContent(isMobile ? "areaGradientM" : "areaGradientT")}
                       </svg>
-
-                      {/* X-Achse: 7d/30d ohne Datum; 6m/1y dünne Linie + Monats-Markierungen */}
-                      {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
-                        <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
-                          <div className="h-px w-full bg-foreground-300" />
-                          {monthTicks.map((t) => (
-                            <div
-                              key={`${t.label}-${t.position}`}
-                              className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
-                              style={{ left: `${t.position}%` }}
-                            >
-                              <div className="w-px h-1 bg-foreground-400" />
-                              <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-400 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
-                                {t.label}
-                              </span>
-                            </div>
-                          ))}
-                          <div className="absolute top-0 right-0 w-px h-1 bg-foreground-400" aria-hidden />
-                        </div>
-                      )}
+                      {monthAxisOverlay}
                     </div>
                   </div>
-
-                  {/* Minimale Legende */}
-                  <div className="mt-3 flex items-center justify-center gap-4 text-[11px] text-foreground-600">
-                    {signalPoints.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-6 rounded bg-accent-500 opacity-80"></div>
-                        <span>
-                          {availableSignals.find((s) => s.id === selectedSignal)?.label}
-                        </span>
-                      </div>
-                    )}
-                    {seizuresInRange.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <svg width="8" height="12" viewBox="0 0 8 12" className="block">
-                          <line x1="4" y1="0" x2="4" y2="12" stroke="var(--color-primary-500)" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                        </svg>
-                        <span>Anfall</span>
-                      </div>
-                    )}
-                  </div>
+                  <div className="mt-3">{chartLegend}</div>
                 </div>
               ) : (
                 <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
-                  <div className="h-48 flex items-center justify-center">
-                    <p className="text-body text-foreground-500">
-                      Für den ausgewählten Zeitraum sind keine Daten verfügbar.
-                    </p>
-                  </div>
+                  {emptyChartState("h-48")}
                 </div>
               )}
-            </div>
-          )}
-
-          {/* TABLET VIEW: Vereinfachte Visualisierung */}
-          {isTablet && selectedSignal && (
-            <div ref={chartContainerRef}>
-              {/* Vereinfachte Visualisierung */}
-              {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
-                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
-                  <div className={`relative h-48 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
-                    <svg
-                      className="h-full w-full"
-                      viewBox="0 0 1000 200"
-                      preserveAspectRatio="none"
-                    >
-                      {/* Signal-Linie - vereinfacht, keine Tooltips */}
-                      {signalPoints.length > 1 && (
-                        <polyline
-                          points={signalPoints.map((p) => `${p.x},${p.y}`).join(" ")}
-                          fill="none"
-                          stroke="var(--color-accent-500)"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          opacity="0.75"
-                        />
-                      )}
-
-                      {/* Anfall-Marker - gestrichelte vertikale Linien */}
-                      {visualizationData.map((d, i) => {
-                        if (!d.hasSeizure) return null;
-                        const x =
-                          visualizationData.length > 1
-                            ? (i / (visualizationData.length - 1)) * 1000
-                            : 500;
-                        return (
-                          <line
-                            key={`seizure-${d.dateStr}`}
-                            x1={x}
-                            y1={200}
-                            x2={x}
-                            y2={0}
-                            stroke="var(--color-primary-500)"
-                            strokeWidth="1"
-                            strokeDasharray="4 4"
-                            opacity="0.6"
-                          />
-                        );
-                      })}
-                    </svg>
-
-                    {/* X-Achse: 7d/30d ohne Datum; 6m/1y dünne Linie + Monats-Markierungen */}
-                    {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
-                      <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
-                        <div className="h-px w-full bg-foreground-300" />
-                        {monthTicks.map((t) => (
-                          <div
-                            key={`${t.label}-${t.position}`}
-                            className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
-                            style={{ left: `${t.position}%` }}
-                          >
-                            <div className="w-px h-1 bg-foreground-400" />
-                            <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-400 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
-                              {t.label}
-                            </span>
-                          </div>
-                        ))}
-                        <div className="absolute top-0 right-0 w-px h-1 bg-foreground-400" aria-hidden />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Minimale Legende */}
-                  <div className="mt-3 flex items-center justify-center gap-4 text-[11px] text-foreground-600">
-                    {signalPoints.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-6 rounded bg-accent-500 opacity-80"></div>
-                        <span>
-                          {availableSignals.find((s) => s.id === selectedSignal)?.label}
-                        </span>
-                      </div>
-                    )}
-                    {seizuresInRange.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <svg width="8" height="12" viewBox="0 0 8 12" className="block">
-                          <line x1="4" y1="0" x2="4" y2="12" stroke="var(--color-primary-500)" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                        </svg>
-                        <span>Anfall</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
-                  <div className="h-48 flex items-center justify-center">
-                    <p className="text-body text-foreground-500">
-                      Für den ausgewählten Zeitraum sind keine Daten verfügbar.
-                    </p>
-                  </div>
-                </div>
-              )}
+              {insightBanner}
             </div>
           )}
 
           {!selectedSignal && (
-            <div className="rounded-2xl border border-background-200/60 bg-white p-6 text-center">
+            <div className="rounded-2xl bg-[#F7FBF9] px-6 py-10 text-center">
               <p className="text-body text-foreground-600">
-                Wähle ein Signal aus, um mögliche Zusammenhänge zu erkennen.
+                Wähle oben ein Symptom, um deine Einträge visuell darzustellen.
+              </p>
+              <p className="mt-2 text-[12px] text-foreground-300">
+                Die Darstellung zeigt deine selbst erfassten Daten im Zeitverlauf.
               </p>
             </div>
           )}
@@ -1183,134 +1193,63 @@ export default function VerlaufPage() {
         {isDesktop && selectedSignal && (
           <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <div ref={chartContainerRef}>
-              {signalPoints.length > 0 || seizuresInRange.length > 0 ? (
+              {hasChartData ? (
                 <div className="rounded-none border-y border-background-200/60 bg-white p-8 lg:px-10">
-                  <div className={`relative h-80 w-full overflow-hidden ${(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 ? "pb-6" : ""}`}>
-                    <svg
-                      className="h-full w-full"
-                      viewBox="0 0 1000 200"
-                      preserveAspectRatio="none"
-                    >
-                      {signalPoints.length > 1 && (
-                        <polyline
-                          points={signalPoints.map((p) => `${p.x},${p.y}`).join(" ")}
-                          fill="none"
-                          stroke="var(--color-accent-500)"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          opacity="0.75"
-                          className="transition-all duration-300"
-                        />
-                      )}
-                      {visualizationData.map((d, i) => {
-                        if (!d.hasSeizure) return null;
-                        const x =
-                          visualizationData.length > 1
-                            ? (i / (visualizationData.length - 1)) * 1000
-                            : 500;
-                        return (
-                          <line
-                            key={`seizure-${d.dateStr}`}
-                            x1={x}
-                            y1={200}
-                            x2={x}
-                            y2={0}
-                            stroke="var(--color-primary-500)"
-                            strokeWidth="1"
-                            strokeDasharray="4 4"
-                            opacity="0.6"
-                            className="transition-all duration-300"
-                          />
-                        );
-                      })}
+                  <p className="mb-2 text-[10px] text-foreground-300">Visuelle Zusammenfassung deiner Einträge</p>
+                  <div className="mb-4">{contextChips("lg")}</div>
+                  <div className={`relative h-80 w-full overflow-hidden ${showMonthAxis ? "pb-6" : ""}`}>
+                    <svg className="h-full w-full" viewBox="0 0 1000 200" preserveAspectRatio="none">
+                      {chartSvgContent("areaGradientD", true)}
                     </svg>
-                    {(timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0 && (
-                      <div className="absolute bottom-0 left-3 right-3 h-4 pt-px">
-                        <div className="h-px w-full bg-foreground-300" />
-                        {monthTicks.map((t) => (
-                          <div
-                            key={`${t.label}-${t.position}`}
-                            className={`absolute top-0 ${t.position <= 0 ? "translate-x-0" : t.position >= 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
-                            style={{ left: `${t.position}%` }}
-                          >
-                            <div className="w-px h-1 bg-foreground-400" />
-                            <span className="absolute top-1.5 left-1/2 -translate-x-1/2 text-foreground-400 whitespace-nowrap leading-none" style={{ fontSize: "9px" }}>
-                              {t.label}
-                            </span>
-                          </div>
-                        ))}
-                        <div className="absolute top-0 right-0 w-px h-1 bg-foreground-400" aria-hidden />
-                      </div>
-                    )}
+                    {monthAxisOverlay}
                   </div>
-                  <div className="mt-4 flex items-center justify-center gap-6 text-body-small text-foreground-600">
-                    {signalPoints.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-8 rounded bg-accent-500 opacity-80" />
-                        <span>{availableSignals.find((s) => s.id === selectedSignal)?.label}</span>
-                      </div>
-                    )}
-                    {seizuresInRange.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <svg width="8" height="12" viewBox="0 0 8 12" className="block">
-                          <line x1="4" y1="0" x2="4" y2="12" stroke="var(--color-primary-500)" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                        </svg>
-                        <span>Anfall</span>
-                      </div>
-                    )}
-                  </div>
+                  <div className="mt-4">{chartLegend}</div>
                 </div>
               ) : (
                 <div className="rounded-none border-y border-background-200/60 bg-white p-8">
-                  <div className="h-80 flex items-center justify-center">
-                    <p className="text-body text-foreground-500">
-                      Für den ausgewählten Zeitraum sind keine Daten verfügbar.
-                    </p>
-                  </div>
+                  {emptyChartState("h-80")}
                 </div>
               )}
             </div>
+            <div className="mx-auto max-w-4xl">{insightBanner}</div>
           </div>
         )}
 
-        {/* PDF-Exporte und Rest – zentriert, geringer Abstand zur Grafik */}
-        <div className="mx-auto max-w-4xl px-4 pt-1 pb-6 sm:px-6 lg:px-8">
-          <div className="mt-2 mb-6 rounded-2xl border border-background-200/60 bg-white p-6">
-            <h2 className="mb-3 text-h5 font-medium text-foreground-900">
-              PDF-Exporte
-            </h2>
-            <p className="mb-4 text-body-small text-foreground-600">
-              Analysen und Zusammenfassungen für den gewählten Zeitraum herunterladen.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        {/* PDF-Exporte – kompakt, sekundär */}
+        <div className="mx-auto max-w-4xl px-4 pt-1 pb-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] text-foreground-300 mr-0.5">Export:</span>
+            <button
+              type="button"
+              onClick={handleExportSeizureSummaryPdf}
+              disabled={isExportingSeizurePdf}
+              className="rounded-md border border-foreground-200/60 px-2.5 py-1 text-[11px] text-foreground-400 transition-colors hover:bg-[#F7FBF9] hover:text-foreground-600 disabled:opacity-50"
+            >
+              {isExportingSeizurePdf ? "Exportiere…" : "Anfälle (PDF)"}
+            </button>
+            {availableSignalsInRange.length > 0 && timeRange !== "7d" && (
               <button
                 type="button"
-                onClick={handleExportSeizureSummaryPdf}
-                disabled={isExportingSeizurePdf}
-                className="rounded-full border border-primary-500/60 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
+                onClick={handleExportPdf}
+                disabled={isExportingPdf}
+                className="rounded-md border border-foreground-200/60 px-2.5 py-1 text-[11px] text-foreground-400 transition-colors hover:bg-[#F7FBF9] hover:text-foreground-600 disabled:opacity-50"
               >
-                {isExportingSeizurePdf ? "Exportiere…" : "Anfälle als Bericht (PDF)"}
+                {isExportingPdf ? "Exportiere…" : "Verlaufskurven (PDF)"}
               </button>
-              {availableSignalsInRange.length > 0 && timeRange !== "7d" && (
-                <button
-                  type="button"
-                  onClick={handleExportPdf}
-                  disabled={isExportingPdf}
-                  className="rounded-full border border-primary-500/60 bg-primary-50 px-4 py-2 text-body-small font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:opacity-50"
-                >
-                  {isExportingPdf ? "Exportiere…" : "Verlaufskurven als PDF"}
-                </button>
-              )}
-              {availableSignalsInRange.length > 0 && timeRange === "7d" && (
-                <span className="text-body-small text-foreground-500">
-                  Analyse-Grafik ab Zeitraum 30 Tage
-                </span>
-              )}
-            </div>
-            <p className="mt-4 text-body-small text-foreground-400">
-              Alle Daten inkl. Profil exportieren? Unter <span className="font-medium text-foreground-600">Einstellungen → Datenexport</span>.
-            </p>
+            )}
+            {availableSignalsInRange.length > 0 && timeRange === "7d" && (
+              <span className="text-[10px] text-foreground-300">ab 30 Tagen verfügbar</span>
+            )}
+          </div>
+        </div>
+
+        {/* Datenschutz-Footer */}
+        <div className="mx-auto max-w-4xl px-4 pb-10 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1.5 text-[10px] text-foreground-300">
+            <svg className="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>Deine Daten werden verschlüsselt verarbeitet und nicht zu Werbezwecken weitergegeben.</span>
           </div>
         </div>
       </div>
