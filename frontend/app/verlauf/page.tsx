@@ -1110,19 +1110,19 @@ export default function VerlaufPage() {
             <button
               type="button"
               onClick={() => setSignalDropdownOpen((prev) => !prev)}
-              className={`flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-left transition-all duration-150 ${
+              className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all duration-150 ${
                 signalDropdownOpen
-                  ? "border-[#DDE7E2] shadow-sm ring-1 ring-[#DDE7E2]"
-                  : "border-[#DDE7E2] hover:border-[#DDE7E2]"
+                  ? "border-[#C9D8D1] bg-[#FFFFFF] shadow-sm ring-1 ring-[#C9D8D1]"
+                  : "border-[#C9D8D1] bg-[#FFFFFF] hover:border-[#B0C4B8]"
               }`}
             >
-              <span className={selectedSignal ? "text-body text-foreground-900" : "text-body text-foreground-400"}>
+              <span className={selectedSignal ? "text-body text-[#1F3A33]" : "text-body text-[#4E6A60]"}>
                 {selectedSignal
                   ? availableSignalsInRange.find((s) => s.id === selectedSignal)?.label || "Bitte auswählen"
                   : "Bitte auswählen"}
               </span>
               <svg
-                className={`h-4 w-4 flex-shrink-0 text-foreground-400 transition-transform duration-200 ${signalDropdownOpen ? "rotate-180" : ""}`}
+                className={`h-4 w-4 flex-shrink-0 text-[#4E6A60] transition-transform duration-200 ${signalDropdownOpen ? "rotate-180" : ""}`}
                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
@@ -1130,7 +1130,7 @@ export default function VerlaufPage() {
             </button>
 
             {signalDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[#DDE7E2] bg-white py-1.5 shadow-md shadow-foreground-900/[0.04] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[#C9D8D1] bg-[#FFFFFF] py-1.5 shadow-md shadow-foreground-900/[0.04] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
                 <button
                   type="button"
                   onClick={() => { setSelectedSignal(""); setSignalDropdownOpen(false); }}
@@ -1164,11 +1164,14 @@ export default function VerlaufPage() {
             )}
           </div>
 
+          {/* Trennlinie */}
+          <div style={{ height: 1, background: '#D9E3DF', margin: '24px 0' }} />
+
           {/* MOBILE / TABLET VIEW */}
           {(isMobile || isTablet) && selectedSignal && (
             <div ref={chartContainerRef}>
               {hasChartData ? (
-                <div className="mb-6 rounded-2xl border border-[#DDE7E2] bg-white p-6">
+                <div className="mb-6 p-6" style={{ background: '#FFFFFF', borderRadius: 20, boxShadow: '0 6px 20px rgba(38, 70, 60, 0.05)' }}>
                   <p className="mb-2 text-[10px] text-foreground-300">Visuelle Zusammenfassung deiner Einträge</p>
                   <div className="mb-3">{contextChips()}</div>
                   <div className={isMobile ? "overflow-x-auto" : undefined}>
@@ -1182,7 +1185,7 @@ export default function VerlaufPage() {
                   <div className="mt-3">{chartLegend}</div>
                 </div>
               ) : (
-                <div className="mb-6 rounded-2xl border border-[#DDE7E2] bg-white p-6">
+                <div className="mb-6 p-6" style={{ background: '#FFFFFF', borderRadius: 20, boxShadow: '0 6px 20px rgba(38, 70, 60, 0.05)' }}>
                   {emptyChartState("h-48")}
                 </div>
               )}
@@ -1191,11 +1194,11 @@ export default function VerlaufPage() {
           )}
 
           {!selectedSignal && (
-            <div className="rounded-2xl bg-[#F7FBF9] px-6 py-10 text-center">
-              <p className="text-body text-foreground-600">
+            <div className="px-6 py-10 text-center" style={{ background: '#FFFFFF', borderRadius: 20, boxShadow: '0 6px 20px rgba(38, 70, 60, 0.05)' }}>
+              <p className="text-body" style={{ color: '#1F3A33' }}>
                 Wähle oben ein Symptom, um deine Einträge visuell darzustellen.
               </p>
-              <p className="mt-2 text-[12px] text-foreground-300">
+              <p className="mt-2 text-[12px]" style={{ color: '#4E6A60' }}>
                 Die Darstellung zeigt deine selbst erfassten Daten im Zeitverlauf.
               </p>
             </div>
@@ -1228,15 +1231,15 @@ export default function VerlaufPage() {
           </div>
         )}
 
-        {/* PDF-Exporte – kompakt, sekundär */}
-        <div className="mx-auto max-w-4xl px-4 pt-1 pb-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-foreground-300 mr-0.5">Export:</span>
+        {/* PDF-Exporte */}
+        <div className="mx-auto max-w-4xl px-4 pt-4 pb-4 sm:px-6 lg:px-8">
+          <p className="text-[11px] font-medium text-[#4E6A60] mb-2">Export</p>
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleExportSeizureSummaryPdf}
               disabled={isExportingSeizurePdf}
-              className="rounded-md border border-foreground-200/60 px-2.5 py-1 text-[11px] text-foreground-400 transition-colors hover:bg-[#F7FBF9] hover:text-foreground-600 disabled:opacity-50"
+              className="rounded-lg border border-[#3F7A63] px-3 py-1.5 text-[12px] font-medium text-[#3F7A63] transition-colors hover:bg-[#E7F1EC] disabled:opacity-50"
             >
               {isExportingSeizurePdf ? "Exportiere…" : "Anfälle (PDF)"}
             </button>
@@ -1245,24 +1248,24 @@ export default function VerlaufPage() {
                 type="button"
                 onClick={handleExportPdf}
                 disabled={isExportingPdf}
-                className="rounded-md border border-foreground-200/60 px-2.5 py-1 text-[11px] text-foreground-400 transition-colors hover:bg-[#F7FBF9] hover:text-foreground-600 disabled:opacity-50"
+                className="rounded-lg border border-[#3F7A63] px-3 py-1.5 text-[12px] font-medium text-[#3F7A63] transition-colors hover:bg-[#E7F1EC] disabled:opacity-50"
               >
                 {isExportingPdf ? "Exportiere…" : "Verlaufskurven (PDF)"}
               </button>
             )}
             {availableSignalsInRange.length > 0 && timeRange === "7d" && (
-              <span className="text-[10px] text-foreground-300">ab 30 Tagen verfügbar</span>
+              <span className="text-[11px] text-[#4E6A60]">ab 30 Tagen verfügbar</span>
             )}
           </div>
         </div>
 
         {/* Datenschutz-Footer */}
-        <div className="mx-auto max-w-4xl px-4 pb-10 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1.5 text-[10px] text-foreground-300">
-            <svg className="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mx-auto max-w-4xl px-4 pt-6 pb-10 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 text-[11px]">
+            <svg className="h-3.5 w-3.5 flex-shrink-0 text-[#3F7A63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <span>Deine Daten werden verschlüsselt verarbeitet und nicht zu Werbezwecken weitergegeben.</span>
+            <span className="text-[#4E6A60]">Deine Daten werden verschlüsselt verarbeitet und nicht zu Werbezwecken weitergegeben.</span>
           </div>
         </div>
       </div>
