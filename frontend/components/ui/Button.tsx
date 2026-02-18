@@ -23,7 +23,7 @@ export const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'text-body rounded-2xl font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
   
   const variantClasses = {
-    primary: 'bg-[#3E7C67] text-white hover:bg-[#346B59] active:bg-[#2D5C4D] focus-visible:outline-[#3E7C67]',
+    primary: 'bg-[#3F7A63] text-[#FFFFFF] hover:bg-[#346B55] active:bg-[#346B55] focus-visible:outline-[#3F7A63]',
     secondary: 'border border-[#9FB8AE] bg-transparent text-[#1E3F34] hover:bg-[#EEF4F1] focus-visible:outline-[#3E7C67]',
   };
 

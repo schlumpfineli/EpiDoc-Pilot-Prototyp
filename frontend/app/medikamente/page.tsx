@@ -40,8 +40,8 @@ const S = {
   cardShadow: "0 4px 12px rgba(38, 70, 60, 0.06)",
   title: "#1E3F34",
   input:
-    "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20",
-  label: "block text-body-small font-medium text-foreground-500 mb-[var(--spacing-2xs)]",
+    "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20",
+  label: "block text-body-small font-medium text-[#2E4A3F] mb-[var(--spacing-2xs)]",
   btnPrimary:
     "flex-1 rounded-2xl px-5 py-3.5 text-body font-medium text-white transition disabled:opacity-50",
   btnPrimaryGradient: "linear-gradient(180deg, #3F7A63 0%, #356B58 100%)",
@@ -489,7 +489,7 @@ export default function MedikamentePage() {
                         placeholder="z.B. Levetiracetam"
                         className={S.input}
                       />
-                      {!form.name.trim() && <p className="mt-1 text-[12px] text-[#7A9088]">Dieses Feld ist erforderlich.</p>}
+                      {!form.name.trim() && <p className="mt-1 text-[12px] text-[#4E6A60]">Dieses Feld ist erforderlich.</p>}
                     </FormField>
                   </div>
                   <div className="flex-1">

@@ -597,7 +597,7 @@ export default function BefindenPage() {
   };
 
   const getRatingTextClass = (rating: number): string => {
-    if (rating <= 4) return 'text-[#1F3E35]';
+    if (rating <= 4) return 'text-[#1F352D]';
     return 'text-[#4F6B63]';
   };
 
@@ -697,7 +697,7 @@ export default function BefindenPage() {
                 disabled={isSaving}
                 className={`flex-1 rounded-lg py-1.5 text-body-small font-medium transition-colors duration-150 ease-out ${
                   isActive
-                    ? 'bg-[#D6EAE2] text-[#1F3E35]'
+                    ? 'bg-[#D6EAE2] text-[#1F352D]'
                     : 'bg-[#E4F2EC] text-[#6B8078] hover:bg-[#D6EAE2]/50'
                 }`}
               >
@@ -777,7 +777,7 @@ export default function BefindenPage() {
                     setMedicationName((prev) => ({ ...prev, [medicationKey]: e.target.value }));
                   }}
                   placeholder="z.B. Lamotrigin"
-                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F3E35] placeholder:text-[#6B8078] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                 />
               </div>
               <div>
@@ -791,7 +791,7 @@ export default function BefindenPage() {
                     setMedicationReason((prev) => ({ ...prev, [medicationKey]: e.target.value }));
                   }}
                   placeholder="z.B. Vergessen, Nebenwirkungen"
-                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F3E35] placeholder:text-[#6B8078] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                 />
               </div>
             </div>
@@ -845,21 +845,21 @@ export default function BefindenPage() {
 
         {deleteConf && ((isAllDay && deleteConf.timeOfDay === 'allDay') || (!isAllDay && deleteConf.timeOfDay === timeOfDay)) && (
           <div className="mt-3 rounded-xl border border-[#D6EAE2] bg-[#E4F2EC] p-3">
-            <p className="mb-2 text-body-small text-[#1F3E35]">
+            <p className="mb-2 text-body-small text-[#1F352D]">
               {isAllDay ? 'Möchtest du alle Einträge für diesen Tag entfernen?' : 'Möchtest du diesen Eintrag entfernen?'}
             </p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => confirmDeleteEntry(itemId)}
-                className="rounded-lg bg-foreground-200 px-3 py-1.5 text-body-small font-medium text-[#1F3E35] hover:bg-foreground-300 transition"
+                className="rounded-lg bg-foreground-200 px-3 py-1.5 text-body-small font-medium text-[#1F352D] hover:bg-foreground-300 transition"
               >
                 Ja, entfernen
               </button>
               <button
                 type="button"
                 onClick={() => cancelDeleteEntry(itemId)}
-                className="rounded-lg px-3 py-1.5 text-body-small text-[#6B8078] hover:text-[#1F3E35] transition"
+                className="rounded-lg px-3 py-1.5 text-body-small text-[#6B8078] hover:text-[#1F352D] transition"
               >
                 Abbrechen
               </button>
@@ -948,7 +948,7 @@ export default function BefindenPage() {
   const getChipClass = (isSelected: boolean): string =>
     `flex flex-col w-full min-h-12 items-center justify-center gap-1 rounded-xl px-3 py-2 text-body-small border ${
       isSelected
-        ? 'bg-[#B7D9C8] border-[#9FC5B2] text-[#1F3E35] font-semibold'
+        ? 'bg-[#B7D9C8] border-[#9FC5B2] text-[#1F352D] font-semibold'
         : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
     }`;
 
@@ -988,7 +988,7 @@ export default function BefindenPage() {
 
           {/* ═══ SEKTION 1: Deine Symptome ═══ */}
           <div className="mb-8">
-            <h2 className="text-body font-medium text-[#1F3E35] mb-1">
+            <h2 className="text-body font-medium text-[#1F352D] mb-1">
               Deine Symptome
             </h2>
             <p className="text-[13px] text-[#7A9088] mb-4">
@@ -1005,13 +1005,13 @@ export default function BefindenPage() {
                   <div key={itemId} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
                     {isRecentlySaved(itemId) && (
                       <div className="absolute top-2.5 right-3 z-10 animate-in fade-in duration-150">
-                        <svg className="h-3.5 w-3.5 text-[#1F3E35]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        <svg className="h-3.5 w-3.5 text-[#1F352D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       </div>
                     )}
                     <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
-                      <span className="text-body font-normal text-[#1F3E35]">{item.label}</span>
+                      <span className="text-body font-normal text-[#1F352D]">{item.label}</span>
                       <div className="flex items-center gap-2">
-                        {hasEntry && <span className="rounded-full bg-[#D6EAE2] px-2 py-0.5 text-[10px] font-medium text-[#1F3E35]">Heute</span>}
+                        {hasEntry && <span className="rounded-full bg-[#D6EAE2] px-2 py-0.5 text-[10px] font-medium text-[#1F352D]">Heute</span>}
                         {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-[#4F6B63]">Ø {avgRating}</span>}
                         <svg className={`h-3.5 w-3.5 text-[#7A9088] flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                       </div>
@@ -1054,11 +1054,11 @@ export default function BefindenPage() {
                     <div key={item.id} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
                       {isRecentlySaved(item.id) && (
                         <div className="absolute top-2.5 right-3 z-10 animate-in fade-in duration-150">
-                          <svg className="h-3.5 w-3.5 text-[#1F3E35]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          <svg className="h-3.5 w-3.5 text-[#1F352D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         </div>
                       )}
                       <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
-                        <span className="text-body font-normal text-[#1F3E35]">{item.label}</span>
+                        <span className="text-body font-normal text-[#1F352D]">{item.label}</span>
                         <div className="flex items-center gap-2">
                           {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-[#4F6B63]">Ø {avgRating}</span>}
                           <svg className={`h-3.5 w-3.5 text-[#7A9088] flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
@@ -1094,12 +1094,12 @@ export default function BefindenPage() {
                     <div key={item.id} className="relative overflow-hidden first:rounded-t-2xl last:rounded-b-2xl">
                       {isRecentlySaved(item.id) && (
                         <div className="absolute top-2.5 right-14 z-10 animate-in fade-in duration-150">
-                          <svg className="h-3.5 w-3.5 text-[#1F3E35]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          <svg className="h-3.5 w-3.5 text-[#1F352D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         </div>
                       )}
                       <div className="flex w-full items-center">
                         <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-5 py-3.5 text-left transition-all duration-200 hover:bg-background-50">
-                          <span className={`text-body font-normal text-[#1F3E35] ${isExpanded ? '' : 'truncate'}`}>{item.label}</span>
+                          <span className={`text-body font-normal text-[#1F352D] ${isExpanded ? '' : 'truncate'}`}>{item.label}</span>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {avgRating !== null && <span className="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-[#4F6B63]">Ø {avgRating}</span>}
                             <svg className={`h-3.5 w-3.5 text-[#7A9088] transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
@@ -1137,14 +1137,14 @@ export default function BefindenPage() {
                     <div className="flex items-center gap-2">
                       <input ref={newSymptomInputRef} type="text" value={newCustomSymptomName} onChange={(e) => setNewCustomSymptomName(e.target.value)}
                         placeholder="Name eingeben…" autoComplete="off"
-                        className="min-w-0 flex-1 rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F3E35] placeholder:text-[#6B8078] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                        className="min-w-0 flex-1 rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddCustomSymptom(); if (e.key === 'Escape') { setNewCustomSymptomName(''); setShowAddCustomSymptom(false); } }}
                       />
                       <button type="button" onClick={handleAddCustomSymptom} className="rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white hover:bg-[#346B59] transition">Speichern</button>
                       <button type="button" onClick={() => { setNewCustomSymptomName(''); setShowAddCustomSymptom(false); }} className="text-[12px] text-[#7A9088] hover:text-[#4F6B63] transition">Abbrechen</button>
                     </div>
                   ) : (
-                    <button type="button" onClick={() => setShowAddCustomSymptom(true)} className="flex items-center gap-2 text-[13px] text-[#6B8078] hover:text-[#1F3E35] transition">
+                    <button type="button" onClick={() => setShowAddCustomSymptom(true)} className="flex items-center gap-2 text-[13px] text-[#6B8078] hover:text-[#1F352D] transition">
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
                       Eigenes Symptom hinzufügen
                     </button>
@@ -1153,7 +1153,7 @@ export default function BefindenPage() {
               </div>
 
               {!showAllWeitere && weitereItems.length > WEITERE_INITIAL_COUNT && (
-                <button type="button" onClick={() => setShowAllWeitere(true)} className="mt-3 flex items-center gap-1.5 text-[13px] text-[#6B8078] hover:text-[#1F3E35] transition mx-auto">
+                <button type="button" onClick={() => setShowAllWeitere(true)} className="mt-3 flex items-center gap-1.5 text-[13px] text-[#6B8078] hover:text-[#1F352D] transition mx-auto">
                   <span>{weitereItems.length - WEITERE_INITIAL_COUNT} weitere anzeigen</span>
                   <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                 </button>

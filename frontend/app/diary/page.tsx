@@ -172,7 +172,7 @@ function ScrollTimeSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
-        className={`w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] text-left focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 cursor-pointer flex items-center justify-between ${isOpen ? "border-[#3E7C67] ring-1 ring-[#3E7C67]/20" : ""}`}
+        className={`w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] text-left focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 cursor-pointer flex items-center justify-between ${isOpen ? "border-[#3E7C67] ring-1 ring-[#3E7C67]/20" : ""}`}
       >
         <span>{value}</span>
         <svg className={`h-4 w-4 text-foreground-500 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -1428,7 +1428,7 @@ export default function DiaryPage() {
                         ? formData.type.join(", ")
                         : "Bitte auswählen"
                     }
-                    className={`w-full cursor-pointer rounded-xl border bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:outline-none transition ${
+                    className={`w-full cursor-pointer rounded-xl border bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:outline-none transition ${
                       typeError 
                         ? "border-warning-400 focus:border-warning-400 focus:ring-1 focus:ring-warning-200" 
                         : "border-[#DDE7E2] focus:border-[#3E7C67] focus:ring-1 focus:ring-[#3E7C67]/20"
@@ -1566,7 +1566,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Min"
-                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationMinutes && (
                             <button
@@ -1608,7 +1608,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Sek"
-                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationSeconds && (
                             <button
@@ -1691,7 +1691,7 @@ export default function DiaryPage() {
                                 seizureCount: e.target.value,
                               }))
                             }
-                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="Anzahl"
                           />
                           {formData.seizureCount && formData.seizureCount !== "1" && (
@@ -1791,7 +1791,7 @@ export default function DiaryPage() {
                         ? formData.afterEffects.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0 && (
@@ -1838,7 +1838,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Weitere Auffälligkeiten eintragen"
-                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                   />
                   {formData.customAfterEffects && (
                     <button
@@ -1882,7 +1882,7 @@ export default function DiaryPage() {
                         ? formData.triggers.join(", ")
                         : "Bitte auswählen"
                     }
-                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     placeholder="Bitte auswählen"
                   />
                   {Array.isArray(formData.triggers) && formData.triggers.length > 0 && (
@@ -1929,7 +1929,7 @@ export default function DiaryPage() {
                       }))
                     }
                     placeholder="Andere Auslöser eintragen"
-                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                   />
                   {formData.customTriggers && (
                     <button
@@ -2009,7 +2009,7 @@ export default function DiaryPage() {
                         }))
                       }
                       placeholder="Name des Notfallmedikaments"
-                      className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                      className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                     />
                     {formData.emergencyMedName && (
                       <button

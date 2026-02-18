@@ -13,7 +13,7 @@ import { de } from "date-fns/locale";
 // ─── Shared CSS Classes ──────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20";
+  "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20";
 
 const CSS = {
   input: `${inputBase} transition`,
@@ -208,7 +208,7 @@ function FormField({ label, type = "text", value, onChange, required, optional, 
         required={required}
         className={CSS.input}
       />
-      {hint && <p className="text-[11px] text-foreground-400">{hint}</p>}
+      {hint && <p className="text-[11px] text-[#4F6A5F]">{hint}</p>}
     </div>
   );
 }

@@ -25,7 +25,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
   const textareaId = useMemo(() => id || generatedId, [id, generatedId]);
   const hasError = !!error;
 
-  const baseClasses = 'text-body rounded-xl border bg-white text-[#1E3F34] placeholder:text-[#6E847A] focus:outline-none focus:ring-1 transition resize-y';
+  const baseClasses = 'text-body rounded-xl border bg-white text-[#1F352D] placeholder:text-[#6B7C74] focus:outline-none focus:ring-1 transition resize-y';
   const stateClasses = hasError
     ? 'border-warning-500 focus:border-warning-500 focus:ring-warning-200'
     : 'border-[#DDE7E2] focus:border-[#3E7C67] focus:ring-[#3E7C67]/20';
@@ -37,7 +37,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
       {label && (
         <label
           htmlFor={textareaId}
-          className="text-body block font-medium text-[#1E3F34]"
+          className="text-body block font-medium text-[#2E4A3F]"
         >
           {label}
           {props.required && <span className="text-foreground-800 ml-1">*</span>}
@@ -58,7 +58,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
         </p>
       )}
       {helperText && !error && (
-        <p id={`${textareaId}-helper`} className="text-body-small text-foreground-600">
+        <p id={`${textareaId}-helper`} className="text-body-small text-[#4F6A5F]">
           {helperText}
         </p>
       )}

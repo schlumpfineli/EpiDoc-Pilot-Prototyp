@@ -72,7 +72,7 @@ export default function KontaktPage() {
                 value={form.message}
                 onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
                 placeholder="Beschreiben Sie Ihr Anliegen (mind. 10 Zeichen)..."
-                className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none"
+                className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none"
               />
               <p className="text-body-small text-foreground-500 mt-[var(--spacing-2xs)]">
                 {form.message.length} / 2000 Zeichen

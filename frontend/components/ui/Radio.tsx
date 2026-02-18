@@ -47,9 +47,11 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
         {options.map((option) => (
           <label
             key={option.value}
-            className={`text-body flex cursor-pointer items-center gap-[var(--spacing-s)] rounded-xl border border-background-200 px-[var(--spacing-m)] py-[var(--spacing-s)] font-medium shadow-sm transition hover:border-primary-200 hover:shadow-md ${
-              option.disabled ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`text-body flex cursor-pointer items-center gap-[var(--spacing-s)] rounded-xl border px-[var(--spacing-m)] py-[var(--spacing-s)] font-medium shadow-sm transition ${
+              value === option.value
+                ? 'border-[#3F7A63] bg-[#E6F1EC]'
+                : 'border-[#C8D6CF] bg-white hover:border-[#A8B8B0]'
+            } ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <input
               type="radio"
@@ -58,7 +60,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
               checked={value === option.value}
               onChange={() => onChange(option.value)}
               disabled={option.disabled}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500"
+              className="h-4 w-4 accent-[#3F7A63] focus:ring-[#3F7A63] focus:ring-offset-0"
             />
             {option.label}
           </label>

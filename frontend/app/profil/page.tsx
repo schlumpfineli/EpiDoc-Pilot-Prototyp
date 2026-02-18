@@ -31,7 +31,7 @@ type ModalType =
 
 const CSS = {
   input:
-    "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1E3F34] placeholder:text-[#6E847A] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 transition",
+    "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 transition",
   btnCancel:
     "rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
   btnSave:
@@ -316,7 +316,7 @@ function FormField({ label, type = "text", value, onChange, placeholder, optiona
 }) {
   return (
     <div className="space-y-1">
-      <label className="text-[12px] font-medium text-foreground-600">
+      <label className="text-[12px] font-medium text-[#2E4A3F]">
         {label}{optional ? <span className="text-foreground-300 font-normal ml-1">(optional)</span> : <span className="text-foreground-300 ml-0.5">*</span>}
       </label>
       <input
