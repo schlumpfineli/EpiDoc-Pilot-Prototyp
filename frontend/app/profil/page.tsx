@@ -31,23 +31,19 @@ type ModalType =
 
 const CSS = {
   input:
-    "w-full rounded-xl border border-background-200/60 px-[var(--spacing-m)] py-[var(--spacing-2xs)] text-body focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition",
+    "w-full rounded-lg border border-background-200/60 px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small text-foreground-800 placeholder:text-foreground-300 focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200 transition",
   btnCancel:
-    "flex-1 rounded-xl border-2 border-background-200/60 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-foreground-700 transition hover:bg-background-50",
+    "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-400 transition hover:text-foreground-600",
   btnSave:
     "flex-1 rounded-xl bg-primary-600 px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed",
   btnEdit:
     "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-500 hover:text-foreground-700 hover:bg-background-100 rounded-xl transition",
-  btnAdd:
-    "inline-flex items-center gap-[var(--spacing-3xs)] px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-xl transition",
   btnAddDashed:
-    "w-full rounded-xl border-2 border-dashed border-background-300 py-[var(--spacing-s)] text-body font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 flex items-center justify-center gap-[var(--spacing-2xs)]",
-  btnDelete:
-    "flex h-8 w-8 items-center justify-center rounded-lg text-foreground-300 transition hover:bg-background-100 hover:text-warning-500",
+    "w-full py-[var(--spacing-xs)] text-body-small font-medium text-foreground-400 transition-all hover:text-primary-600 flex items-center justify-center gap-[var(--spacing-2xs)]",
   btnClose:
     "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
   entryCard:
-    "rounded-2xl border border-background-200/60 bg-white p-[var(--spacing-m)] space-y-[var(--spacing-m)]",
+    "py-[var(--spacing-s)] space-y-[var(--spacing-xs)] border-b border-background-200/40 last:border-b-0",
 } as const;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -118,12 +114,6 @@ const IconPhone = ({ className = "w-5 h-5" }: IconProps) => (
   </svg>
 );
 
-const IconShield = ({ className = "w-5 h-5" }: IconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-  </svg>
-);
-
 const IconPlus = ({ className = "w-4 h-4" }: IconProps) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -164,27 +154,15 @@ const CloseIcon = () => (
 // ─── Reusable UI Components ──────────────────────────────────────────────────
 
 function ProfileCompletionBar({ percentage }: { percentage: number }) {
-  const label = percentage === 100
-    ? "Vollständig — gut gemacht."
-    : percentage >= 60
-      ? "Fast geschafft."
-      : percentage >= 20
-        ? "Gut gestartet."
-        : "Dein Profil wächst";
-
   return (
-    <div className="space-y-[var(--spacing-2xs)]">
-      <div className="flex items-center justify-between text-body-small">
-        <span className="text-foreground-500">{label}</span>
-        <span className="font-medium text-foreground-600 tabular-nums">{percentage} %</span>
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] text-foreground-500">Profil: {percentage} % ergänzt</span>
       </div>
-      <div className="h-1.5 bg-background-200 rounded-full overflow-hidden">
+      <div className="h-1 bg-background-200 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{
-            width: `${percentage}%`,
-            background: percentage === 100 ? "#95D5B2" : "#B7E4C7",
-          }}
+          style={{ width: `${percentage}%`, background: "#B7E4C7" }}
         />
       </div>
     </div>
@@ -193,26 +171,22 @@ function ProfileCompletionBar({ percentage }: { percentage: number }) {
 
 function PrivacyNote() {
   return (
-    <div className="space-y-1 px-1 py-[var(--spacing-xs)]">
-      <div className="flex items-center gap-1.5">
-        <IconShield className="w-3.5 h-3.5 text-foreground-300 shrink-0" />
-        <p className="text-[11px] text-foreground-400">Deine Angaben bleiben privat und sicher gespeichert.</p>
-      </div>
-      <p className="text-[11px] text-foreground-300 pl-5">Du entscheidest, welche Informationen du festhältst. Die Daten werden verschlüsselt verarbeitet.</p>
-    </div>
+    <p className="text-[11px] text-foreground-300 text-center py-[var(--spacing-m)]">
+      Deine Angaben bleiben privat und verschlüsselt gespeichert.
+    </p>
   );
 }
 
 function EmptyState({ message, onAdd, addLabel }: { message: string; onAdd: () => void; addLabel: string }) {
   return (
-    <div className="flex flex-col items-center py-[var(--spacing-m)] gap-[var(--spacing-s)]">
-      <p className="text-body-small text-foreground-400 italic text-center">{message}</p>
+    <div className="flex flex-col items-center py-[var(--spacing-s)] gap-[var(--spacing-2xs)]">
+      <p className="text-body-small text-foreground-400 text-center">{message}</p>
       <button
         type="button"
         onClick={onAdd}
-        className="inline-flex items-center gap-[var(--spacing-2xs)] rounded-xl border-2 border-dashed border-background-300 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body-small font-medium text-foreground-500 transition-all hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 active:scale-[0.98]"
+        className="inline-flex items-center gap-1 text-body-small font-medium text-primary-600 transition hover:text-primary-700"
       >
-        <IconPlus className="w-4 h-4" />
+        <IconPlus className="w-3.5 h-3.5" />
         {addLabel}
       </button>
     </div>
@@ -223,24 +197,22 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-2xl bg-white border border-background-200/60 overflow-hidden">
+    <div>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-[var(--spacing-m)] py-[var(--spacing-s)] bg-white transition-colors hover:bg-background-100 cursor-pointer"
+        className="flex w-full items-center justify-between px-1 py-[var(--spacing-xs)] transition-colors cursor-pointer group"
       >
         <div className="flex items-center gap-[var(--spacing-xs)] min-w-0">
-          <span className="text-primary-400 shrink-0">{icon}</span>
-          <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
+          <span className="text-foreground-300 group-hover:text-primary-400 shrink-0 transition-colors">{icon}</span>
+          <h2 className="text-body font-medium text-foreground-800 truncate">{title}</h2>
         </div>
         <span className={`text-foreground-300 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
           <IconChevronDown className="w-4 h-4" />
         </span>
       </button>
       {isOpen && (
-        <div className="border-t border-background-100">
-          <div className="px-[var(--spacing-m)] py-[var(--spacing-m)]">{children}</div>
-        </div>
+        <div className="pt-[var(--spacing-xs)] pb-[var(--spacing-2xs)] px-1">{children}</div>
       )}
     </div>
   );
@@ -248,12 +220,12 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
 
 function EntryCard({ name, details }: { name: string; details: { icon: ReactNode; text: string }[] }) {
   return (
-    <div className="rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)] space-y-[var(--spacing-3xs)]">
-      <p className="text-body font-medium text-foreground-900 break-words">{name}</p>
+    <div className="py-[var(--spacing-xs)] space-y-[var(--spacing-3xs)]">
+      <p className="text-body font-medium text-foreground-800 break-words">{name}</p>
       {details
         .filter((d) => d.text)
         .map((d, i) => (
-          <div key={i} className="flex items-center gap-[var(--spacing-2xs)] text-foreground-500">
+          <div key={i} className="flex items-center gap-[var(--spacing-2xs)] text-foreground-400">
             <span className="shrink-0">{d.icon}</span>
             <span className="text-body-small break-all">{d.text}</span>
           </div>
@@ -314,38 +286,37 @@ function ConfirmDeleteButton({ onConfirm, label }: { onConfirm: () => void; labe
   );
 }
 
-function InlineModal({ title, subtitle, onClose, children }: { title: string; subtitle?: string; onClose: () => void; children: ReactNode }) {
+function InlineModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="modal-overlay">
-      <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl border border-primary-500 ring-2 ring-primary-200 overflow-hidden flex flex-col">
+      <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-lg border border-background-200/60 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
-          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)] z-10">
-            <div className="min-w-0">
-              <h2 className="text-body font-medium text-foreground-900">{title}</h2>
-              {subtitle && <p className="text-[11px] text-foreground-400 leading-relaxed mt-0.5">{subtitle}</p>}
-            </div>
+          <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-s)] py-[var(--spacing-s)] z-10">
+            <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
             <button type="button" onClick={onClose} className={CSS.btnClose} aria-label="Schließen">
               <CloseIcon />
             </button>
           </div>
-          <div className="bg-[#FAFCFB] p-[var(--spacing-s)] space-y-[var(--spacing-s)]">{children}</div>
+          <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">{children}</div>
         </div>
       </div>
     </div>
   );
 }
 
-/** Label + Input im Diary-Stil. */
-function FormField({ label, type = "text", value, onChange, placeholder }: {
+function FormField({ label, type = "text", value, onChange, placeholder, optional }: {
   label: string;
   type?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  optional?: boolean;
 }) {
   return (
-    <div className="space-y-[var(--spacing-xs)]">
-      <label className="text-body font-medium text-foreground-800">{label}</label>
+    <div className="space-y-1">
+      <label className="text-[12px] font-medium text-foreground-600">
+        {label}{optional ? <span className="text-foreground-300 font-normal ml-1">(optional)</span> : <span className="text-foreground-300 ml-0.5">*</span>}
+      </label>
       <input
         type={type}
         value={value}
@@ -360,24 +331,18 @@ function FormField({ label, type = "text", value, onChange, placeholder }: {
 function ModalActions({ onCancel, onSave, isSaving }: { onCancel: () => void; onSave: () => void; isSaving: boolean }) {
   return (
     <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-s)]">
-      <div className="flex gap-[var(--spacing-m)]">
-        <button type="button" onClick={onCancel} className={CSS.btnCancel}>Schliessen</button>
-        <button type="button" onClick={onSave} disabled={isSaving} className={CSS.btnSave}>
-          {isSaving ? "Speichert..." : "Speichern"}
-        </button>
-      </div>
-      <p className="text-[10px] text-foreground-300 text-center">Deine Angaben bleiben privat und werden verschlüsselt gespeichert.</p>
+      <button type="button" onClick={onSave} disabled={isSaving} className={`${CSS.btnSave} w-full`}>
+        {isSaving ? "Speichert..." : "Speichern"}
+      </button>
+      <button type="button" onClick={onCancel} className={`${CSS.btnCancel} w-full text-center`}>Abbrechen</button>
     </div>
   );
 }
 
-function SectionActions({ onEdit, onAdd }: { onEdit: () => void; onAdd?: () => void }) {
+function SectionActions({ onEdit }: { onEdit: () => void }) {
   return (
-    <div className="flex items-center gap-[var(--spacing-2xs)]">
-      <button type="button" onClick={onEdit} className={CSS.btnEdit}>Anpassen</button>
-      {onAdd && (
-        <button type="button" onClick={onAdd} className={CSS.btnAdd}><IconPlus className="w-3.5 h-3.5" /> Ergänzen</button>
-      )}
+    <div className="flex items-center">
+      <button type="button" onClick={onEdit} className={CSS.btnEdit}>Bearbeiten</button>
     </div>
   );
 }
@@ -493,8 +458,8 @@ export default function ProfilPage() {
   };
 
   // ── Profile Completion ──
-  const completionInfo = (() => {
-    if (!profileData) return { percentage: 0, missingCount: 5 };
+  const completionPercentage = (() => {
+    if (!profileData) return 0;
     const sections = [
       !!(profileData.diagnoses && profileData.diagnoses.length > 0) || !!profileData.disease,
       !!(profileData.doctors && profileData.doctors.length > 0),
@@ -502,8 +467,7 @@ export default function ProfilPage() {
       !!(profileData.pharmacies && profileData.pharmacies.length > 0),
       !!profileData.emergency_contact?.name,
     ];
-    const filled = sections.filter(Boolean).length;
-    return { percentage: Math.round((filled / 5) * 100), missingCount: 5 - filled };
+    return Math.round((sections.filter(Boolean).length / 5) * 100);
   })();
 
   // ── Loading State ──
@@ -526,45 +490,43 @@ export default function ProfilPage() {
       <div className="min-h-screen bg-background-50 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900">
         <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* ── Header ── */}
-          <div className="space-y-[var(--spacing-2xs)]">
-            <div className="relative py-[var(--spacing-m)] sm:py-[var(--spacing-l)] md:py-[var(--spacing-xl)]">
+          <div className="space-y-[var(--spacing-xs)]">
+            <div className="relative py-[var(--spacing-s)] sm:py-[var(--spacing-m)]">
               <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center">{t("Mein Profil")}</h1>
               {showSaveSuccess && (
-                <div className="absolute top-[var(--spacing-s)] right-0 flex items-center gap-1 text-[12px] text-primary-600 animate-in fade-in duration-150">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute top-[var(--spacing-2xs)] right-0 flex items-center gap-1 text-[12px] text-primary-600 animate-in fade-in duration-150">
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Gespeichert
                 </div>
               )}
             </div>
-            <ProfileCompletionBar percentage={completionInfo.percentage} />
-            <p className="text-[11px] text-foreground-400 leading-[1.7]">
-              Dein Profil kann jederzeit ergänzt werden. Zusätzliche Angaben können dir mehr Übersicht geben.
-            </p>
+            <ProfileCompletionBar percentage={completionPercentage} />
+            <p className="text-[11px] text-foreground-400">Du kannst jederzeit weitere Angaben ergänzen.</p>
           </div>
 
-          <div className="h-2" />
-
           {/* ── Gruppe: Medizinische Angaben ── */}
-          <div className="space-y-[var(--spacing-xs)]">
+          <div className="space-y-[var(--spacing-s)]">
             <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Medizinische Angaben</p>
-            <div className="space-y-[var(--spacing-2xs)]">
+            <div className="space-y-1 divide-y divide-background-200/40">
               <SectionCard icon={<IconMedical className="w-5 h-5" />} title="Diagnose / Epilepsieform">
                 {(profileData?.diagnoses && profileData.diagnoses.length > 0) || profileData?.disease ? (
-                  <div className="space-y-[var(--spacing-s)]">
-                    {profileData?.diagnoses && profileData.diagnoses.length > 0 ? (
-                      profileData.diagnoses.map((d, i) => (
-                        <div key={i} className="rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)]">
-                          <p className="text-body text-foreground-800">{d.type}</p>
+                  <div className="space-y-[var(--spacing-xs)]">
+                    <div>
+                      {profileData?.diagnoses && profileData.diagnoses.length > 0 ? (
+                        profileData.diagnoses.map((d, i) => (
+                          <div key={i} className="py-[var(--spacing-2xs)]">
+                            <p className="text-body text-foreground-800">{d.type}</p>
+                          </div>
+                        ))
+                      ) : profileData?.disease ? (
+                        <div className="py-[var(--spacing-2xs)]">
+                          <p className="text-body text-foreground-800">{profileData.disease}</p>
                         </div>
-                      ))
-                    ) : profileData?.disease ? (
-                      <div className="rounded-xl border border-background-200/60 bg-white px-[var(--spacing-s)] py-[var(--spacing-xs)]">
-                        <p className="text-body text-foreground-800">{profileData.disease}</p>
-                      </div>
-                    ) : null}
-                    <SectionActions onEdit={() => openModal("diagnoses")} onAdd={() => { openModal("diagnoses"); diagnosisHelpers.add(); }} />
+                      ) : null}
+                    </div>
+                    <SectionActions onEdit={() => openModal("diagnoses")} />
                   </div>
                 ) : (
                   <EmptyState message="Noch keine Diagnose erfasst" onAdd={() => openModal("diagnoses")} addLabel="Diagnose ergänzen" />
@@ -573,14 +535,16 @@ export default function ProfilPage() {
 
               <SectionCard icon={<IconStethoscope className="w-5 h-5" />} title="Behandelnde Ärztinnen und Ärzte">
                 {profileData?.doctors && profileData.doctors.length > 0 ? (
-                  <div className="space-y-[var(--spacing-s)]">
+                  <div className="space-y-[var(--spacing-xs)]">
+                    <div className="divide-y divide-background-200/30">
                     {profileData.doctors.map((doc, i) => (
                       <EntryCard key={i} name={doc.name} details={[
                         { icon: <IconPhone className="w-3.5 h-3.5" />, text: doc.phone || "" },
                         { icon: <IconMail className="w-3.5 h-3.5" />, text: doc.email || "" },
                       ]} />
                     ))}
-                    <SectionActions onEdit={() => openModal("doctors")} onAdd={() => { openModal("doctors"); doctorHelpers.add(); }} />
+                    </div>
+                    <SectionActions onEdit={() => openModal("doctors")} />
                   </div>
                 ) : (
                   <EmptyState message="Noch keine Ärzte erfasst" onAdd={() => openModal("doctors")} addLabel="Ärztin / Arzt ergänzen" />
@@ -589,14 +553,16 @@ export default function ProfilPage() {
 
               <SectionCard icon={<IconBuilding className="w-5 h-5" />} title="Kliniken / Spitäler">
                 {profileData?.clinics && profileData.clinics.length > 0 ? (
-                  <div className="space-y-[var(--spacing-s)]">
+                  <div className="space-y-[var(--spacing-xs)]">
+                    <div className="divide-y divide-background-200/30">
                     {profileData.clinics.map((clinic, i) => (
                       <EntryCard key={i} name={clinic.name} details={[
                         { icon: <IconPhone className="w-3.5 h-3.5" />, text: clinic.phone || "" },
                         { icon: <IconMapPin className="w-3.5 h-3.5" />, text: clinic.address || "" },
                       ]} />
                     ))}
-                    <SectionActions onEdit={() => openModal("clinics")} onAdd={() => { openModal("clinics"); clinicHelpers.add(); }} />
+                    </div>
+                    <SectionActions onEdit={() => openModal("clinics")} />
                   </div>
                 ) : (
                   <EmptyState message="Noch keine Kliniken erfasst" onAdd={() => openModal("clinics")} addLabel="Klinik ergänzen" />
@@ -605,14 +571,16 @@ export default function ProfilPage() {
 
               <SectionCard icon={<IconPills className="w-5 h-5" />} title="Apotheken">
                 {profileData?.pharmacies && profileData.pharmacies.length > 0 ? (
-                  <div className="space-y-[var(--spacing-s)]">
+                  <div className="space-y-[var(--spacing-xs)]">
+                    <div className="divide-y divide-background-200/30">
                     {profileData.pharmacies.map((pharmacy, i) => (
                       <EntryCard key={i} name={pharmacy.name} details={[
                         { icon: <IconPhone className="w-3.5 h-3.5" />, text: pharmacy.phone || "" },
                         { icon: <IconMapPin className="w-3.5 h-3.5" />, text: pharmacy.address || "" },
                       ]} />
                     ))}
-                    <SectionActions onEdit={() => openModal("pharmacies")} onAdd={() => { openModal("pharmacies"); pharmacyHelpers.add(); }} />
+                    </div>
+                    <SectionActions onEdit={() => openModal("pharmacies")} />
                   </div>
                 ) : (
                   <EmptyState message="Noch keine Apotheken erfasst" onAdd={() => openModal("pharmacies")} addLabel="Apotheke ergänzen" />
@@ -622,14 +590,14 @@ export default function ProfilPage() {
           </div>
 
           {/* ── Gruppe: Notfall & Kontakte ── */}
-          <div className="space-y-[var(--spacing-xs)]">
+          <div className="space-y-[var(--spacing-s)]">
             <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Notfall & Kontakte</p>
-            <div className="space-y-[var(--spacing-2xs)]">
+            <div className="space-y-1">
               <SectionCard icon={<IconPhone className="w-5 h-5" />} title="Notfallkontakt">
                 {profileData?.emergency_contact?.name ? (
-                  <div className="space-y-[var(--spacing-s)]">
+                  <div className="space-y-[var(--spacing-xs)]">
                     <div className="space-y-[var(--spacing-3xs)]">
-                      <p className="text-body font-medium text-foreground-900">{profileData.emergency_contact.name}</p>
+                      <p className="text-body font-medium text-foreground-800">{profileData.emergency_contact.name}</p>
                       {profileData.emergency_contact.phone && (
                         <div className="flex items-center gap-[var(--spacing-2xs)] text-foreground-500">
                           <IconPhone className="w-3.5 h-3.5" />
@@ -659,7 +627,7 @@ export default function ProfilPage() {
       {/* ── Modals ── */}
 
       {activeModal === "diagnoses" && (
-        <InlineModal title="Diagnosen ergänzen oder anpassen" subtitle="Diese Angaben helfen dir, deine Einträge besser einzuordnen." onClose={closeModal}>
+        <InlineModal title="Diagnosen bearbeiten" onClose={closeModal}>
           {diagnoses.length === 0 && (
             <p className="text-body text-foreground-400 text-center py-[var(--spacing-s)]">Noch keine Diagnosen ergänzt.</p>
           )}
@@ -680,7 +648,7 @@ export default function ProfilPage() {
       )}
 
       {activeModal === "doctors" && (
-        <InlineModal title="Ärztliche Kontakte ergänzen" subtitle="Diese Angaben sind nur für dich sichtbar und können bei Gesprächen hilfreich sein." onClose={closeModal}>
+        <InlineModal title="Ärztliche Kontakte bearbeiten" onClose={closeModal}>
           {doctors.length === 0 && (
             <p className="text-body text-foreground-400 text-center py-[var(--spacing-s)]">Noch keine ärztlichen Kontakte ergänzt.</p>
           )}
@@ -691,8 +659,8 @@ export default function ProfilPage() {
                 <ConfirmDeleteButton onConfirm={() => doctorHelpers.remove(i)} label="Eintrag entfernen" />
               </div>
               <FormField label="Name" value={doc.name} onChange={(v) => doctorHelpers.update(i, "name", v)} placeholder="Name des Arztes" />
-              <FormField label="Telefon" type="tel" value={doc.phone || ""} onChange={(v) => doctorHelpers.update(i, "phone", v)} placeholder="Telefonnummer" />
-              <FormField label="E-Mail" type="email" value={doc.email || ""} onChange={(v) => doctorHelpers.update(i, "email", v)} placeholder="E-Mail-Adresse" />
+              <FormField label="Telefon" type="tel" value={doc.phone || ""} onChange={(v) => doctorHelpers.update(i, "phone", v)} placeholder="Telefonnummer" optional />
+              <FormField label="E-Mail" type="email" value={doc.email || ""} onChange={(v) => doctorHelpers.update(i, "email", v)} placeholder="E-Mail-Adresse" optional />
             </div>
           ))}
           <button type="button" onClick={doctorHelpers.add} className={CSS.btnAddDashed}>
@@ -703,7 +671,7 @@ export default function ProfilPage() {
       )}
 
       {activeModal === "clinics" && (
-        <InlineModal title="Kliniken oder Spitäler ergänzen" subtitle="Du kannst hier Einrichtungen speichern, mit denen du in Kontakt stehst." onClose={closeModal}>
+        <InlineModal title="Kliniken bearbeiten" onClose={closeModal}>
           {clinics.length === 0 && (
             <p className="text-body text-foreground-400 text-center py-[var(--spacing-s)]">Noch keine Kliniken ergänzt.</p>
           )}
@@ -714,8 +682,8 @@ export default function ProfilPage() {
                 <ConfirmDeleteButton onConfirm={() => clinicHelpers.remove(i)} label="Eintrag entfernen" />
               </div>
               <FormField label="Name" value={clinic.name} onChange={(v) => clinicHelpers.update(i, "name", v)} placeholder="Name der Klinik" />
-              <FormField label="Telefon" type="tel" value={clinic.phone || ""} onChange={(v) => clinicHelpers.update(i, "phone", v)} placeholder="Telefonnummer" />
-              <FormField label="Adresse" value={clinic.address || ""} onChange={(v) => clinicHelpers.update(i, "address", v)} placeholder="Strasse und Ort" />
+              <FormField label="Telefon" type="tel" value={clinic.phone || ""} onChange={(v) => clinicHelpers.update(i, "phone", v)} placeholder="Telefonnummer" optional />
+              <FormField label="Adresse" value={clinic.address || ""} onChange={(v) => clinicHelpers.update(i, "address", v)} placeholder="Strasse und Ort" optional />
             </div>
           ))}
           <button type="button" onClick={clinicHelpers.add} className={CSS.btnAddDashed}>
@@ -726,7 +694,7 @@ export default function ProfilPage() {
       )}
 
       {activeModal === "pharmacies" && (
-        <InlineModal title="Apotheken ergänzen" subtitle="Zum schnellen Nachschlagen bei Bedarf." onClose={closeModal}>
+        <InlineModal title="Apotheken bearbeiten" onClose={closeModal}>
           {pharmacies.length === 0 && (
             <p className="text-body text-foreground-400 text-center py-[var(--spacing-s)]">Noch keine Apotheken ergänzt.</p>
           )}
@@ -737,8 +705,8 @@ export default function ProfilPage() {
                 <ConfirmDeleteButton onConfirm={() => pharmacyHelpers.remove(i)} label="Eintrag entfernen" />
               </div>
               <FormField label="Name" value={pharmacy.name} onChange={(v) => pharmacyHelpers.update(i, "name", v)} placeholder="Name der Apotheke" />
-              <FormField label="Telefon" type="tel" value={pharmacy.phone || ""} onChange={(v) => pharmacyHelpers.update(i, "phone", v)} placeholder="Telefonnummer" />
-              <FormField label="Adresse" value={pharmacy.address || ""} onChange={(v) => pharmacyHelpers.update(i, "address", v)} placeholder="Strasse und Ort" />
+              <FormField label="Telefon" type="tel" value={pharmacy.phone || ""} onChange={(v) => pharmacyHelpers.update(i, "phone", v)} placeholder="Telefonnummer" optional />
+              <FormField label="Adresse" value={pharmacy.address || ""} onChange={(v) => pharmacyHelpers.update(i, "address", v)} placeholder="Strasse und Ort" optional />
             </div>
           ))}
           <button type="button" onClick={pharmacyHelpers.add} className={CSS.btnAddDashed}>
@@ -749,10 +717,10 @@ export default function ProfilPage() {
       )}
 
       {activeModal === "emergency_contact" && (
-        <InlineModal title="Kontakt für den Notfall hinterlegen" subtitle="Diese Person kann im Ernstfall informiert werden. Du kannst die Angaben jederzeit ändern oder entfernen." onClose={closeModal}>
+        <InlineModal title="Notfallkontakt bearbeiten" onClose={closeModal}>
           <FormField label="Name" value={emergencyContact.name} onChange={(v) => setEmergencyContact({ ...emergencyContact, name: v })} placeholder="Name der Kontaktperson" />
-          <FormField label="Telefon" type="tel" value={emergencyContact.phone || ""} onChange={(v) => setEmergencyContact({ ...emergencyContact, phone: v })} placeholder="Telefonnummer" />
-          <FormField label="Beziehung" value={emergencyContact.relationship || ""} onChange={(v) => setEmergencyContact({ ...emergencyContact, relationship: v })} placeholder="z.B. Partner, Elternteil, Freund..." />
+          <FormField label="Telefon" type="tel" value={emergencyContact.phone || ""} onChange={(v) => setEmergencyContact({ ...emergencyContact, phone: v })} placeholder="Telefonnummer" optional />
+          <FormField label="Beziehung" value={emergencyContact.relationship || ""} onChange={(v) => setEmergencyContact({ ...emergencyContact, relationship: v })} placeholder="z. B. Partner, Elternteil" optional />
           <ModalActions onCancel={closeModal} onSave={() => saveSection("emergency_contact")} isSaving={isSaving} />
         </InlineModal>
       )}
