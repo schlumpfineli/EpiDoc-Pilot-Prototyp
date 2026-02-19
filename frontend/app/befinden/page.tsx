@@ -969,31 +969,6 @@ export default function BefindenPage() {
         : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
     }`;
 
-  // Hat Nutzer eine Bewertung ausgewählt (noch nicht gespeichert)?
-  const hasSelection = (itemId: string): boolean => {
-    const slot = expandedTimeSlots[itemId];
-    if (!expandedItems[itemId] || !slot) return false;
-    if (slot === 'allDay') return tempRatings[itemId]?.allDay != null;
-    return tempRatings[itemId]?.[slot] != null;
-  };
-
-  // Befinden-Card: 3 Zustände – Default | Auswahl (leicht färben) | Gespeichert (farbig + Häkchen + Wert)
-  const getBefindenCardStyle = (hasEntry: boolean, isExpanded: boolean, itemId: string): React.CSSProperties => {
-    const shadow = "0 2px 6px rgba(47,79,67,0.06)";
-    if (hasEntry) {
-      return { background: "#E6F1EC", border: "1.5px solid #3F7A63", boxShadow: shadow };
-    }
-    if (hasSelection(itemId)) {
-      return { background: "#F4F7F5", border: "1px solid #C8DBD3", boxShadow: shadow };
-    }
-    return { background: "#FFFFFF", border: "1px solid #D6E3DD", boxShadow: shadow };
-  };
-
-  const getBefindenCardHoverClass = (hasEntry: boolean, isExpanded: boolean, itemId: string): string => {
-    if (hasEntry || isExpanded || hasSelection(itemId)) return "";
-    return "hover:!bg-[#F4F7F5] hover:!border-[#C8DBD3]";
-  };
-
 
   return (
     <ProtectedRoute>
@@ -1036,7 +1011,7 @@ export default function BefindenPage() {
             <p className="text-[13px] text-[#7A9088] mb-4">
               Symptome, die du regelmäßig erfasst.
             </p>
-            <div className="flex flex-col gap-3">
+            <div className="rounded-2xl divide-y divide-background-200/40 overflow-hidden" style={{ background: '#FFFFFF', boxShadow: '0 2px 6px rgba(47,79,67,0.06)' }}>
               {personalItemIds.map((itemId) => {
                 const item = allItems.find((i) => i.id === itemId) || coreItems.find((i) => i.id === itemId);
                 if (!item) return null;
@@ -1044,7 +1019,7 @@ export default function BefindenPage() {
                 const isExpanded = expandedItems[itemId];
                 const selectedTimeSlot = expandedTimeSlots[itemId];
                 return (
-                  <div key={itemId} className={`relative overflow-hidden rounded-xl transition-all duration-200 ${getBefindenCardHoverClass(hasEntry, isExpanded, itemId)}`} style={getBefindenCardStyle(hasEntry, isExpanded, itemId)}>
+                  <div key={itemId} className={`relative transition-all duration-200 ${hasEntry ? 'bg-[#E6F1EC]' : 'hover:bg-background-50/50'}`}>
                     <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
                       <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                       <div className="flex items-center gap-2">
@@ -1086,13 +1061,13 @@ export default function BefindenPage() {
               <h2 className="text-[13px] font-medium text-[#6B8078] mb-4">
                 Weitere Symptome
               </h2>
-              <div className="flex flex-col gap-3">
+              <div className="rounded-2xl divide-y divide-background-200/40 overflow-hidden" style={{ background: '#FFFFFF', boxShadow: '0 2px 6px rgba(47,79,67,0.06)' }}>
                 {(showAllWeitere ? weitereItems : weitereItems.slice(0, WEITERE_INITIAL_COUNT)).map((item) => {
                   const { hasEntry, avgRating } = getItemStats(item.id);
                   const isExpanded = expandedItems[item.id];
                   const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className={`relative overflow-hidden rounded-xl transition-all duration-200 ${getBefindenCardHoverClass(hasEntry, isExpanded, item.id)}`} style={getBefindenCardStyle(hasEntry, isExpanded, item.id)}>
+                    <div key={item.id} className={`relative transition-all duration-200 ${hasEntry ? 'bg-[#E6F1EC]' : 'hover:bg-background-50/50'}`}>
                       <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
                         <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                         <div className="flex items-center gap-2">
@@ -1132,7 +1107,7 @@ export default function BefindenPage() {
                   const isExpanded = expandedItems[item.id];
                   const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className={`relative overflow-hidden rounded-xl transition-all duration-200 ${getBefindenCardHoverClass(hasEntry, isExpanded, item.id)}`} style={getBefindenCardStyle(hasEntry, isExpanded, item.id)}>
+                    <div key={item.id} className={`relative transition-all duration-200 ${hasEntry ? 'bg-[#E6F1EC]' : 'hover:bg-background-50/50'}`}>
                       <div className="flex w-full items-center">
                         <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors">
                           <span className={`text-body font-normal ${isExpanded ? '' : 'truncate'}`} style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
