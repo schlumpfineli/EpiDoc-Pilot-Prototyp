@@ -9,8 +9,8 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { toastService } from "@/components/ui";
 import { useRoleText } from "@/lib/hooks/useRoleText";
 
-// Verfügbare Signale aus der Befinden-Seite
-const availableSignals = [
+// Vordefinierte Signale aus der Befinden-Seite (Kern + Optional)
+const knownSignals = [
   { id: "sleep-rhythm", label: "Schlaf-Wach-Rhythmus" },
   { id: "fatigue", label: "Müdigkeit / Erschöpfung" },
   { id: "concentration", label: "Konzentration" },
@@ -24,7 +24,13 @@ const availableSignals = [
   { id: "anxiety", label: "Angst" },
   { id: "headache", label: "Kopfschmerz" },
   { id: "menstrual", label: "Zyklusbezogene Beschwerden" },
+  { id: "memory-problems", label: "Gedächtnisprobleme" },
+  { id: "confusion", label: "Verwirrtheit" },
+  { id: "loss-of-appetite", label: "Appetitlosigkeit" },
+  { id: "malaise", label: "Krankheitsgefühl" },
 ];
+
+const knownSignalMap = new Map(knownSignals.map((s) => [s.id, s.label]));
 
 // Englische Werte (z. B. aus Seed/API) → Deutsch für PDF-Anfallsarten
 const seizureTypeLabelDe: Record<string, string> = {
@@ -120,6 +126,19 @@ export default function VerlaufPage() {
   const signalDropdownRef = useRef<HTMLDivElement>(null);
   const breakpoint = useBreakpoint();
 
+  // Eigene Symptome aus localStorage laden (gleiche Quelle wie Befinden-Seite)
+  const customSymptomMap = useMemo(() => {
+    const map = new Map<string, string>();
+    try {
+      const stored = typeof window !== "undefined" ? localStorage.getItem("customSymptoms") : null;
+      if (stored) {
+        const parsed = JSON.parse(stored) as Array<{ id: string; label: string }>;
+        parsed.forEach((s) => map.set(s.id, s.label));
+      }
+    } catch { /* ignore */ }
+    return map;
+  }, []);
+
   // Click-Outside schließt Dropdown
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (signalDropdownRef.current && !signalDropdownRef.current.contains(e.target as Node)) {
@@ -192,12 +211,32 @@ export default function VerlaufPage() {
     });
   }, [seizures, timeRangeData]);
 
-  // Finde alle Signale mit mindestens einem Eintrag (alle Einträge sichtbar, unabhängig vom gewählten Zeitraum)
+  // Finde alle Signale mit mindestens einem Eintrag (inkl. eigene Symptome)
   const availableSignalsInRange = useMemo(() => {
     const signalsWithData = new Set<string>();
     befindenData.forEach((item) => signalsWithData.add(item.symptom_id));
-    return availableSignals.filter((signal) => signalsWithData.has(signal.id));
-  }, [befindenData]);
+
+    const result: Array<{ id: string; label: string }> = [];
+    const added = new Set<string>();
+
+    // Vordefinierte Signale mit Daten
+    knownSignals.forEach((signal) => {
+      if (signalsWithData.has(signal.id)) {
+        result.push(signal);
+        added.add(signal.id);
+      }
+    });
+
+    // Eigene Symptome mit Daten (alles was Daten hat, aber nicht in knownSignals ist)
+    signalsWithData.forEach((id) => {
+      if (!added.has(id)) {
+        const label = customSymptomMap.get(id) || id;
+        result.push({ id, label });
+      }
+    });
+
+    return result;
+  }, [befindenData, customSymptomMap]);
 
   // Setze ausgewähltes Signal zurück, wenn es nicht mehr verfügbar ist
   useEffect(() => {
@@ -265,7 +304,7 @@ export default function VerlaufPage() {
     if (!selectedSignal || seizuresInRange.length === 0) return [];
 
     const insightsList: StructuredInsight[] = [];
-    const signalLabel = availableSignals.find((s) => s.id === selectedSignal)?.label || selectedSignal;
+    const signalLabel = availableSignalsInRange.find((s) => s.id === selectedSignal)?.label || knownSignalMap.get(selectedSignal) || customSymptomMap.get(selectedSignal) || selectedSignal;
 
     if (seizuresInRange.length < MIN_SEIZURES_FOR_INSIGHT) {
       insightsList.push({
@@ -329,7 +368,7 @@ export default function VerlaufPage() {
     }
 
     return insightsList;
-  }, [seizuresInRange, selectedSignal, signalByDay, availableSignals]);
+  }, [seizuresInRange, selectedSignal, signalByDay, availableSignalsInRange, knownSignalMap, customSymptomMap]);
 
   const summaryInsight = selectedSignal ? (insights[0]?.text ?? null) : null;
 
@@ -1016,7 +1055,7 @@ export default function VerlaufPage() {
   const isTablet = breakpoint === "tablet";
   const isDesktop = breakpoint === "desktop";
 
-  const selectedSignalLabel = availableSignals.find((s) => s.id === selectedSignal)?.label;
+  const selectedSignalLabel = availableSignalsInRange.find((s) => s.id === selectedSignal)?.label;
   const hasChartData = signalPoints.length > 0 || seizuresInRange.length > 0;
   const showMonthAxis = (timeRange === "6m" || timeRange === "1y") && monthTicks.length > 0;
 
