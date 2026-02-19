@@ -194,6 +194,17 @@ export default function BefindenPage() {
     loadAllHistory();
   }, [selectedDate]);
 
+  // Refetch bei Rückkehr zur Seite (Tab-Wechsel oder Navigation zurück)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadHistory();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [selectedDate]);
+
   // Fokus auf Eingabefeld, wenn „Hinzufügen“ geöffnet wird
   useEffect(() => {
     if (showAddCustomSymptom) {

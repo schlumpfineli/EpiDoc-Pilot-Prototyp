@@ -79,10 +79,13 @@ export class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
+      const method = options.method || 'GET';
       const response = await fetch(url, {
         ...options,
+        method,
         headers,
         signal: controller.signal,
+        ...(method === 'GET' && { cache: 'no-store' as RequestCache }),
       });
       clearTimeout(timeoutId);
 
