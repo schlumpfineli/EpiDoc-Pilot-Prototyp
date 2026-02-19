@@ -10,7 +10,7 @@ import { useRoleText } from "@/lib/hooks/useRoleText";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Diagnosis = { type: string };
-type Doctor = { name: string; phone?: string; email?: string };
+type Doctor = { name: string; specialty?: string; phone?: string; email?: string };
 type Clinic = { name: string; phone?: string; address?: string };
 type Pharmacy = { name: string; phone?: string; address?: string };
 type EmergencyContact = {
@@ -373,7 +373,7 @@ export default function ProfilPage() {
 
   // ── Generic list helpers ──
   const diagnosisHelpers = useListHelpers(diagnoses, setDiagnoses, { type: "" });
-  const doctorHelpers = useListHelpers(doctors, setDoctors, { name: "", phone: "", email: "" });
+  const doctorHelpers = useListHelpers(doctors, setDoctors, { name: "", specialty: "", phone: "", email: "" });
   const clinicHelpers = useListHelpers(clinics, setClinics, { name: "", phone: "", address: "" });
   const pharmacyHelpers = useListHelpers(pharmacies, setPharmacies, { name: "", phone: "", address: "" });
 
@@ -541,6 +541,7 @@ export default function ProfilPage() {
                     <div className="divide-y divide-background-200/30">
                     {profileData.doctors.map((doc, i) => (
                       <EntryCard key={i} name={doc.name} details={[
+                        { icon: <IconStethoscope className="w-3.5 h-3.5" />, text: doc.specialty || "" },
                         { icon: <IconPhone className="w-3.5 h-3.5" />, text: doc.phone || "" },
                         { icon: <IconMail className="w-3.5 h-3.5" />, text: doc.email || "" },
                       ]} />
@@ -661,6 +662,7 @@ export default function ProfilPage() {
                 <ConfirmDeleteButton onConfirm={() => doctorHelpers.remove(i)} label="Eintrag entfernen" />
               </div>
               <FormField label="Name" value={doc.name} onChange={(v) => doctorHelpers.update(i, "name", v)} placeholder="Name des Arztes" />
+              <FormField label="Fachbereich" value={doc.specialty || ""} onChange={(v) => doctorHelpers.update(i, "specialty", v)} placeholder="z. B. Neurologie, Epileptologie" optional />
               <FormField label="Telefon" type="tel" value={doc.phone || ""} onChange={(v) => doctorHelpers.update(i, "phone", v)} placeholder="Telefonnummer" optional />
               <FormField label="E-Mail" type="email" value={doc.email || ""} onChange={(v) => doctorHelpers.update(i, "email", v)} placeholder="E-Mail-Adresse" optional />
             </div>

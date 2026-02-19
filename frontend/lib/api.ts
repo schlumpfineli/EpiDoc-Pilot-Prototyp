@@ -289,6 +289,7 @@ export interface UserProfile {
   }>;
   doctors?: Array<{
     name: string;
+    specialty?: string;
     phone?: string;
     email?: string;
   }>;
