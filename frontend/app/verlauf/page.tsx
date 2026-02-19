@@ -227,11 +227,13 @@ export default function VerlaufPage() {
       }
     });
 
-    // Eigene Symptome mit Daten (alles was Daten hat, aber nicht in knownSignals ist)
+    // Eigene Symptome nur anzeigen wenn ein lesbarer Name bekannt ist
     signalsWithData.forEach((id) => {
       if (!added.has(id)) {
-        const label = customSymptomMap.get(id) || id;
-        result.push({ id, label });
+        const label = customSymptomMap.get(id);
+        if (label) {
+          result.push({ id, label });
+        }
       }
     });
 
