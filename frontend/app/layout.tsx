@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { ToastContainer } from "@/components/ui";
-import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { ErrorBoundaryWrapper } from "@/components/ErrorBoundaryWrapper";
 import { AppInitializer } from "@/components/AppInitializer";
 import { SessionTracker } from "@/components/SessionTracker";
@@ -34,7 +33,6 @@ export default function RootLayout({
         <AppInitializer />
         <SessionTracker />
         <PageViewTracker />
-        <ServiceWorkerRegistration />
         <Navbar />
         <ErrorBoundaryWrapper>
           {children}

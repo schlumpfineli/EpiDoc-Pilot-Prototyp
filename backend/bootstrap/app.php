@@ -33,10 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
-        // Befinden-Erinnerungen: 09:00, 14:00, 19:00 (3x täglich)
-        $schedule->command('push:send befinden')->dailyAt('09:00');
-        $schedule->command('push:send befinden')->dailyAt('14:00');
-        $schedule->command('push:send befinden')->dailyAt('19:00');
+        // Push-Benachrichtigungen sind im Pilot deaktiviert.
+        // Für zukünftige Versionen:
+        // $schedule->command('push:send befinden')->dailyAt('09:00');
+        // $schedule->command('push:send befinden')->dailyAt('14:00');
+        // $schedule->command('push:send befinden')->dailyAt('19:00');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // API Exception Handling wird in App\Exceptions\Handler behandelt

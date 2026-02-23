@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Befinden routes
+    Route::get('befinden/custom-labels', [BefindenController::class, 'customLabels']);
     Route::apiResource('befinden', BefindenController::class);
 
     // Seizure routes

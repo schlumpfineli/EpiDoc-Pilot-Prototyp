@@ -126,17 +126,17 @@ export default function VerlaufPage() {
   const signalDropdownRef = useRef<HTMLDivElement>(null);
   const breakpoint = useBreakpoint();
 
-  // Eigene Symptome aus localStorage laden (gleiche Quelle wie Befinden-Seite)
-  const customSymptomMap = useMemo(() => {
-    const map = new Map<string, string>();
-    try {
-      const stored = typeof window !== "undefined" ? localStorage.getItem("customSymptoms") : null;
-      if (stored) {
-        const parsed = JSON.parse(stored) as Array<{ id: string; label: string }>;
-        parsed.forEach((s) => map.set(s.id, s.label));
-      }
-    } catch { /* ignore */ }
-    return map;
+  // Eigene Symptom-Labels vom Server laden (geräteübergreifend)
+  const [customSymptomMap, setCustomSymptomMap] = useState<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    befindenApi.getCustomLabels()
+      .then((res) => {
+        const map = new Map<string, string>();
+        Object.entries(res.data).forEach(([id, label]) => map.set(id, label));
+        setCustomSymptomMap(map);
+      })
+      .catch(() => { /* Labels nicht verfügbar */ });
   }, []);
 
   // Click-Outside schließt Dropdown

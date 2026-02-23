@@ -32,7 +32,7 @@ class FeedbackController extends Controller
 
         // Trimme die Nachricht und prüfe erneut die Länge
         $trimmedMessage = trim($request->message);
-        if (strlen($trimmedMessage) < 10) {
+        if (mb_strlen($trimmedMessage, 'UTF-8') < 10) {
             return response()->json([
                 'message' => 'Validierungsfehler',
                 'errors' => [
@@ -114,27 +114,6 @@ class FeedbackController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'Ein Fehler ist aufgetreten',
             ], 500);
         }
-    }
-
-    /**
-     * Get all feedback entries (for admin purposes).
-     * Note: In production, add proper authorization.
-     */
-    public function index(Request $request): JsonResponse
-    {
-        $query = Feedback::with('user')
-            ->orderBy('created_at', 'desc');
-
-        // Filter by type if provided
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 50);
-        $feedback = $query->paginate($perPage);
-
-        return response()->json($feedback);
     }
 
     /**

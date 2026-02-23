@@ -16,14 +16,6 @@ export interface ApiError {
   errors?: Record<string, string[]>;
 }
 
-export interface PushSubscription {
-  endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-}
-
 export class ApiClient {
   private baseUrl: string;
   private token: string | null = null;
@@ -392,6 +384,10 @@ export const befindenApi = {
   delete: async (id: number): Promise<{ message: string }> => {
     return apiClient.delete<{ message: string }>(`/befinden/${id}`);
   },
+
+  getCustomLabels: async (): Promise<{ data: Record<string, string> }> => {
+    return apiClient.get<{ data: Record<string, string> }>('/befinden/custom-labels');
+  },
 };
 
 export const seizureApi = {
@@ -493,15 +489,6 @@ export const profileApi = {
     new_password_confirmation: string;
   }): Promise<{ message: string }> => {
     return apiClient.put<{ message: string }>('/user/password', data);
-  },
-
-  // Push Subscriptions (Prototyp): Backend-Endpunkte müssen existieren, sonst kommt 404 zur Laufzeit.
-  subscribePush: async (subscription: PushSubscription): Promise<{ message: string }> => {
-    return apiClient.post<{ message: string }>('/push/subscribe', subscription);
-  },
-
-  unsubscribePush: async (endpoint: string): Promise<{ message: string }> => {
-    return apiClient.post<{ message: string }>('/push/unsubscribe', { endpoint });
   },
 
   delete: async (password: string): Promise<{ message: string }> => {

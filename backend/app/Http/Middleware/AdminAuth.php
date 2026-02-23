@@ -31,7 +31,7 @@ class AdminAuth
                 ], 503);
             }
             
-            if ($request->admin_password === $adminPassword) {
+            if (hash_equals($adminPassword, $request->admin_password)) {
                 session(['admin_authenticated' => true]);
                 // Bei POST-Requests: Redirect zu GET, um POST-Data-Loss zu vermeiden
                 if ($request->isMethod('POST')) {

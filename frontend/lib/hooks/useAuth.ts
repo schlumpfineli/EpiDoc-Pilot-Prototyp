@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient, authApi, sessionApi, type User } from "@/lib/api";
-import { getToken, clearToken, refreshTokenIfNeeded } from "@/lib/tokenRefresh";
+import { getToken, clearToken } from "@/lib/tokenRefresh";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -12,16 +12,8 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      // Prüfe zuerst, ob Token erneuert werden muss (auch abgelaufene Tokens in Gnadenfrist)
-      // Timeout: Wenn refreshTokenIfNeeded länger als 5 Sekunden dauert, überspringen
-      await Promise.race([
-        refreshTokenIfNeeded(),
-        new Promise((resolve) => setTimeout(resolve, 5000)),
-      ]);
-      
-      // Hole Token (synchron, nach möglicher Erneuerung)
       const token = getToken();
-      
+
       if (!token) {
         setUser(null);
         setIsLoading(false);
@@ -29,18 +21,10 @@ export function useAuth() {
       }
 
       apiClient.setToken(token);
-      
-      // API-Call mit Timeout (wird bereits von apiClient gehandhabt, aber hier als Fallback)
-      const response = await Promise.race([
-        authApi.getUser(),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 10000)
-        ),
-      ]);
-      
+
+      const response = await authApi.getUser();
       setUser(response.user);
     } catch (error) {
-      // Token ungültig, abgelaufen oder API nicht erreichbar
       console.warn('Auth check failed:', error);
       clearToken();
       setUser(null);

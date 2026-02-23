@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Schema;
 class AnalyticsController extends Controller
 {
     /** Funktionen, die nicht mehr zur App gehören (z. B. entfernte Features), in der Anzeige ausblenden. */
-    private const EXCLUDED_FUNCTION_NAMES = ['medications'];
+    private const EXCLUDED_FUNCTION_NAMES = [];
 
     /**
      * Beschwerden/Symptome: häufigste und nie genutzte (Befinden).
@@ -37,26 +37,7 @@ class AnalyticsController extends Controller
         $usedIds = $used->pluck('symptom_id')->unique()->values()->all();
         $neverUsed = array_values(array_diff($knownIds, $usedIds));
 
-        $symptomLabels = [
-            'sleep-rhythm' => 'Schlaf-Wach-Rhythmus',
-            'fatigue' => 'Müdigkeit / Erschöpfung',
-            'stress' => 'Stress',
-            'restlessness' => 'Innere Unruhe',
-            'concentration' => 'Konzentration',
-            'sensitivity' => 'Reizempfindlichkeit',
-            'irritability' => 'Reizbarkeit',
-            'medication-adherence' => 'Medikamente nicht wie geplant',
-            'pain' => 'Schmerzen',
-            'depression' => 'Depressive Belastung',
-            'anxiety' => 'Angst',
-            'headache' => 'Kopfschmerz',
-            'menstrual' => 'Zyklusbezogene Beschwerden',
-            'memory-problems' => 'Gedächtnisprobleme',
-            'confusion' => 'Verwirrtheit',
-            'loss-of-appetite' => 'Appetitlosigkeit',
-            'malaise' => 'Krankheitsgefühl',
-            'observation' => 'Beobachtung',
-        ];
+        $symptomLabels = config('befinden.symptom_labels', []);
 
         return response()->json([
             'period' => ['start_date' => $startDate, 'end_date' => $endDate],
@@ -411,16 +392,7 @@ class AnalyticsController extends Controller
                     ->get();
                 $usedIds = $used->pluck('symptom_id')->unique()->values()->all();
                 $neverUsedIds = array_diff(config('befinden.known_symptom_ids', []), $usedIds);
-                $labels = [
-                    'sleep-rhythm' => 'Schlaf-Wach-Rhythmus', 'fatigue' => 'Müdigkeit / Erschöpfung',
-                    'stress' => 'Stress', 'restlessness' => 'Innere Unruhe', 'concentration' => 'Konzentration',
-                    'sensitivity' => 'Reizempfindlichkeit', 'irritability' => 'Reizbarkeit',
-                    'medication-adherence' => 'Medikamente nicht wie geplant', 'pain' => 'Schmerzen',
-                    'depression' => 'Depressive Belastung', 'anxiety' => 'Angst', 'headache' => 'Kopfschmerz',
-                    'menstrual' => 'Zyklusbezogene Beschwerden', 'memory-problems' => 'Gedächtnisprobleme',
-                    'confusion' => 'Verwirrtheit', 'loss-of-appetite' => 'Appetitlosigkeit', 'malaise' => 'Krankheitsgefühl',
-                    'observation' => 'Beobachtung',
-                ];
+                $labels = config('befinden.symptom_labels', []);
                 $symptomMostUsed = $used->map(fn ($row) => (object) ['symptom_id' => $row->symptom_id, 'label' => $labels[$row->symptom_id] ?? $row->symptom_id, 'count' => $row->count]);
                 $symptomNeverUsed = collect(array_map(fn ($id) => (object) ['symptom_id' => $id, 'label' => $labels[$id] ?? $id], $neverUsedIds));
             }

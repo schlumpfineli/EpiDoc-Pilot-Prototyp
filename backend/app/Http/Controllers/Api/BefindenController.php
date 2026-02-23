@@ -250,6 +250,32 @@ class BefindenController extends Controller
     }
 
     /**
+     * Gibt Labels für eigene Symptome zurück, die der Nutzer verwendet hat.
+     */
+    public function customLabels(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $customIds = Befinden::where('user_id', $user->id)
+            ->where('symptom_id', 'like', 'custom-%')
+            ->distinct()
+            ->pluck('symptom_id');
+
+        if ($customIds->isEmpty()) {
+            return response()->json(['data' => []]);
+        }
+
+        $labels = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('custom_symptom_labels')) {
+            $labels = CustomSymptomLabel::whereIn('symptom_id', $customIds)
+                ->pluck('label', 'symptom_id')
+                ->toArray();
+        }
+
+        return response()->json(['data' => $labels]);
+    }
+
+    /**
      * Speichert Anzeigename für eigene Symptome (anonym für Admin-Liste).
      */
     private function saveCustomSymptomLabelIfNeeded(?string $symptomId, ?string $label): void

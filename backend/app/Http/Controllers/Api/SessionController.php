@@ -34,6 +34,11 @@ class SessionController extends Controller
      */
     public function end(Request $request): JsonResponse
     {
+        $request->validate([
+            'session_id' => ['nullable', 'integer', 'min:1'],
+            'duration_seconds' => ['nullable', 'integer', 'min:0', 'max:86400'],
+        ]);
+
         $user = $request->user();
 
         $sessionId = $request->input('session_id');

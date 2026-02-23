@@ -358,31 +358,6 @@ async function svgToCanvas(svg: string): Promise<HTMLCanvasElement> {
   return canvas;
 }
 
-// ─── Notification Preferences (localStorage) ────────────────────────────────
-
-type NotificationPrefs = {
-  diary: boolean;
-  medication: boolean;
-  befinden: boolean;
-};
-
-const NOTIFICATION_KEY = "epidoc_notification_prefs";
-
-function loadNotificationPrefs(): NotificationPrefs {
-  if (typeof window === "undefined") return { diary: false, medication: false, befinden: false };
-  try {
-    const stored = localStorage.getItem(NOTIFICATION_KEY);
-    if (stored) return JSON.parse(stored) as NotificationPrefs;
-  } catch { /* ignore */ }
-  return { diary: false, medication: false, befinden: false };
-}
-
-function saveNotificationPrefs(prefs: NotificationPrefs): void {
-  try {
-    localStorage.setItem(NOTIFICATION_KEY, JSON.stringify(prefs));
-  } catch { /* ignore */ }
-}
-
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function EinstellungenPage() {
@@ -393,20 +368,6 @@ export default function EinstellungenPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
-
-  // ── Notification Prefs ──
-  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>({ diary: false, medication: false, befinden: false });
-
-  useEffect(() => {
-    setNotifPrefs(loadNotificationPrefs());
-  }, []);
-
-  const updateNotifPref = (key: keyof NotificationPrefs, value: boolean) => {
-    const updated = { ...notifPrefs, [key]: value };
-    setNotifPrefs(updated);
-    saveNotificationPrefs(updated);
-    toastService.show(value ? "Erinnerung aktiviert" : "Erinnerung deaktiviert", "success");
-  };
 
   // ── Modal State ──
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -875,34 +836,14 @@ export default function EinstellungenPage() {
             </div>
           </div>
 
-          {/* ── Gruppe: Erinnerungen ── */}
+          {/* ── Gruppe: Erinnerungen (deaktiviert für Pilot) ── */}
           <div className="space-y-[var(--spacing-s)]">
             <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Erinnerungen</p>
             <div className="space-y-1 divide-y divide-background-200/40">
-              <SectionCard icon={<IconBell className="w-5 h-5" />} title="Erinnerungen verwalten">
-                <div className="space-y-[var(--spacing-m)]">
-                  <Toggle
-                    label="Tagebuch"
-                    description="Tägliche Erinnerung, Anfälle im Tagebuch zu erfassen"
-                    checked={notifPrefs.diary}
-                    onChange={(v) => updateNotifPref("diary", v)}
-                  />
-                  <Toggle
-                    label="Medikamente"
-                    description="Erinnerung an die Medikamenten-Einnahme"
-                    checked={notifPrefs.medication}
-                    onChange={(v) => updateNotifPref("medication", v)}
-                  />
-                  <Toggle
-                    label="Befinden"
-                    description="Regelmässige Erinnerung, dein Befinden zu dokumentieren"
-                    checked={notifPrefs.befinden}
-                    onChange={(v) => updateNotifPref("befinden", v)}
-                  />
-                  <p className="text-[11px] text-foreground-300">
-                    Push-Benachrichtigungen folgen in einer zukünftigen Version.
-                  </p>
-                </div>
+              <SectionCard icon={<IconBell className="w-5 h-5" />} title="Erinnerungen">
+                <p className="text-body-small text-foreground-400">
+                  Push-Benachrichtigungen und Erinnerungen werden in einer zukünftigen Version verfügbar sein.
+                </p>
               </SectionCard>
             </div>
           </div>
