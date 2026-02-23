@@ -212,12 +212,18 @@ export default function BefindenPage() {
     }
   }, [showAddCustomSymptom]);
 
+  const normalizeDate = (d: string): string => d.slice(0, 10);
+
   const loadHistory = async () => {
     setLoading(true);
     try {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
       const response = await befindenApi.getAll({ date: dateStr });
-      setHistory(response.data || []);
+      const data = (response.data || []).map(entry => ({
+        ...entry,
+        date: normalizeDate(entry.date),
+      }));
+      setHistory(data);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Fehler beim Laden der Daten';
       toastService.show(errorMessage, 'error');
@@ -230,7 +236,11 @@ export default function BefindenPage() {
   const loadAllHistory = async () => {
     try {
       const response = await befindenApi.getAll({});
-      setAllHistory(response.data || []);
+      const data = (response.data || []).map(entry => ({
+        ...entry,
+        date: normalizeDate(entry.date),
+      }));
+      setAllHistory(data);
     } catch {
       // Hintergrund-Ladevorgang – Fehler werden stillschweigend ignoriert
     }
@@ -1019,7 +1029,7 @@ export default function BefindenPage() {
                 const isExpanded = expandedItems[itemId];
                 const selectedTimeSlot = expandedTimeSlots[itemId];
                 return (
-                  <div key={itemId} className={`relative transition-all duration-200 ${hasEntry ? 'bg-[#E6F1EC]' : 'hover:bg-background-50/50'}`}>
+                  <div key={itemId} className={`relative transition-all duration-200 hover:bg-background-50/50`}>
                     <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
                       <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                       <div className="flex items-center gap-2">
@@ -1067,7 +1077,7 @@ export default function BefindenPage() {
                   const isExpanded = expandedItems[item.id];
                   const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className={`relative transition-all duration-200 ${hasEntry ? 'bg-[#E6F1EC]' : 'hover:bg-background-50/50'}`}>
+                    <div key={item.id} className={`relative transition-all duration-200 hover:bg-background-50/50`}>
                       <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
                         <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                         <div className="flex items-center gap-2">
@@ -1107,7 +1117,7 @@ export default function BefindenPage() {
                   const isExpanded = expandedItems[item.id];
                   const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className={`relative transition-all duration-200 ${hasEntry ? 'bg-[#E6F1EC]' : 'hover:bg-background-50/50'}`}>
+                    <div key={item.id} className={`relative transition-all duration-200 hover:bg-background-50/50`}>
                       <div className="flex w-full items-center">
                         <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors">
                           <span className={`text-body font-normal ${isExpanded ? '' : 'truncate'}`} style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
