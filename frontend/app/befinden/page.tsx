@@ -870,7 +870,7 @@ export default function BefindenPage() {
   };
 
   const getChipClass = (isSelected: boolean, hasEntry: boolean = false): string =>
-    `flex flex-col w-full min-h-12 items-center justify-center gap-1 rounded-xl px-3 py-2 text-body-small border ${
+    `relative flex flex-col w-full min-h-12 items-center justify-center gap-1 rounded-xl px-3 py-2 text-body-small border ${
       isSelected
         ? 'bg-[#B7D9C8] border-[#9FC5B2] text-[#1F352D] font-semibold'
         : hasEntry
@@ -906,15 +906,22 @@ export default function BefindenPage() {
       <div className="border-t border-background-200/40 p-5">
         <p className="text-[11px] text-[#7A9088] mb-3">Wann war das?</p>
         <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {TIME_SLOTS.map((slot) => (
-            <button key={slot.id} type="button" onClick={() => toggleTimeSlot(itemId, slot.id)}
-              className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(itemId, slot.id))}
-              title={getTimeSlotLabel(slot.id)}
-            >
-              {getTimeSlotIcon(slot.id)}
-              <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
-            </button>
-          ))}
+          {TIME_SLOTS.map((slot) => {
+            const isSelected = selectedTimeSlot === slot.id;
+            const hasEntry = hasEntryForSlot(itemId, slot.id);
+            return (
+              <button key={slot.id} type="button" onClick={() => toggleTimeSlot(itemId, slot.id)}
+                className={getChipClass(isSelected, hasEntry)}
+                title={getTimeSlotLabel(slot.id)}
+              >
+                {getTimeSlotIcon(slot.id)}
+                <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
+                {hasEntry && !isSelected && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#3F7A63]" />
+                )}
+              </button>
+            );
+          })}
         </div>
         {selectedTimeSlot && renderRatingScale(itemId, selectedTimeSlot)}
       </div>
