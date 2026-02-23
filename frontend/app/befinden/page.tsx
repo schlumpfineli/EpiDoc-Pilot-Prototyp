@@ -60,49 +60,10 @@ type CustomSymptom = {
   createdAt: string;
 };
 
-const COLORS = {
-  bg:        '#F2F6F4',
-  header:    'linear-gradient(180deg, #E4F2EC 0%, #F2F6F4 100%)',
-  title:     '#1F3E35',
-  subtitle:  '#4F6B63',
-  muted:     '#6B8078',
-  primary:   '#3E7C67',
-  hover:     '#346B59',
-  surface:   '#D6EAE2',
-  surfaceAlt:'#E4F2EC',
-  card:      '#FFFFFF',
-  border:    '#DDE7E2',
-} as const;
-
-// Befinden-Card States (visuelle Rückmeldung)
 const BEFINDEN_CARD = {
-  default: {
-    bg: '#FFFFFF',
-    border: '1px solid #D6E3DD',
-    title: '#2F4F43',
-    chevron: '#5F7D72',
-    shadow: '0 2px 6px rgba(47,79,67,0.06)',
-  },
-  hover: { bg: '#F4F7F5', border: '1px solid #C8DBD3' },
-  expanded: {
-    bg: '#F9FBFA',
-    border: '1px solid #CFE2DB',
-    chevron: '#3F7A63',
-    topAccent: '3px solid #3F7A63',
-  },
-  bewertet: {
-    bg: '#E6F1EC',
-    border: '1.5px solid #3F7A63',
-    title: '#2F4F43',
-    valueText: '#2E6F57',
-    checkIcon: '#3F7A63',
-  },
-  bewertetEdit: {
-    bg: '#DFF2E8',
-    border: '2px solid #2E6F57',
-    sliderActive: '#3F7A63',
-    sliderInactive: '#BFD8CF',
-  },
+  default: { title: '#2F4F43', chevron: '#5F7D72' },
+  expanded: { chevron: '#3F7A63' },
+  bewertet: { valueText: '#2E6F57', checkIcon: '#3F7A63' },
 } as const;
 
 export default function BefindenPage() {
@@ -111,7 +72,6 @@ export default function BefindenPage() {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [expandedTimeSlots, setExpandedTimeSlots] = useState<Record<string, TimeOfDay | 'allDay' | null>>({});
   const [tempRatings, setTempRatings] = useState<Record<string, Partial<Record<TimeOfDay, number | null>> & { allDay?: number | null }>>({});
-  const [deleteConfirmations, setDeleteConfirmations] = useState<Record<string, { date: string; timeOfDay: TimeOfDay | 'allDay' } | null>>({});
   const [history, setHistory] = useState<Befinden[]>([]);
   const [allHistory, setAllHistory] = useState<Befinden[]>([]);
   const [loading, setLoading] = useState(false);
@@ -356,54 +316,6 @@ export default function BefindenPage() {
     }
   };
 
-  // Eintrag löschen
-  const requestDeleteEntry = (date: string, symptomId: string, timeOfDay: TimeOfDay | 'allDay') => {
-    setDeleteConfirmations((prev) => ({
-      ...prev,
-      [symptomId]: { date, timeOfDay },
-    }));
-  };
-
-  const confirmDeleteEntry = async (symptomId: string) => {
-    const confirmation = deleteConfirmations[symptomId];
-    if (!confirmation) return;
-
-    try {
-      if (confirmation.timeOfDay === 'allDay') {
-        // Alle Einträge für diesen Tag löschen
-        const entries = history.filter(
-          (h) => h.date === confirmation.date && h.symptom_id === symptomId
-        );
-        for (const entry of entries) {
-          await befindenApi.delete(entry.id);
-        }
-        toastService.show('Alle Einträge für diesen Tag gelöscht', 'success');
-      } else {
-        // Einzelnen Eintrag löschen
-        const entry = history.find(
-          (h) =>
-            h.date === confirmation.date &&
-            h.symptom_id === symptomId &&
-            h.time_of_day === confirmation.timeOfDay
-        );
-
-        if (entry) {
-          await befindenApi.delete(entry.id);
-          toastService.show('Eintrag gelöscht', 'success');
-        }
-      }
-      await loadHistory();
-    } catch (error) {
-      console.error('Fehler beim Löschen:', error);
-      toastService.show('Fehler beim Löschen', 'error');
-    }
-
-    setDeleteConfirmations((prev) => ({
-      ...prev,
-      [symptomId]: null,
-    }));
-  };
-
   // Eintrag löschen mit Undo
   const deleteEntry = async (date: string, symptomId: string, timeOfDay: TimeOfDay | 'allDay') => {
     try {
@@ -561,13 +473,6 @@ export default function BefindenPage() {
     }
   };
 
-  const cancelDeleteEntry = (symptomId: string) => {
-    setDeleteConfirmations((prev) => ({
-      ...prev,
-      [symptomId]: null,
-    }));
-  };
-    
   // Icon für Zeitpunkt
   const getTimeSlotIcon = (timeSlotId: TimeSlotId) => {
     switch (timeSlotId) {
@@ -690,7 +595,6 @@ export default function BefindenPage() {
     
     const key = isAllDay ? `${itemId}:allDay` : `${itemId}:${timeOfDay}`;
     const isSaving = saving[key];
-    const deleteConf = deleteConfirmations[itemId];
 
     return (
       <div className="mt-4 space-y-4">
@@ -866,29 +770,6 @@ export default function BefindenPage() {
           );
         })()}
 
-        {deleteConf && ((isAllDay && deleteConf.timeOfDay === 'allDay') || (!isAllDay && deleteConf.timeOfDay === timeOfDay)) && (
-          <div className="mt-3 rounded-xl border border-[#D6EAE2] bg-[#E4F2EC] p-3">
-            <p className="mb-2 text-body-small text-[#1F352D]">
-              {isAllDay ? 'Möchtest du alle Einträge für diesen Tag entfernen?' : 'Möchtest du diesen Eintrag entfernen?'}
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => confirmDeleteEntry(itemId)}
-                className="rounded-lg bg-foreground-200 px-3 py-1.5 text-body-small font-medium text-[#1F352D] hover:bg-foreground-300 transition"
-              >
-                Ja, entfernen
-              </button>
-              <button
-                type="button"
-                onClick={() => cancelDeleteEntry(itemId)}
-                className="rounded-lg px-3 py-1.5 text-body-small text-[#6B8078] hover:text-[#1F352D] transition"
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -997,6 +878,48 @@ export default function BefindenPage() {
           : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
     }`;
 
+  const renderStatusBadge = (hasEntry: boolean, avgRating: number | null) => {
+    if (!hasEntry) return null;
+    return (
+      <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
+        <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+        {avgRating !== null ? avgRating : '✓'}
+      </span>
+    );
+  };
+
+  const renderChevron = (isExpanded: boolean) => (
+    <svg
+      className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+      style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }}
+      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+
+  const renderTimeSlotsPanel = (itemId: string) => {
+    const selectedTimeSlot = expandedTimeSlots[itemId] || null;
+    return (
+      <div className="border-t border-background-200/40 p-5">
+        <p className="text-[11px] text-[#7A9088] mb-3">Wann war das?</p>
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {TIME_SLOTS.map((slot) => (
+            <button key={slot.id} type="button" onClick={() => toggleTimeSlot(itemId, slot.id)}
+              className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(itemId, slot.id))}
+              title={getTimeSlotLabel(slot.id)}
+            >
+              {getTimeSlotIcon(slot.id)}
+              <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
+            </button>
+          ))}
+        </div>
+        {selectedTimeSlot && renderRatingScale(itemId, selectedTimeSlot)}
+      </div>
+    );
+  };
 
   return (
     <ProtectedRoute>
@@ -1043,40 +966,18 @@ export default function BefindenPage() {
               {personalItemIds.map((itemId) => {
                 const item = allItems.find((i) => i.id === itemId) || coreItems.find((i) => i.id === itemId);
                 if (!item) return null;
-                const { dateStr, hasEntry, avgRating } = getItemStats(itemId);
+                const { hasEntry, avgRating } = getItemStats(itemId);
                 const isExpanded = expandedItems[itemId];
-                const selectedTimeSlot = expandedTimeSlots[itemId];
                 return (
-                  <div key={itemId} className={`relative transition-all duration-200 hover:bg-background-50/50`}>
+                  <div key={itemId} className="relative transition-all duration-200 hover:bg-background-50/50">
                     <button type="button" onClick={(e) => toggleItem(itemId, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
                       <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                       <div className="flex items-center gap-2">
-                        {hasEntry && (
-                          <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
-                            <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            {avgRating !== null ? avgRating : '✓'}
-                          </span>
-                        )}
-                        <svg className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                        {renderStatusBadge(hasEntry, avgRating)}
+                        {renderChevron(!!isExpanded)}
                       </div>
                     </button>
-                    {isExpanded && (
-                      <div className="border-t border-background-200/40 p-5">
-                        <p className="text-[11px] text-[#7A9088] mb-3">Wann war das?</p>
-                        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                          {TIME_SLOTS.map((slot) => (
-                            <button key={slot.id} type="button" onClick={() => toggleTimeSlot(itemId, slot.id)}
-                              className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(itemId, slot.id))}
-                              title={getTimeSlotLabel(slot.id)}
-                            >
-                              {getTimeSlotIcon(slot.id)}
-                              <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
-                            </button>
-                          ))}
-                        </div>
-                        {selectedTimeSlot && renderRatingScale(itemId, selectedTimeSlot)}
-                      </div>
-                    )}
+                    {isExpanded && renderTimeSlotsPanel(itemId)}
                   </div>
                 );
               })}
@@ -1093,38 +994,16 @@ export default function BefindenPage() {
                 {(showAllWeitere ? weitereItems : weitereItems.slice(0, WEITERE_INITIAL_COUNT)).map((item) => {
                   const { hasEntry, avgRating } = getItemStats(item.id);
                   const isExpanded = expandedItems[item.id];
-                  const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className={`relative transition-all duration-200 hover:bg-background-50/50`}>
+                    <div key={item.id} className="relative transition-all duration-200 hover:bg-background-50/50">
                       <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors">
                         <span className="text-body font-normal" style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                         <div className="flex items-center gap-2">
-                          {hasEntry && (
-                            <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
-                              <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                              {avgRating !== null ? avgRating : '✓'}
-                            </span>
-                          )}
-                          <svg className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                          {renderStatusBadge(hasEntry, avgRating)}
+                          {renderChevron(!!isExpanded)}
                         </div>
                       </button>
-                      {isExpanded && (
-                        <div className="border-t border-background-200/40 p-5">
-                          <p className="text-[11px] text-[#7A9088] mb-3">Wann war das?</p>
-                          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            {TIME_SLOTS.map((slot) => (
-                              <button key={slot.id} type="button" onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(item.id, slot.id))}
-                                title={getTimeSlotLabel(slot.id)}
-                              >
-                                {getTimeSlotIcon(slot.id)}
-                                <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
-                              </button>
-                            ))}
-                          </div>
-                          {selectedTimeSlot && renderRatingScale(item.id, selectedTimeSlot)}
-                        </div>
-                      )}
+                      {isExpanded && renderTimeSlotsPanel(item.id)}
                     </div>
                   );
                 })}
@@ -1133,20 +1012,14 @@ export default function BefindenPage() {
                 {customSymptoms.map((item) => {
                   const { hasEntry, avgRating } = getItemStats(item.id);
                   const isExpanded = expandedItems[item.id];
-                  const selectedTimeSlot = expandedTimeSlots[item.id];
                   return (
-                    <div key={item.id} className={`relative transition-all duration-200 hover:bg-background-50/50`}>
+                    <div key={item.id} className="relative transition-all duration-200 hover:bg-background-50/50">
                       <div className="flex w-full items-center">
                         <button type="button" onClick={(e) => toggleItem(item.id, e)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors">
                           <span className={`text-body font-normal ${isExpanded ? '' : 'truncate'}`} style={{ color: BEFINDEN_CARD.default.title }}>{item.label}</span>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            {hasEntry && (
-                              <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: BEFINDEN_CARD.bewertet.valueText }}>
-                                <svg className="h-3.5 w-3.5 flex-shrink-0" style={{ color: BEFINDEN_CARD.bewertet.checkIcon }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                {avgRating !== null ? avgRating : '✓'}
-                              </span>
-                            )}
-                            <svg className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: isExpanded ? BEFINDEN_CARD.expanded.chevron : BEFINDEN_CARD.default.chevron }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                            {renderStatusBadge(hasEntry, avgRating)}
+                            {renderChevron(!!isExpanded)}
                           </div>
                         </button>
                         <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveCustomSymptom(item.id); }}
@@ -1154,23 +1027,7 @@ export default function BefindenPage() {
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                       </div>
-                      {isExpanded && (
-                        <div className="border-t border-background-200/40 p-5">
-                          <p className="text-[11px] text-[#7A9088] mb-3">Wann war das?</p>
-                          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            {TIME_SLOTS.map((slot) => (
-                              <button key={slot.id} type="button" onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(item.id, slot.id))}
-                                title={getTimeSlotLabel(slot.id)}
-                              >
-                                {getTimeSlotIcon(slot.id)}
-                                <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
-                              </button>
-                            ))}
-                          </div>
-                          {selectedTimeSlot && renderRatingScale(item.id, selectedTimeSlot)}
-                        </div>
-                      )}
+                      {isExpanded && renderTimeSlotsPanel(item.id)}
                     </div>
                   );
                 })}
