@@ -972,11 +972,25 @@ export default function BefindenPage() {
     return { dateStr, entries, hasEntry, avgRating };
   };
 
-  const getChipClass = (isSelected: boolean): string =>
+  const hasEntryForSlot = (symptomId: string, slotId: TimeSlotId): boolean => {
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    if (slotId === 'allDay') {
+      return (['morning', 'noon', 'evening'] as TimeOfDay[]).some(
+        tod => history.some(h => h.date === dateStr && h.symptom_id === symptomId && h.time_of_day === tod)
+          || tempRatings[symptomId]?.[tod] != null
+      );
+    }
+    return history.some(h => h.date === dateStr && h.symptom_id === symptomId && h.time_of_day === slotId)
+      || tempRatings[symptomId]?.[slotId as TimeOfDay] != null;
+  };
+
+  const getChipClass = (isSelected: boolean, hasEntry: boolean = false): string =>
     `flex flex-col w-full min-h-12 items-center justify-center gap-1 rounded-xl px-3 py-2 text-body-small border ${
       isSelected
         ? 'bg-[#B7D9C8] border-[#9FC5B2] text-[#1F352D] font-semibold'
-        : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
+        : hasEntry
+          ? 'bg-[#D6E8DE] border-[#C4D9CE] text-[#3D5A4E] font-medium'
+          : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
     }`;
 
 
@@ -1048,7 +1062,7 @@ export default function BefindenPage() {
                         <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                           {TIME_SLOTS.map((slot) => (
                             <button key={slot.id} type="button" onClick={() => toggleTimeSlot(itemId, slot.id)}
-                              className={getChipClass(selectedTimeSlot === slot.id)}
+                              className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(itemId, slot.id))}
                               title={getTimeSlotLabel(slot.id)}
                             >
                               {getTimeSlotIcon(slot.id)}
@@ -1096,7 +1110,7 @@ export default function BefindenPage() {
                           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                             {TIME_SLOTS.map((slot) => (
                               <button key={slot.id} type="button" onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                className={getChipClass(selectedTimeSlot === slot.id)}
+                                className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(item.id, slot.id))}
                                 title={getTimeSlotLabel(slot.id)}
                               >
                                 {getTimeSlotIcon(slot.id)}
@@ -1142,7 +1156,7 @@ export default function BefindenPage() {
                           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                             {TIME_SLOTS.map((slot) => (
                               <button key={slot.id} type="button" onClick={() => toggleTimeSlot(item.id, slot.id)}
-                                className={getChipClass(selectedTimeSlot === slot.id)}
+                                className={getChipClass(selectedTimeSlot === slot.id, hasEntryForSlot(item.id, slot.id))}
                                 title={getTimeSlotLabel(slot.id)}
                               >
                                 {getTimeSlotIcon(slot.id)}
