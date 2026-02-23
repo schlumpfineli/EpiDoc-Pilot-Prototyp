@@ -928,12 +928,9 @@ export default function BefindenPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen pb-20 xl:pb-0" style={{ background: "#F2F6F4" }}>
-        <div className="mx-auto max-w-4xl px-4 pt-0 pb-6 sm:px-6 lg:px-8">
-          {/* Hero */}
-          <div
-            className="rounded-b-3xl px-4 pt-10 pb-8 -mx-4 sm:-mx-6 lg:-mx-8 sm:px-6 lg:px-8 mb-8"
-            style={{ background: "linear-gradient(180deg, #E4F2EC 0%, #F2F6F4 100%)" }}
-          >
+        {/* Hero – full width */}
+        <div className="w-full pt-10 pb-8 mb-8" style={{ background: "linear-gradient(180deg, #E4F2EC 0%, #F2F6F4 100%)" }}>
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <h1 className="text-center text-h4 sm:text-h3 font-medium" style={{ color: "#1F3E35" }}>
               {t("Wie geht es dir heute?")}
             </h1>
@@ -944,6 +941,9 @@ export default function BefindenPage() {
               Ein kurzer Check-in hilft dir, Muster zu erkennen.
             </p>
           </div>
+        </div>
+
+        <div className="mx-auto max-w-4xl px-4 pb-6 sm:px-6 lg:px-8">
 
           {/* Datumsauswahl */}
           <div className="mb-8">
