@@ -916,9 +916,6 @@ export default function BefindenPage() {
               >
                 {getTimeSlotIcon(slot.id)}
                 <span className="text-[10px] font-medium leading-none">{getTimeSlotLabel(slot.id)}</span>
-                {hasEntry && !isSelected && (
-                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#3F7A63]" />
-                )}
               </button>
             );
           })}
