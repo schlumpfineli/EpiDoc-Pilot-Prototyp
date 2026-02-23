@@ -164,9 +164,15 @@ export function Navbar() {
               {isLoading ? (
                 <div className="h-7 w-7 animate-pulse rounded-full" style={{ background: C.skeleton }} />
               ) : user ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <span className="text-[13px]" style={{ color: C.secondary }}>{user.display_name ?? ''}</span>
-                  <Button variant="secondary" size="sm" onClick={handleLogout}>Abmelden</Button>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-lg border px-2.5 py-1 text-[13px] font-medium transition-colors"
+                    style={{ borderColor: C.border, color: C.secondary }}
+                  >
+                    Abmelden
+                  </button>
                 </div>
               ) : (
                 <AuthButtons />
