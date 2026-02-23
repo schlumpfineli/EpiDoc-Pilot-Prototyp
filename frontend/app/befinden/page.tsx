@@ -974,14 +974,18 @@ export default function BefindenPage() {
 
   const hasEntryForSlot = (symptomId: string, slotId: TimeSlotId): boolean => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    const tr = tempRatings[symptomId];
+    const hasAllDayTemp = tr?.allDay != null;
+
     if (slotId === 'allDay') {
-      return (['morning', 'noon', 'evening'] as TimeOfDay[]).some(
+      return hasAllDayTemp || (['morning', 'noon', 'evening'] as TimeOfDay[]).some(
         tod => history.some(h => h.date === dateStr && h.symptom_id === symptomId && h.time_of_day === tod)
-          || tempRatings[symptomId]?.[tod] != null
+          || tr?.[tod] != null
       );
     }
     return history.some(h => h.date === dateStr && h.symptom_id === symptomId && h.time_of_day === slotId)
-      || tempRatings[symptomId]?.[slotId as TimeOfDay] != null;
+      || tr?.[slotId as TimeOfDay] != null
+      || hasAllDayTemp;
   };
 
   const getChipClass = (isSelected: boolean, hasEntry: boolean = false): string =>
@@ -989,7 +993,7 @@ export default function BefindenPage() {
       isSelected
         ? 'bg-[#B7D9C8] border-[#9FC5B2] text-[#1F352D] font-semibold'
         : hasEntry
-          ? 'bg-[#D6E8DE] border-[#C4D9CE] text-[#3D5A4E] font-medium'
+          ? 'bg-[#C2DBCF] border-[#A8C9B9] text-[#2F4F43] font-medium'
           : 'bg-[#EEF4F1] border-transparent text-[#7A9088] hover:bg-[#E4F2EC] hover:text-[#4F6B63]'
     }`;
 
