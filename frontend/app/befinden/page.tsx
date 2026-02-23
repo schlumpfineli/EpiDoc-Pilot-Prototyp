@@ -978,7 +978,7 @@ export default function BefindenPage() {
     const hasAllDayTemp = tr?.allDay != null;
 
     if (slotId === 'allDay') {
-      return hasAllDayTemp || (['morning', 'noon', 'evening'] as TimeOfDay[]).some(
+      return hasAllDayTemp || (['morning', 'noon', 'evening'] as TimeOfDay[]).every(
         tod => history.some(h => h.date === dateStr && h.symptom_id === symptomId && h.time_of_day === tod)
           || tr?.[tod] != null
       );
