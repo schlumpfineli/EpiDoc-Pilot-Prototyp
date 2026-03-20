@@ -153,8 +153,12 @@ export class ApiClient {
       if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
         console.error(`[API] Unknown error for ${url}:`, error);
       }
+      const fallbackMessage =
+        error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string'
+          ? (error as { message: string }).message
+          : 'Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.';
       const fallbackError: ApiError = {
-        message: (error as any)?.message || 'Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
+        message: fallbackMessage,
       };
       throw fallbackError;
     }
