@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\AnalyticsController;
 
 use App\Http\Middleware\AdminAuth;
 
-Route::get('/feedback', [FeedbackController::class, 'view'])
+Route::match(['GET', 'POST'], '/feedback', [FeedbackController::class, 'view'])
     ->middleware([AdminAuth::class])
     ->name('feedback.view');
 

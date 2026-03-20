@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminAuth
@@ -23,15 +24,23 @@ class AdminAuth
 
         // Wenn Passwort gesendet wurde, prüfe es
         if ($request->has('admin_password')) {
-            $adminPassword = config('app.admin_password');
+            $adminPassword = trim((string) config('app.admin_password', ''));
+            $providedPassword = trim((string) $request->input('admin_password', ''));
             
             if (!$adminPassword) {
                 return response()->view('admin.login', [
                     'error' => 'Admin-Zugang nicht konfiguriert. Bitte ADMIN_PASSWORD als Umgebungsvariable setzen.',
                 ], 503);
             }
-            
-            if (hash_equals($adminPassword, $request->admin_password)) {
+
+            $isValid = false;
+            if (str_starts_with($adminPassword, '$2y$') || str_starts_with($adminPassword, '$2a$')) {
+                $isValid = Hash::check($providedPassword, $adminPassword);
+            } else {
+                $isValid = hash_equals($adminPassword, $providedPassword);
+            }
+
+            if ($isValid) {
                 session(['admin_authenticated' => true]);
                 // Bei POST-Requests: Redirect zu GET, um POST-Data-Loss zu vermeiden
                 if ($request->isMethod('POST')) {
