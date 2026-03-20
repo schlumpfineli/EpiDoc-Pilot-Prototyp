@@ -6,6 +6,7 @@ import { profileApi, authApi, UserProfile } from "@/lib/api";
 import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRoleText } from "@/lib/hooks/useRoleText";
+import { useRouter } from "next/navigation";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -26,6 +27,8 @@ type ModalType =
   | "pharmacies"
   | "emergency_contact"
   | null;
+
+const pilotEnableProfilePage = process.env.NEXT_PUBLIC_PILOT_ENABLE_PROFILE_PAGE === "true";
 
 // ─── Shared CSS Classes ──────────────────────────────────────────────────────
 
@@ -354,6 +357,7 @@ function SectionActions({ onEdit }: { onEdit: () => void }) {
 export default function ProfilPage() {
   const { user } = useAuth();
   const { t } = useRoleText();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
@@ -395,6 +399,12 @@ export default function ProfilPage() {
   useEffect(() => {
     loadProfile();
   }, [user, loadProfile]);
+
+  useEffect(() => {
+    if (!pilotEnableProfilePage) {
+      router.replace("/einstellungen");
+    }
+  }, [router]);
 
   function syncFormState(data: UserProfile): void {
     // diagnoses aus Backend-Array oder Fallback aus altem disease-String
@@ -471,6 +481,10 @@ export default function ProfilPage() {
     ];
     return Math.round((sections.filter(Boolean).length / 5) * 100);
   })();
+
+  if (!pilotEnableProfilePage) {
+    return null;
+  }
 
   // ── Loading State ──
   if (isLoading) {

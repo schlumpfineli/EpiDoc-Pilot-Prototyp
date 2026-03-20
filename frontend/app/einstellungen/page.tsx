@@ -361,6 +361,8 @@ async function svgToCanvas(svg: string): Promise<HTMLCanvasElement> {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const strictPilotMode = process.env.NEXT_PUBLIC_PILOT_STRICT_ANONYMITY !== "false";
+const pilotEnableMinimalProfileSection = process.env.NEXT_PUBLIC_PILOT_ENABLE_MINIMAL_PROFILE_SECTION === "true";
+const pilotEnableRemindersSection = process.env.NEXT_PUBLIC_PILOT_ENABLE_REMINDERS_SECTION === "true";
 
 export default function EinstellungenPage() {
   const { user, logout } = useAuth();
@@ -801,38 +803,40 @@ export default function EinstellungenPage() {
                 </SectionCard>
               )}
 
-              <SectionCard icon={<IconInfo className="w-5 h-5" />} title="Minimales Profil (Pilot)">
-                <div className="space-y-[var(--spacing-s)]">
-                  <p className="text-body-small text-foreground-500">
-                    Bitte keine persönlichen Identifikatoren eingeben (z. B. Name, Adresse, Telefonnummer oder konkrete Orte).
-                  </p>
-                  {strictPilotMode && (
-                    <p className="text-[11px] text-foreground-400">
-                      Strikter Pilotmodus aktiv: Es sind nur minimal medizinisch notwendige Angaben erlaubt.
+              {pilotEnableMinimalProfileSection && (
+                <SectionCard icon={<IconInfo className="w-5 h-5" />} title="Minimales Profil (Pilot)">
+                  <div className="space-y-[var(--spacing-s)]">
+                    <p className="text-body-small text-foreground-500">
+                      Bitte keine persönlichen Identifikatoren eingeben (z. B. Name, Adresse, Telefonnummer oder konkrete Orte).
                     </p>
-                  )}
-                  <div className="space-y-1">
-                    <label className="text-[12px] font-medium text-foreground-600">
-                      Diagnose / medizinisch notwendige Information
-                    </label>
-                    <textarea
-                      value={diseaseInput}
-                      onChange={(e) => setDiseaseInput(e.target.value)}
-                      rows={3}
-                      placeholder="z. B. Epilepsie (ohne personenbezogene Angaben)"
-                      className={CSS.textarea}
-                    />
+                    {strictPilotMode && (
+                      <p className="text-[11px] text-foreground-400">
+                        Strikter Pilotmodus aktiv: Es sind nur minimal medizinisch notwendige Angaben erlaubt.
+                      </p>
+                    )}
+                    <div className="space-y-1">
+                      <label className="text-[12px] font-medium text-foreground-600">
+                        Diagnose / medizinisch notwendige Information
+                      </label>
+                      <textarea
+                        value={diseaseInput}
+                        onChange={(e) => setDiseaseInput(e.target.value)}
+                        rows={3}
+                        placeholder="z. B. Epilepsie (ohne personenbezogene Angaben)"
+                        className={CSS.textarea}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={saveMedicalProfile}
+                      disabled={isSaving}
+                      className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isSaving ? "Speichert..." : "Medizinische Angaben speichern"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={saveMedicalProfile}
-                    disabled={isSaving}
-                    className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {isSaving ? "Speichert..." : "Medizinische Angaben speichern"}
-                  </button>
-                </div>
-              </SectionCard>
+                </SectionCard>
+              )}
 
               <SectionCard icon={<IconCog className="w-5 h-5" />} title="Sicherheit & Konto">
                 <div className="space-y-[var(--spacing-s)]">
@@ -894,17 +898,18 @@ export default function EinstellungenPage() {
             </div>
           </div>
 
-          {/* ── Gruppe: Erinnerungen (deaktiviert für Pilot) ── */}
-          <div className="space-y-[var(--spacing-s)]">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Erinnerungen</p>
-            <div className="space-y-1 divide-y divide-background-200/40">
-              <SectionCard icon={<IconBell className="w-5 h-5" />} title="Erinnerungen">
-                <p className="text-body-small text-foreground-400">
-                  Push-Benachrichtigungen und Erinnerungen werden in einer zukünftigen Version verfügbar sein.
-                </p>
-              </SectionCard>
+          {pilotEnableRemindersSection && (
+            <div className="space-y-[var(--spacing-s)]">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-foreground-300 px-1">Erinnerungen</p>
+              <div className="space-y-1 divide-y divide-background-200/40">
+                <SectionCard icon={<IconBell className="w-5 h-5" />} title="Erinnerungen">
+                  <p className="text-body-small text-foreground-400">
+                    Push-Benachrichtigungen und Erinnerungen werden in einer zukünftigen Version verfügbar sein.
+                  </p>
+                </SectionCard>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* ── Gruppe: Support ── */}
           <div className="space-y-[var(--spacing-s)]">

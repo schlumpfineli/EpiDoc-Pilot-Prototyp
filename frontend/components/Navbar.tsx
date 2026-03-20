@@ -26,6 +26,7 @@ const C = {
 } as const;
 
 const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password'];
+const pilotEnableProfilePage = process.env.NEXT_PUBLIC_PILOT_ENABLE_PROFILE_PAGE === 'true';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ const TAB_DEFS: NavTab[] = [
   { href: '/diary',       label: 'Tagebuch',    icon: BookIcon,  type: 'functional' },
   { href: '/medikamente', label: 'Medikamente', icon: PillIcon,  type: 'functional' },
   { href: '/verlauf',     label: 'Analyse',     icon: ChartIcon, type: 'analytical' },
-  { href: '/profil',      label: 'Profil',      icon: UserIcon,  type: 'administrative' },
+  ...(pilotEnableProfilePage ? [{ href: '/profil', label: 'Profil', icon: UserIcon, type: 'administrative' as const }] : []),
 ];
 
 // ─── Subcomponents ───────────────────────────────────────────────────────────
