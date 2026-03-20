@@ -60,7 +60,14 @@ class AdminAuth
             }
 
             $isValid = false;
-            if (str_starts_with($adminPassword, '$2y$') || str_starts_with($adminPassword, '$2a$')) {
+            $isHashedPassword =
+                str_starts_with($adminPassword, '$2a$') ||
+                str_starts_with($adminPassword, '$2b$') ||
+                str_starts_with($adminPassword, '$2y$') ||
+                str_starts_with($adminPassword, '$argon2i$') ||
+                str_starts_with($adminPassword, '$argon2id$');
+
+            if ($isHashedPassword) {
                 $isValid = Hash::check($providedPassword, $adminPassword);
             } else {
                 $isValid = hash_equals($adminPassword, $providedPassword);
