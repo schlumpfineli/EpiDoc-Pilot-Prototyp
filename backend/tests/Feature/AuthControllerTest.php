@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
@@ -218,20 +219,76 @@ class AuthControllerTest extends TestCase
         $user = $this->createAuthenticatedUser();
 
         $response = $this->putJson('/api/user/profile', [
-            'phone' => '+41 12 345 67 89',
-            'address' => 'Test Address 123',
+            'disease' => 'Epilepsie',
         ]);
 
         $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'Profil aktualisiert',
-            ]);
+            ->assertJsonPath('message', 'Profil aktualisiert')
+            ->assertJsonPath('user.disease', 'Epilepsie');
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        if (Schema::hasColumn('users', 'disease')) {
+            $this->assertDatabaseHas('users', [
+                'id' => $user->id,
+                'disease' => 'Epilepsie',
+            ]);
+        } elseif (Schema::hasColumn('users', 'diagnoses')) {
+            $user->refresh();
+            $diagnoses = $user->getAttribute('diagnoses');
+            $this->assertIsArray($diagnoses);
+            $this->assertSame('Epilepsie', $diagnoses[0]['type'] ?? null);
+        }
+    }
+
+    /** @test */
+    public function strict_mode_blocks_contact_profile_fields()
+    {
+        $this->createAuthenticatedUser();
+
+        $response = $this->putJson('/api/user/profile', [
             'phone' => '+41 12 345 67 89',
-            'address' => 'Test Address 123',
         ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['phone']);
+    }
+
+    /** @test */
+    public function strict_mode_hides_contact_fields_in_user_response()
+    {
+        $user = User::factory()->create([
+            'email' => 'privacy@example.com',
+            'role' => 'patient',
+            'doctors' => [['name' => 'Dr. Muster', 'phone' => '0000']],
+            'clinics' => [['name' => 'Klinik A', 'address' => 'Adresse']],
+            'pharmacies' => [['name' => 'Apotheke A', 'phone' => '0000']],
+            'emergency_contact' => ['name' => 'Kontakt', 'phone' => '1111'],
+        ]);
+
+        $token = $user->createToken('test-token')->plainTextToken;
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('/api/user');
+
+        $response->assertStatus(200)
+            ->assertJsonMissingPath('user.doctors')
+            ->assertJsonMissingPath('user.clinics')
+            ->assertJsonMissingPath('user.pharmacies')
+            ->assertJsonMissingPath('user.emergency_contact');
+
+        $this->assertSame('privacy@example.com', $response->json('user.email'));
+    }
+
+    /** @test */
+    public function strict_mode_blocks_name_in_registration()
+    {
+        $response = $this->postJson('/api/register', [
+            'name' => 'Klara Name',
+            'email' => 'strict-register@example.com',
+            'role' => 'patient',
+            'password' => 'Password123',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
     }
 
     /** @test */

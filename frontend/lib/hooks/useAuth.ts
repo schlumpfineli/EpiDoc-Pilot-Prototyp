@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { apiClient, authApi, sessionApi, type User } from "@/lib/api";
 import { getToken, clearToken } from "@/lib/tokenRefresh";
 
+const usageTrackingEnabled = process.env.NEXT_PUBLIC_ENABLE_USAGE_TRACKING === "true";
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,10 +64,12 @@ export function useAuth() {
   }, []);
 
   const logout = async () => {
-    try {
-      await sessionApi.end();
-    } catch {
-      // Session-Ende nur für Statistik; Fehler ignorieren
+    if (usageTrackingEnabled) {
+      try {
+        await sessionApi.end();
+      } catch {
+        // Session-Ende nur für Statistik; Fehler ignorieren
+      }
     }
     try {
       await authApi.logout();

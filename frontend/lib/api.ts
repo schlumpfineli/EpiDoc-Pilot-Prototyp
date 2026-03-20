@@ -273,7 +273,7 @@ export interface UserProfile {
   display_name: string;
   email: string;
   role: 'patient' | 'relative';
-  disease?: string;
+  disease?: string | null;
   diagnoses?: Array<{
     type: string;
     diagnosis_date?: string | null;

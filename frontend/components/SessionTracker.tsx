@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { sessionApi } from "@/lib/api";
 
+const usageTrackingEnabled = process.env.NEXT_PUBLIC_ENABLE_USAGE_TRACKING === "true";
+
 /**
  * Startet eine App-Session bei eingeloggtem User und sendet Session-Ende
  * beim Verlassen (Tab wechseln, App wegdücken, Fenster schließen) per keepalive-fetch.
@@ -15,6 +17,7 @@ export function SessionTracker() {
   const hasListeners = useRef(false);
 
   useEffect(() => {
+    if (!usageTrackingEnabled) return;
     if (typeof window === "undefined" || !user) return;
 
     const startSession = async () => {

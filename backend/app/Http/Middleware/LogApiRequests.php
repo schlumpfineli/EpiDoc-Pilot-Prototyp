@@ -9,6 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LogApiRequests
 {
+    private function hashIp(Request $request): string
+    {
+        $ip = (string) $request->ip();
+        $salt = (string) config('app.key', 'epidoc-pilot');
+
+        return hash_hmac('sha256', $ip, $salt);
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -26,10 +34,10 @@ class LogApiRequests
         if ($response->getStatusCode() >= 400 || $duration > 1000) {
             Log::warning('API Request', [
                 'method' => $request->method(),
-                'url' => $request->fullUrl(),
+                'path' => $request->path(),
                 'status' => $response->getStatusCode(),
                 'duration_ms' => $duration,
-                'ip' => $request->ip(),
+                'ip_hash' => $this->hashIp($request),
                 'user_id' => $request->user()?->id,
             ]);
         }

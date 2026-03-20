@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'disease',
         'diagnoses',
         'doctors',
         'clinics',

@@ -8,6 +8,8 @@ import { AppInitializer } from "@/components/AppInitializer";
 import { SessionTracker } from "@/components/SessionTracker";
 import { PageViewTracker } from "@/components/PageViewTracker";
 
+const usageTrackingEnabled = process.env.NEXT_PUBLIC_ENABLE_USAGE_TRACKING === "true";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -31,8 +33,8 @@ export default function RootLayout({
         className={`${inter.variable} antialiased`}
       >
         <AppInitializer />
-        <SessionTracker />
-        <PageViewTracker />
+        {usageTrackingEnabled && <SessionTracker />}
+        {usageTrackingEnabled && <PageViewTracker />}
         <Navbar />
         <ErrorBoundaryWrapper>
           {children}

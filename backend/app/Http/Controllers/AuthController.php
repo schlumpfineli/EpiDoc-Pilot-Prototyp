@@ -8,11 +8,31 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    private const CONTACT_PROFILE_FIELDS = [
+        'phone',
+        'address',
+        'doctors',
+        'clinics',
+        'pharmacies',
+        'emergency_contact',
+    ];
+
+    private function strictAnonymityEnabled(): bool
+    {
+        $value = env('PILOT_STRICT_ANONYMITY', true);
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? true;
+    }
+
     /**
      * Pilot: User-Objekt für API ohne Klartext-Name, nur display_name (User-ID).
      */
@@ -24,17 +44,49 @@ class AuthController extends Controller
         return $base;
     }
 
+    private function userHasColumn(string $column): bool
+    {
+        try {
+            return Schema::hasColumn('users', $column);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    private function userToProfileResponse(User $user): array
+    {
+        $fields = ['id', 'email', 'role', 'diagnoses', 'created_at', 'updated_at'];
+
+        if (!$this->strictAnonymityEnabled()) {
+            $fields = array_merge($fields, self::CONTACT_PROFILE_FIELDS);
+        }
+
+        $data = $user->only($fields);
+        $diagnoses = $user->diagnoses;
+        $data['disease'] = is_array($diagnoses) && count($diagnoses) > 0 ? ($diagnoses[0]['type'] ?? null) : null;
+        $data['display_name'] = $user->display_name;
+
+        return $data;
+    }
+
     /**
      * Registrierung: E-Mail Pflicht, kein Klartext-Name. Anzeige nur als User-ID.
      */
     public function register(Request $request): JsonResponse
     {
-        $data = $request->validate([
-            'name' => ['nullable', 'string', 'max:255'],
+        $rules = [
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(['patient', 'relative'])],
             'password' => ['required', 'string', 'min:8', new StrongPassword()],
-        ]);
+        ];
+
+        if ($this->strictAnonymityEnabled()) {
+            $rules['name'] = ['prohibited'];
+        } else {
+            $rules['name'] = ['nullable', 'string', 'max:255'];
+        }
+
+        $data = $request->validate($rules);
 
         $user = User::create([
             'name' => 'User',
@@ -84,31 +136,43 @@ class AuthController extends Controller
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
+        $strictMode = $this->strictAnonymityEnabled();
 
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string', 'max:500'],
             'disease' => ['nullable', 'string', 'max:255'],
             'diagnoses' => ['nullable', 'array'],
             'diagnoses.*.type' => ['required_with:diagnoses', 'string', 'max:255'],
-            'doctors' => ['nullable', 'array'],
-            'doctors.*.name' => ['required_with:doctors', 'string', 'max:255'],
-            'doctors.*.phone' => ['nullable', 'string', 'max:255'],
-            'doctors.*.email' => ['nullable', 'email', 'max:255'],
-            'clinics' => ['nullable', 'array'],
-            'clinics.*.name' => ['required_with:clinics', 'string', 'max:255'],
-            'clinics.*.phone' => ['nullable', 'string', 'max:255'],
-            'clinics.*.address' => ['nullable', 'string', 'max:500'],
-            'pharmacies' => ['nullable', 'array'],
-            'pharmacies.*.name' => ['required_with:pharmacies', 'string', 'max:255'],
-            'pharmacies.*.phone' => ['nullable', 'string', 'max:255'],
-            'pharmacies.*.address' => ['nullable', 'string', 'max:500'],
-            'emergency_contact' => ['nullable', 'array'],
-            'emergency_contact.name' => ['required_with:emergency_contact', 'string', 'max:255'],
-            'emergency_contact.phone' => ['required_with:emergency_contact', 'string', 'max:255'],
-            'emergency_contact.relationship' => ['nullable', 'string', 'max:255'],
-        ]);
+        ];
+
+        if ($strictMode) {
+            foreach (self::CONTACT_PROFILE_FIELDS as $field) {
+                $rules[$field] = ['prohibited'];
+            }
+        } else {
+            $rules = array_merge($rules, [
+                'phone' => ['nullable', 'string', 'max:255'],
+                'address' => ['nullable', 'string', 'max:500'],
+                'doctors' => ['nullable', 'array'],
+                'doctors.*.name' => ['required_with:doctors', 'string', 'max:255'],
+                'doctors.*.phone' => ['nullable', 'string', 'max:255'],
+                'doctors.*.email' => ['nullable', 'email', 'max:255'],
+                'clinics' => ['nullable', 'array'],
+                'clinics.*.name' => ['required_with:clinics', 'string', 'max:255'],
+                'clinics.*.phone' => ['nullable', 'string', 'max:255'],
+                'clinics.*.address' => ['nullable', 'string', 'max:500'],
+                'pharmacies' => ['nullable', 'array'],
+                'pharmacies.*.name' => ['required_with:pharmacies', 'string', 'max:255'],
+                'pharmacies.*.phone' => ['nullable', 'string', 'max:255'],
+                'pharmacies.*.address' => ['nullable', 'string', 'max:500'],
+                'emergency_contact' => ['nullable', 'array'],
+                'emergency_contact.name' => ['required_with:emergency_contact', 'string', 'max:255'],
+                'emergency_contact.phone' => ['required_with:emergency_contact', 'string', 'max:255'],
+                'emergency_contact.relationship' => ['nullable', 'string', 'max:255'],
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -150,23 +214,28 @@ class AuthController extends Controller
             }
         }
 
+        if ($strictMode) {
+            foreach (self::CONTACT_PROFILE_FIELDS as $field) {
+                if ($this->userHasColumn($field)) {
+                    $validated[$field] = null;
+                }
+            }
+        }
+
         $user->update($validated);
 
-        $response = $user->only([
-            'id', 'email', 'role', 'diagnoses',
-            'doctors', 'clinics', 'pharmacies', 'emergency_contact',
-            'created_at', 'updated_at'
-        ]);
-        $response['display_name'] = $user->display_name;
-        // Rückwärtskompatibilität: 'disease' als einfachen String zurückgeben
-        $diagnoses = $user->diagnoses;
-        $response['disease'] = is_array($diagnoses) && count($diagnoses) > 0 ? ($diagnoses[0]['type'] ?? null) : null;
-        $response['diagnoses'] = $diagnoses;
+        $response = $this->userToProfileResponse($user);
 
         return response()->json([
             'message' => 'Profil aktualisiert',
             'user' => $response,
         ]);
+    }
+
+    public function user(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        return response()->json(['user' => $this->userToProfileResponse($user)]);
     }
 
     /**

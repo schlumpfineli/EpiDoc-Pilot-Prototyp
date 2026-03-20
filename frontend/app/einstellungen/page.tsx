@@ -360,6 +360,8 @@ async function svgToCanvas(svg: string): Promise<HTMLCanvasElement> {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
+const strictPilotMode = process.env.NEXT_PUBLIC_PILOT_STRICT_ANONYMITY !== "false";
+
 export default function EinstellungenPage() {
   const { user, logout } = useAuth();
   const { t } = useRoleText();
@@ -368,6 +370,7 @@ export default function EinstellungenPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [diseaseInput, setDiseaseInput] = useState("");
 
   // ── Modal State ──
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -396,7 +399,9 @@ export default function EinstellungenPage() {
     try {
       setIsLoading(true);
       const response = await authApi.getUser();
-      setProfileData(response.user as UserProfile);
+      const userProfile = response.user as UserProfile;
+      setProfileData(userProfile);
+      setDiseaseInput(userProfile.disease || userProfile.diagnoses?.[0]?.type || "");
     } catch (error: unknown) {
       const msg = error && typeof error === "object" && "message" in error
         ? (error as { message: string }).message
@@ -404,6 +409,26 @@ export default function EinstellungenPage() {
       toastService.show(msg, "error");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveMedicalProfile = async () => {
+    try {
+      setIsSaving(true);
+      const response = await profileApi.update({
+        disease: diseaseInput.trim() ? diseaseInput.trim() : null,
+      });
+      const userProfile = response.user;
+      setProfileData(userProfile);
+      setDiseaseInput(userProfile.disease || userProfile.diagnoses?.[0]?.type || "");
+      toastService.show("Medizinische Angaben gespeichert", "success");
+    } catch (error: unknown) {
+      const msg = error && typeof error === "object" && "message" in error
+        ? (error as { message: string }).message
+        : "Fehler beim Speichern der medizinischen Angaben";
+      toastService.show(msg, "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -775,6 +800,39 @@ export default function EinstellungenPage() {
                   </div>
                 </SectionCard>
               )}
+
+              <SectionCard icon={<IconInfo className="w-5 h-5" />} title="Minimales Profil (Pilot)">
+                <div className="space-y-[var(--spacing-s)]">
+                  <p className="text-body-small text-foreground-500">
+                    Bitte keine persönlichen Identifikatoren eingeben (z. B. Name, Adresse, Telefonnummer oder konkrete Orte).
+                  </p>
+                  {strictPilotMode && (
+                    <p className="text-[11px] text-foreground-400">
+                      Strikter Pilotmodus aktiv: Es sind nur minimal medizinisch notwendige Angaben erlaubt.
+                    </p>
+                  )}
+                  <div className="space-y-1">
+                    <label className="text-[12px] font-medium text-foreground-600">
+                      Diagnose / medizinisch notwendige Information
+                    </label>
+                    <textarea
+                      value={diseaseInput}
+                      onChange={(e) => setDiseaseInput(e.target.value)}
+                      rows={3}
+                      placeholder="z. B. Epilepsie (ohne personenbezogene Angaben)"
+                      className={CSS.textarea}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={saveMedicalProfile}
+                    disabled={isSaving}
+                    className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isSaving ? "Speichert..." : "Medizinische Angaben speichern"}
+                  </button>
+                </div>
+              </SectionCard>
 
               <SectionCard icon={<IconCog className="w-5 h-5" />} title="Sicherheit & Konto">
                 <div className="space-y-[var(--spacing-s)]">
