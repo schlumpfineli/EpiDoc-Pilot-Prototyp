@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminAuth
@@ -19,20 +20,43 @@ class AdminAuth
         return trim($value, " \t\n\r\0\x0B\"'");
     }
 
-    private function resolveAdminPassword(): string
+    private function readEnvValue(string $key): ?string
     {
-        $runtime = getenv('ADMIN_PASSWORD');
+        $serverValue = $_SERVER[$key] ?? null;
+        if (is_string($serverValue) && $this->normalizeSecret($serverValue) !== '') {
+            return $this->normalizeSecret($serverValue);
+        }
+
+        $envValue = $_ENV[$key] ?? null;
+        if (is_string($envValue) && $this->normalizeSecret($envValue) !== '') {
+            return $this->normalizeSecret($envValue);
+        }
+
+        $runtime = getenv($key);
         if (is_string($runtime) && $this->normalizeSecret($runtime) !== '') {
             return $this->normalizeSecret($runtime);
         }
 
-        // Fallback für versehentlich falsche Legacy-Schreibweise.
-        $legacy = getenv('Admin_Password');
-        if (is_string($legacy) && $this->normalizeSecret($legacy) !== '') {
-            return $this->normalizeSecret($legacy);
+        return null;
+    }
+
+    private function resolveAdminPassword(): array
+    {
+        $runtime = $this->readEnvValue('ADMIN_PASSWORD');
+        if ($runtime !== null) {
+            return ['value' => $runtime, 'source' => 'runtime_env_admin_password'];
         }
 
-        return $this->normalizeSecret((string) config('app.admin_password', ''));
+        // Fallback für versehentlich falsche Legacy-Schreibweise.
+        $legacy = $this->readEnvValue('Admin_Password');
+        if ($legacy !== null) {
+            return ['value' => $legacy, 'source' => 'runtime_env_legacy_admin_password'];
+        }
+
+        return [
+            'value' => $this->normalizeSecret((string) config('app.admin_password', '')),
+            'source' => 'config_app_admin_password',
+        ];
     }
 
     /**
@@ -50,7 +74,9 @@ class AdminAuth
 
         // Wenn Passwort gesendet wurde, prüfe es
         if ($request->has('admin_password')) {
-            $adminPassword = $this->resolveAdminPassword();
+            $adminResolution = $this->resolveAdminPassword();
+            $adminPassword = $adminResolution['value'];
+            $adminPasswordSource = $adminResolution['source'];
             $providedPassword = $this->normalizeSecret((string) $request->input('admin_password', ''));
             
             if (!$adminPassword) {
@@ -81,6 +107,15 @@ class AdminAuth
                 }
                 return redirect($request->url());
             }
+
+            Log::warning('Admin login failed', [
+                'password_source' => $adminPasswordSource,
+                'configured_length' => strlen($adminPassword),
+                'provided_length' => strlen($providedPassword),
+                'configured_prefix' => substr($adminPassword, 0, 8),
+                'is_hashed_password' => $isHashedPassword,
+                'url' => $request->path(),
+            ]);
             
             return redirect($request->url())->with('error', 'Falsches Passwort');
         }
