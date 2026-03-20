@@ -145,6 +145,6 @@ return [
     |
     */
 
-    'admin_password' => env('ADMIN_PASSWORD'),
+    'admin_password' => env('ADMIN_PASSWORD', env('Admin_Password')),
 
 ];

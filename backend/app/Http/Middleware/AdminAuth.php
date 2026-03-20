@@ -9,6 +9,32 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminAuth
 {
+    private function normalizeSecret(?string $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        // Toleriert versehentliche Quotes/Whitespace aus ENV-UI Copy&Paste.
+        return trim($value, " \t\n\r\0\x0B\"'");
+    }
+
+    private function resolveAdminPassword(): string
+    {
+        $runtime = getenv('ADMIN_PASSWORD');
+        if (is_string($runtime) && $this->normalizeSecret($runtime) !== '') {
+            return $this->normalizeSecret($runtime);
+        }
+
+        // Fallback für versehentlich falsche Legacy-Schreibweise.
+        $legacy = getenv('Admin_Password');
+        if (is_string($legacy) && $this->normalizeSecret($legacy) !== '') {
+            return $this->normalizeSecret($legacy);
+        }
+
+        return $this->normalizeSecret((string) config('app.admin_password', ''));
+    }
+
     /**
      * Handle an incoming request.
      * 
@@ -24,8 +50,8 @@ class AdminAuth
 
         // Wenn Passwort gesendet wurde, prüfe es
         if ($request->has('admin_password')) {
-            $adminPassword = trim((string) config('app.admin_password', ''));
-            $providedPassword = trim((string) $request->input('admin_password', ''));
+            $adminPassword = $this->resolveAdminPassword();
+            $providedPassword = $this->normalizeSecret((string) $request->input('admin_password', ''));
             
             if (!$adminPassword) {
                 return response()->view('admin.login', [
