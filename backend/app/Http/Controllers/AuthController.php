@@ -7,6 +7,7 @@ use App\Rules\StrongPassword;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -332,12 +333,21 @@ class AuthController extends Controller
         $data = $request->validate([
             'email' => ['required', 'email'],
         ]);
+        try {
+            $status = Password::sendResetLink(['email' => $data['email']]);
 
-        $status = Password::sendResetLink(['email' => $data['email']]);
-
-        if ($status !== Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.',
+            if ($status !== Password::RESET_LINK_SENT) {
+                return response()->json([
+                    'message' => 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Pilot-robust: Keine technischen Details an den Client leaken,
+            // aber serverseitig ausreichend Kontext zum Debuggen loggen.
+            Log::error('Password reset mail dispatch failed', [
+                'email_hash' => hash('sha256', strtolower(trim($data['email']))),
+                'exception' => $e::class,
+                'error' => $e->getMessage(),
             ]);
         }
 
