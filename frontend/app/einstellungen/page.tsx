@@ -1081,6 +1081,9 @@ export default function EinstellungenPage() {
               <p className="text-[11px] text-foreground-300">Wir lesen jedes Feedback persönlich.</p>
             </div>
           </div>
+          <p className="text-[11px] text-foreground-400">
+            Hinweis: Senden ist ab mindestens 10 Zeichen möglich.
+          </p>
           <ModalActions onCancel={closeFeedbackModal} onSave={handleSendFeedback} isSaving={isSaving} saveLabel="Feedback senden" savingLabel="Sendet..." disabled={feedbackForm.message.trim().length < 10} />
         </InlineModal>
       )}

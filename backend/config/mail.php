@@ -39,13 +39,19 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
+            // MAIL_SCHEME ist in eurem Code der primäre Wert.
+            // Fallback auf MAIL_ENCRYPTION, damit bestehende .env/Provider-Setups
+            // nicht ins Timeout/Socket-Probleme laufen, falls MAIL_SCHEME fehlt.
+            'scheme' => env('MAIL_SCHEME', env('MAIL_ENCRYPTION')),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // Nicht "null" lassen: sonst hängt der Mailversand ggf. bis zum
+            // Request-Timeout (Symfony/SocketStream) und der Frontend-User
+            // bekommt nur einen Server Error.
+            'timeout' => (int) env('MAIL_TIMEOUT', 15),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
