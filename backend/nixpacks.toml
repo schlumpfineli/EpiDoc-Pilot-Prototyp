@@ -17,6 +17,6 @@ cmds = [
 ]
 
 [start]
-# Config erst nach Start cachen, wenn alle Env-Vars (Mail, DB, …) gesetzt sind.
-cmd = 'php artisan migrate --force || echo "Migration failed, starting server anyway" && php artisan config:cache || true && php artisan serve --host=0.0.0.0 --port=$PORT'
+# Alten Config-Cache zuerst leeren, dann mit Runtime-Env (Railway) neu cachen.
+cmd = 'php artisan migrate --force || echo "Migration failed, starting server anyway" && php artisan config:clear && php artisan config:cache || true && php artisan serve --host=0.0.0.0 --port=$PORT'
 
