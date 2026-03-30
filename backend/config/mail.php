@@ -39,10 +39,16 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            // MAIL_SCHEME ist in eurem Code der primäre Wert.
-            // Fallback auf MAIL_ENCRYPTION, damit bestehende .env/Provider-Setups
-            // nicht ins Timeout/Socket-Probleme laufen, falls MAIL_SCHEME fehlt.
-            'scheme' => env('MAIL_SCHEME', env('MAIL_ENCRYPTION')),
+            // Symfony Mailer erlaubt nur die Schemes "smtp" (STARTTLS, z. B. Port 587)
+            // und "smtps" (SSL, z. B. Port 465). "tls" ist kein gültiges URL-Schema –
+            // MAIL_ENCRYPTION=tls muss auf "smtp" gemappt werden.
+            'scheme' => match (strtolower((string) (env('MAIL_SCHEME') ?: env('MAIL_ENCRYPTION', 'tls')))) {
+                'tls' => 'smtp',
+                'ssl' => 'smtps',
+                'smtp' => 'smtp',
+                'smtps' => 'smtps',
+                default => 'smtp',
+            },
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
