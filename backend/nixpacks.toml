@@ -7,8 +7,9 @@ cmds = [
 ]
 
 [phases.build]
+# Kein config:cache hier: Railway-Umgebungsvariablen (z. B. MAIL_MAILER) sind zur Build-Zeit
+# oft noch nicht vollständig – sonst wird MAIL_MAILER=log dauerhaft eingefroren.
 cmds = [
-    'php artisan config:cache || true',
     'php artisan route:cache || true',
     'php artisan view:cache || true',
     'php artisan migrate --force || echo "Migration failed, will retry on startup"',
@@ -16,5 +17,6 @@ cmds = [
 ]
 
 [start]
-cmd = 'php artisan migrate --force || echo "Migration failed, starting server anyway" && php artisan serve --host=0.0.0.0 --port=$PORT'
+# Config erst nach Start cachen, wenn alle Env-Vars (Mail, DB, …) gesetzt sind.
+cmd = 'php artisan migrate --force || echo "Migration failed, starting server anyway" && php artisan config:cache || true && php artisan serve --host=0.0.0.0 --port=$PORT'
 
