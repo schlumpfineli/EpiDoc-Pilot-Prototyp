@@ -6,6 +6,7 @@ import { profileApi, authApi, UserProfile, feedbackApi, FeedbackData, Seizure, B
 import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRoleText } from "@/lib/hooks/useRoleText";
+import { LEGAL_OPERATOR } from "@/lib/legal";
 import { useRouter } from "next/navigation";
 import { format, parseISO, subMonths, eachDayOfInterval, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
@@ -1005,7 +1006,9 @@ export default function EinstellungenPage() {
                     <h3 className="text-[12px] font-medium text-foreground-700 mb-1">Impressum</h3>
                     <div className="text-[11px] text-foreground-500 leading-relaxed">
                       <p>EpiDoc – Digitales Epilepsie-Tagebuch (Prototyp/Pilot)</p>
-                      <p>Kontakt: <a href="mailto:epidoc@kontakt.ch" className="text-[#3E7C67]">epidoc@kontakt.ch</a></p>
+                      <p>{LEGAL_OPERATOR.name}</p>
+                      <p>{LEGAL_OPERATOR.street}, {LEGAL_OPERATOR.zipCity}, {LEGAL_OPERATOR.country}</p>
+                      <p>Kontakt: <a href={`mailto:${LEGAL_OPERATOR.email}`} className="text-[#3E7C67]">{LEGAL_OPERATOR.email}</a></p>
                       <p className="mt-1">
                         <a href="/impressum" className="text-[#3E7C67] underline underline-offset-2">Vollständiges Impressum</a>
                       </p>

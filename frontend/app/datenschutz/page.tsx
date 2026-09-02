@@ -1,4 +1,5 @@
 import { LegalPageShell } from "@/components/LegalPageShell";
+import { LEGAL_OPERATOR } from "@/lib/legal";
 
 export default function DatenschutzPage() {
   return (
@@ -14,13 +15,14 @@ export default function DatenschutzPage() {
         Verantwortliche Stelle
       </h2>
       <p>
-        Betreiberin des Pilots ist die im{" "}
+        Verantwortlich: {LEGAL_OPERATOR.name}, {LEGAL_OPERATOR.street},{" "}
+        {LEGAL_OPERATOR.zipCity}, {LEGAL_OPERATOR.country}. Angaben auch im{" "}
         <a href="/impressum" className="underline underline-offset-2 text-[#2E6F57]">
           Impressum
-        </a>{" "}
-        genannte Person. Fragen zum Datenschutz:{" "}
-        <a href="mailto:epidoc@kontakt.ch" className="underline underline-offset-2 text-[#2E6F57]">
-          epidoc@kontakt.ch
+        </a>
+        . Fragen zum Datenschutz:{" "}
+        <a href={`mailto:${LEGAL_OPERATOR.email}`} className="underline underline-offset-2 text-[#2E6F57]">
+          {LEGAL_OPERATOR.email}
         </a>
         .
       </p>

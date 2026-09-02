@@ -1,4 +1,5 @@
 import { LegalPageShell } from "@/components/LegalPageShell";
+import { LEGAL_OPERATOR } from "@/lib/legal";
 
 export default function ImpressumPage() {
   return (
@@ -14,15 +15,16 @@ export default function ImpressumPage() {
       <p>
         EpiDoc – Digitales Epilepsie-Tagebuch (Pilot)
         <br />
+        Verantwortlich: {LEGAL_OPERATOR.name}
+        <br />
+        {LEGAL_OPERATOR.street}
+        <br />
+        {LEGAL_OPERATOR.zipCity}, {LEGAL_OPERATOR.country}
+        <br />
         Kontakt:{" "}
-        <a href="mailto:epidoc@kontakt.ch" className="underline underline-offset-2 text-[#2E6F57]">
-          epidoc@kontakt.ch
+        <a href={`mailto:${LEGAL_OPERATOR.email}`} className="underline underline-offset-2 text-[#2E6F57]">
+          {LEGAL_OPERATOR.email}
         </a>
-      </p>
-      <p>
-        Name und ladungsfähige Postadresse der verantwortlichen Person sind
-        hier noch nicht vollständig hinterlegt und müssen vor einem
-        öffentlichen Pilot ergänzt werden.
       </p>
 
       <h2 className="text-body font-medium text-foreground-900 pt-[var(--spacing-2xs)]">
