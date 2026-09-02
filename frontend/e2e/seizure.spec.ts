@@ -10,7 +10,7 @@ test.describe('Anfallstagebuch', () => {
   test.beforeEach(async ({ page }) => {
     // Voraussetzung: Benutzer muss eingeloggt sein
     await login(page);
-    await page.goto('/diary');
+    await page.goto('/diary/anfaelle');
     await page.waitForLoadState('networkidle');
   });
 

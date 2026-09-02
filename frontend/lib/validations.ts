@@ -19,6 +19,12 @@ export const registerSchema = z.object({
     errorMap: () => ({ message: 'Bitte wähle eine Rolle' }),
   } as any),
   password: passwordSchema,
+  privacyAccepted: z.boolean().refine((value) => value === true, {
+    message: 'Bitte die Datenschutzerklärung akzeptieren',
+  }),
+  healthDataConsent: z.boolean().refine((value) => value === true, {
+    message: 'Bitte in die Verarbeitung der Gesundheitsdaten einwilligen',
+  }),
 });
 
 export const loginSchema = z.object({

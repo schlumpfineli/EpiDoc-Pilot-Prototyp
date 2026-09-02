@@ -80,8 +80,8 @@ type NavTab = {
 // ─── Tab Definitions (single source of truth) ───────────────────────────────
 
 const TAB_DEFS: NavTab[] = [
-  { href: '/befinden',    label: 'Heute',       icon: HeartIcon, type: 'emotional' },
   { href: '/diary',       label: 'Tagebuch',    icon: BookIcon,  type: 'functional' },
+  { href: '/befinden',    label: 'Heute',       icon: HeartIcon, type: 'emotional' },
   { href: '/medikamente', label: 'Medikamente', icon: PillIcon,  type: 'functional' },
   { href: '/verlauf',     label: 'Analyse',     icon: ChartIcon, type: 'analytical' },
   ...(pilotEnableProfilePage ? [{ href: '/profil', label: 'Profil', icon: UserIcon, type: 'administrative' as const }] : []),

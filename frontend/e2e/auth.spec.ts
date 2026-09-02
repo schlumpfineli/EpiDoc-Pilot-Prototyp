@@ -26,6 +26,9 @@ test.describe('Authentifizierung', () => {
       await roleInput.click();
     }
 
+    await page.locator('input[type="checkbox"]').nth(0).check();
+    await page.locator('input[type="checkbox"]').nth(1).check();
+
     // Submit
     const submitButton = page.locator('button[type="submit"]').first();
     await submitButton.click();

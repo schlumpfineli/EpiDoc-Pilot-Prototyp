@@ -24,6 +24,23 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * Gültige Registrierungsdaten inkl. Einwilligungen.
+     *
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    protected function registerPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'email' => 'test@example.com',
+            'role' => 'patient',
+            'password' => 'Password123',
+            'privacy_accepted' => true,
+            'health_data_consent' => true,
+        ], $overrides);
+    }
+
+    /**
      * Helper: Create and authenticate a user.
      *
      * @param array $attributes

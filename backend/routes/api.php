@@ -4,9 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\BefindenController;
 use App\Http\Controllers\Api\SeizureController;
+use App\Http\Controllers\Api\SeizureCustomOptionController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\MedicationController;
+use App\Http\Controllers\Api\JournalEntryController;
 use App\Http\Controllers\FeedbackController;
 
 // Public routes (mit Rate-Limiting gegen Brute-Force)
@@ -27,10 +29,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('befinden', BefindenController::class);
 
     // Seizure routes
+    Route::get('seizure-options', [SeizureCustomOptionController::class, 'index']);
+    Route::post('seizure-options', [SeizureCustomOptionController::class, 'store']);
+    Route::delete('seizure-options/{id}', [SeizureCustomOptionController::class, 'destroy']);
     Route::apiResource('seizures', SeizureController::class);
 
     // Medication routes
     Route::apiResource('medications', MedicationController::class);
+
+    // Freies Gedankentagebuch
+    Route::apiResource('journal-entries', JournalEntryController::class);
 
     // User profile routes
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);

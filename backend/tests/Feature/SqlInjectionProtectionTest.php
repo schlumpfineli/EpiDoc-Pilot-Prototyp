@@ -17,12 +17,9 @@ class SqlInjectionProtectionTest extends \Tests\TestCase
         // Versuche SQL-Injection über E-Mail-Feld
         $maliciousEmail = "test@example.com' OR '1'='1";
         
-        $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
+        $response = $this->postJson('/api/register', $this->registerPayload([
             'email' => $maliciousEmail,
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        ]));
 
         // Sollte entweder Validierungsfehler geben (ungültige E-Mail) oder User erstellen
         // Wichtig: Kein SQL-Injection möglich

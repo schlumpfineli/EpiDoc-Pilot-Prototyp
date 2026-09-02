@@ -30,6 +30,8 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       role: "patient",
+      privacyAccepted: false,
+      healthDataConsent: false,
     },
   });
 
@@ -39,8 +41,11 @@ export default function RegisterPage() {
     try {
       setApiError(null);
       const response = await authApi.register({
-        ...data,
+        email: data.email,
+        password: data.password,
         role: data.role as "patient" | "relative",
+        privacy_accepted: true,
+        health_data_consent: true,
       });
       
       // Token speichern
@@ -103,6 +108,46 @@ export default function RegisterPage() {
             helperText="Mindestens 8 Zeichen, 1 Grossbuchstabe, 1 Kleinbuchstabe, 1 Zahl"
           />
 
+          <div className="space-y-[var(--spacing-s)]">
+            <label className="flex items-start gap-[var(--spacing-2xs)] cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded text-primary-600 focus:ring-primary-500"
+                {...register("privacyAccepted")}
+              />
+              <span className="text-body-small text-foreground-700">
+                Ich habe die{" "}
+                <a href="/datenschutz" className={AUTH_LINK_CLASS} target="_blank" rel="noreferrer">
+                  Datenschutzerklärung
+                </a>{" "}
+                gelesen und akzeptiere sie.
+              </span>
+            </label>
+            {errors.privacyAccepted && (
+              <p className="text-body-small text-warning-600" role="alert">
+                {errors.privacyAccepted.message}
+              </p>
+            )}
+
+            <label className="flex items-start gap-[var(--spacing-2xs)] cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded text-primary-600 focus:ring-primary-500"
+                {...register("healthDataConsent")}
+              />
+              <span className="text-body-small text-foreground-700">
+                Ich willige ausdrücklich in die Verarbeitung meiner Gesundheitsdaten
+                (Anfälle, Befinden, Medikamente, Tagebuch) ein. Der Widerruf erfolgt
+                durch Löschen des Kontos.
+              </span>
+            </label>
+            {errors.healthDataConsent && (
+              <p className="text-body-small text-warning-600" role="alert">
+                {errors.healthDataConsent.message}
+              </p>
+            )}
+          </div>
+
           {apiError && (
             <div className="rounded-lg border border-warning-200/60 bg-warning-50/50 px-[var(--spacing-m)] py-[var(--spacing-s)]">
               <p className="text-body-small text-warning-700">{apiError}</p>
@@ -119,6 +164,11 @@ export default function RegisterPage() {
           <a href="/login" className={AUTH_LINK_CLASS}>
             Zum Login wechseln
           </a>
+        </p>
+        <p className="text-body-small text-center text-foreground-500">
+          <a href="/datenschutz" className={AUTH_LINK_CLASS}>Datenschutz</a>
+          {" · "}
+          <a href="/impressum" className={AUTH_LINK_CLASS}>Impressum</a>
         </p>
       </div>
     </div>

@@ -79,6 +79,8 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(['patient', 'relative'])],
             'password' => ['required', 'string', 'min:8', new StrongPassword()],
+            'privacy_accepted' => ['required', 'accepted'],
+            'health_data_consent' => ['required', 'accepted'],
         ];
 
         if ($this->strictAnonymityEnabled()) {
@@ -94,6 +96,8 @@ class AuthController extends Controller
             'email' => $data['email'],
             'role' => $data['role'],
             'password' => Hash::make($data['password']),
+            'privacy_accepted_at' => now(),
+            'health_data_consent_at' => now(),
         ]);
         $user->update(['name' => 'User-' . $user->id]);
 

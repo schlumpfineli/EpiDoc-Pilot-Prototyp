@@ -256,6 +256,27 @@ export interface Seizure {
   updated_at: string;
 }
 
+export type SeizureCustomOptionKind = 'after_effect' | 'trigger';
+
+/** Selbst eingetragene Auffälligkeit oder Auslöser, die in der Auswahlliste oben steht */
+export interface SeizureCustomOption {
+  id: number;
+  label: string;
+}
+
+export interface SeizureCustomOptions {
+  after_effects: SeizureCustomOption[];
+  triggers: SeizureCustomOption[];
+}
+
+export interface JournalEntry {
+  id: number;
+  user_id: number;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Medication {
   id: number;
   user_id: number;
@@ -316,6 +337,7 @@ export interface ExportData {
   profile?: UserProfile;
   befinden?: Befinden[];
   seizures?: Seizure[];
+  journal_entries?: JournalEntry[];
 }
 
 // API Functions
@@ -324,6 +346,8 @@ export const authApi = {
     email: string;
     role: 'patient' | 'relative';
     password: string;
+    privacy_accepted: true;
+    health_data_consent: true;
   }): Promise<AuthResponse> => {
     return apiClient.post<AuthResponse>('/register', data);
   },
@@ -425,6 +449,45 @@ export const seizureApi = {
   },
 };
 
+export const seizureOptionApi = {
+  getAll: async (): Promise<{ data: SeizureCustomOptions }> => {
+    return apiClient.get<{ data: SeizureCustomOptions }>('/seizure-options');
+  },
+
+  add: async (data: {
+    kind: SeizureCustomOptionKind;
+    labels: string[];
+  }): Promise<{ message: string; data: SeizureCustomOptions }> => {
+    return apiClient.post<{ message: string; data: SeizureCustomOptions }>('/seizure-options', data);
+  },
+
+  remove: async (id: number): Promise<{ message: string; data: SeizureCustomOptions }> => {
+    return apiClient.delete<{ message: string; data: SeizureCustomOptions }>(`/seizure-options/${id}`);
+  },
+};
+
+export const journalApi = {
+  getAll: async (): Promise<{ data: JournalEntry[] }> => {
+    return apiClient.get<{ data: JournalEntry[] }>('/journal-entries');
+  },
+
+  getOne: async (id: number): Promise<{ data: JournalEntry }> => {
+    return apiClient.get<{ data: JournalEntry }>(`/journal-entries/${id}`);
+  },
+
+  create: async (data: { body: string }): Promise<{ message: string; data: JournalEntry }> => {
+    return apiClient.post<{ message: string; data: JournalEntry }>('/journal-entries', data);
+  },
+
+  update: async (id: number, data: { body: string }): Promise<{ message: string; data: JournalEntry }> => {
+    return apiClient.put<{ message: string; data: JournalEntry }>(`/journal-entries/${id}`, data);
+  },
+
+  delete: async (id: number): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/journal-entries/${id}`);
+  },
+};
+
 export const medicationApi = {
   getAll: async (params?: { active?: boolean }): Promise<{ data: Medication[] }> => {
     const query = params ? new URLSearchParams(
@@ -476,6 +539,7 @@ export const profileApi = {
 
     const befindenResp = await safe(() => befindenApi.getAll());
     const seizuresResp = await safe(() => seizureApi.getAll());
+    const journalResp = await safe(() => journalApi.getAll());
 
     return {
       exported_at,
@@ -484,6 +548,7 @@ export const profileApi = {
       profile: userResp?.user,
       befinden: befindenResp?.data ?? [],
       seizures: seizuresResp?.data ?? [],
+      journal_entries: journalResp?.data ?? [],
     };
   },
 

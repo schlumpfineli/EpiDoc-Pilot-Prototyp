@@ -12,70 +12,88 @@ describe('Validation Schemas', () => {
   describe('registerSchema', () => {
     it('validates correct registration data', () => {
       const validData = {
-        name: 'Test User',
         email: 'test@example.com',
         role: 'patient' as const,
         password: 'Password123',
+        privacyAccepted: true,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(validData)).not.toThrow();
     });
 
     it('rejects password without uppercase', () => {
       const invalidData = {
-        name: 'Test User',
         email: 'test@example.com',
         role: 'patient' as const,
         password: 'password123',
+        privacyAccepted: true,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(invalidData)).toThrow();
     });
 
     it('rejects password without lowercase', () => {
       const invalidData = {
-        name: 'Test User',
         email: 'test@example.com',
         role: 'patient' as const,
         password: 'PASSWORD123',
+        privacyAccepted: true,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(invalidData)).toThrow();
     });
 
     it('rejects password without number', () => {
       const invalidData = {
-        name: 'Test User',
         email: 'test@example.com',
         role: 'patient' as const,
         password: 'Password',
+        privacyAccepted: true,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(invalidData)).toThrow();
     });
 
     it('rejects password shorter than 8 characters', () => {
       const invalidData = {
-        name: 'Test User',
         email: 'test@example.com',
         role: 'patient' as const,
         password: 'Pass1',
+        privacyAccepted: true,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(invalidData)).toThrow();
     });
 
     it('rejects invalid email', () => {
       const invalidData = {
-        name: 'Test User',
         email: 'invalid-email',
         role: 'patient' as const,
         password: 'Password123',
+        privacyAccepted: true,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(invalidData)).toThrow();
     });
 
     it('rejects invalid role', () => {
       const invalidData = {
-        name: 'Test User',
         email: 'test@example.com',
         role: 'invalid' as any,
         password: 'Password123',
+        privacyAccepted: true,
+        healthDataConsent: true,
+      };
+      expect(() => registerSchema.parse(invalidData)).toThrow();
+    });
+
+    it('rejects missing privacy consent', () => {
+      const invalidData = {
+        email: 'test@example.com',
+        role: 'patient' as const,
+        password: 'Password123',
+        privacyAccepted: false,
+        healthDataConsent: true,
       };
       expect(() => registerSchema.parse(invalidData)).toThrow();
     });

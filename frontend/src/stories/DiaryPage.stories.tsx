@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import DiaryPage from "../../app/diary/page";
+import DiaryPage from "../../app/diary/anfaelle/page";
 
 const meta: Meta<typeof DiaryPage> = {
   title: "Seiten/Anfallstagebuch",

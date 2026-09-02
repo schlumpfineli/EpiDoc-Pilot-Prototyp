@@ -115,6 +115,9 @@ export async function register(page: Page, userData: {
       await roleInput.click();
     }
   }
+
+  await page.locator('input[type="checkbox"]').nth(0).check();
+  await page.locator('input[type="checkbox"]').nth(1).check();
   
   // Submit
   const submitButton = page.locator('button[type="submit"], button:has-text("Registrieren")').first();

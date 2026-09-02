@@ -14,12 +14,7 @@ class TokenExpirationTest extends \Tests\TestCase
     /** @test */
     public function token_has_expiration_time_after_registration()
     {
-        $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload());
 
         $response->assertStatus(201);
         $token = $response->json('token');
@@ -122,12 +117,7 @@ class TokenExpirationTest extends \Tests\TestCase
         // Setze eine andere Ablaufzeit über Config (simuliert ENV)
         config(['sanctum.expiration' => 60]); // 1 Stunde
 
-        $response = $this->postJson('/api/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload());
 
         $response->assertStatus(201);
         $token = $response->json('token');

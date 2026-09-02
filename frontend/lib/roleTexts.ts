@@ -22,6 +22,15 @@ export const caregiverTexts: Readonly<Record<string, string>> = {
   "Bitte gib einen Namen ein": "Bitte geben Sie einen Namen ein",
 
   // ─── Tagebuch-Seite ───────────────────────────────────────────────────────
+  "Wähle, was du festhalten möchtest – Anfälle oder freie Gedanken.":
+    "Wählen Sie, was Sie festhalten möchten – Anfälle oder freie Gedanken.",
+  "Eigene Gedanken frei festhalten – ohne Vorgaben.":
+    "Gedanken frei festhalten – ohne Vorgaben.",
+  "Schreib einfach, was dir durch den Kopf geht.":
+    "Schreiben Sie einfach, was Ihnen durch den Kopf geht.",
+  "Deine Gedanken": "Gedanken",
+  "Bitte schreibe etwas, bevor du speicherst.":
+    "Bitte schreiben Sie etwas, bevor Sie speichern.",
   "Wähle einen Tag aus dem Kalender aus, um Anfälle einzutragen oder bereits erfasste Anfälle anzuzeigen.":
     "Wählen Sie einen Tag aus, um Anfälle einzutragen oder anzuzeigen.",
   "Hast du es vorher gespürt?": "Hat die Person es vorher gespürt?",
@@ -40,8 +49,8 @@ export const caregiverTexts: Readonly<Record<string, string>> = {
   "Mein Profil": "Profil der betreuten Person",
 
   // ─── Einstellungen-Seite ──────────────────────────────────────────────────
-  "Exportieren Sie alle Ihre Daten (Profil, Anfallstagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur persönlichen Sicherung.":
-    "Exportieren Sie alle Daten (Profil, Anfallstagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur Sicherung.",
+  "Exportieren Sie alle Ihre Daten (Profil, Anfallstagebuch, Gedankentagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur persönlichen Sicherung.":
+    "Exportieren Sie alle Daten (Profil, Anfallstagebuch, Gedankentagebuch, Befinden) als PDF-Dokument. Ideal für Arztbesuche oder zur Sicherung.",
   "Regelmässige Erinnerung, Ihr Befinden zu dokumentieren":
     "Regelmässige Erinnerung, das Befinden zu dokumentieren",
 };

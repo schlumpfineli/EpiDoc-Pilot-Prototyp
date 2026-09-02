@@ -115,6 +115,11 @@ function LoginForm() {
               Jetzt registrieren
             </a>
           </p>
+          <p className="text-body-small text-foreground-500">
+            <a href="/datenschutz" className={AUTH_LINK_CLASS_SMALL}>Datenschutz</a>
+            {" · "}
+            <a href="/impressum" className={AUTH_LINK_CLASS_SMALL}>Impressum</a>
+          </p>
         </div>
       </div>
     </div>

@@ -572,6 +572,26 @@ export default function EinstellungenPage() {
       }
       y += 4;
 
+      // ── Gedankentagebuch ──
+      const journalEntries = data.journal_entries ?? [];
+      heading("Gedankentagebuch");
+      if (journalEntries.length === 0) {
+        bodyText("Keine Einträge erfasst.");
+      } else {
+        bodyText(`${journalEntries.length} Einträge`);
+        for (const entry of journalEntries) {
+          checkPage(24);
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(100, 100, 100);
+          pdf.text(fmtDateTime(entry.created_at), M, y);
+          y += 5;
+          bodyText(entry.body);
+          y += 2;
+        }
+      }
+      y += 4;
+
       // ── Befinden als Grafiken ──
       const befinden = data.befinden ?? [];
       heading("Befinden – Symptomverläufe");
@@ -840,7 +860,7 @@ export default function EinstellungenPage() {
 
               <SectionCard icon={<IconCog className="w-5 h-5" />} title="Sicherheit & Konto">
                 <div className="space-y-[var(--spacing-s)]">
-                  <p className="text-[11px] text-foreground-400 leading-relaxed">Deine Angaben bleiben privat und verschlüsselt gespeichert.</p>
+                  <p className="text-[11px] text-foreground-400 leading-relaxed">Deine Angaben bleiben privat und sind nur mit deinem Login zugänglich.</p>
                   <button
                     type="button"
                     onClick={openPasswordModal}
@@ -873,7 +893,7 @@ export default function EinstellungenPage() {
               <SectionCard icon={<IconDownload className="w-5 h-5" />} title="Datenexport">
                 <div className="space-y-[var(--spacing-s)]">
                   <p className="text-body-small text-foreground-500">
-                    Alle Daten (Profil, Tagebuch, Befinden) als PDF exportieren – z. B. für Arztbesuche.
+                    Alle Daten (Profil, Anfallstagebuch, Gedankentagebuch, Befinden) als PDF exportieren – z. B. für Arztbesuche.
                   </p>
                   <button
                     type="button"
@@ -963,9 +983,14 @@ export default function EinstellungenPage() {
                     </div>
                   </div>
                   <div className="text-[11px] text-foreground-500 space-y-1 leading-relaxed">
-                    <p>Deine Daten werden vertraulich behandelt und ausschliesslich für die Funktionalität der App verwendet. Es findet keine Weitergabe an Dritte statt.</p>
-                    <p>Alle Gesundheitsdaten werden verschlüsselt gespeichert und sind nur mit deinem Login zugänglich. Du kannst deine Daten jederzeit exportieren oder dein Konto vollständig löschen.</p>
+                    <p>Deine Daten werden vertraulich behandelt und ausschliesslich für die Funktionalität der App verwendet. Es findet keine Weitergabe an Dritte zu Werbezwecken statt. Hosting erfolgt über Vercel und Railway.</p>
+                    <p>Die Verbindung läuft über HTTPS. Passwörter werden gehasht gespeichert. Gesundheitsdaten sind nur mit deinem Login über die API zugänglich; sie werden in der Datenbank nicht feldweise verschlüsselt. Du kannst deine Daten exportieren oder dein Konto vollständig löschen.</p>
                     <p>Die Datenverarbeitung erfolgt in Übereinstimmung mit dem Schweizer Datenschutzgesetz (DSG) und der DSGVO.</p>
+                    <p>
+                      <a href="/datenschutz" className="text-[#3E7C67] underline underline-offset-2">Vollständige Datenschutzerklärung</a>
+                      {" · "}
+                      <a href="/impressum" className="text-[#3E7C67] underline underline-offset-2">Impressum</a>
+                    </p>
                   </div>
                 </div>
               </SectionCard>
@@ -980,7 +1005,10 @@ export default function EinstellungenPage() {
                     <h3 className="text-[12px] font-medium text-foreground-700 mb-1">Impressum</h3>
                     <div className="text-[11px] text-foreground-500 leading-relaxed">
                       <p>EpiDoc – Digitales Epilepsie-Tagebuch (Prototyp/Pilot)</p>
-                      <p>Kontakt: <span className="text-[#3E7C67]">epidoc@kontakt.ch</span></p>
+                      <p>Kontakt: <a href="mailto:epidoc@kontakt.ch" className="text-[#3E7C67]">epidoc@kontakt.ch</a></p>
+                      <p className="mt-1">
+                        <a href="/impressum" className="text-[#3E7C67] underline underline-offset-2">Vollständiges Impressum</a>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1006,7 +1034,7 @@ export default function EinstellungenPage() {
                   Diese Aktion kann <strong>nicht rückgängig</strong> gemacht werden.
                 </p>
                 <p className="text-[11px] text-foreground-400">
-                  Alle Daten – Profil, Tagebuch, Medikamente und Befinden – werden unwiderruflich gelöscht.
+                  Alle Daten – Profil, Anfallstagebuch, Gedankentagebuch, Medikamente und Befinden – werden unwiderruflich gelöscht.
                 </p>
               </div>
               <div className="space-y-[var(--spacing-xs)]">

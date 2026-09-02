@@ -16,11 +16,7 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_can_register_with_valid_data()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload());
 
         $response->assertStatus(201)
             ->assertJsonStructure([
@@ -44,16 +40,16 @@ class AuthControllerTest extends TestCase
         ]);
 
         $this->assertTrue(Hash::check('Password123', $user->password));
+        $this->assertNotNull($user->privacy_accepted_at);
+        $this->assertNotNull($user->health_data_consent_at);
     }
 
     /** @test */
     public function user_cannot_register_with_invalid_email()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson('/api/register', $this->registerPayload([
             'email' => 'invalid-email',
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -64,11 +60,9 @@ class AuthControllerTest extends TestCase
     {
         User::factory()->create(['email' => 'existing@example.com']);
 
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson('/api/register', $this->registerPayload([
             'email' => 'existing@example.com',
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -77,11 +71,9 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_cannot_register_with_short_password()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
-            'role' => 'patient',
+        $response = $this->postJson('/api/register', $this->registerPayload([
             'password' => 'short',
-        ]);
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['password']);
@@ -90,11 +82,9 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_cannot_register_with_password_without_uppercase()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'password123', // Kein Großbuchstabe
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload([
+            'password' => 'password123',
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['password']);
@@ -103,11 +93,9 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_cannot_register_with_password_without_lowercase()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'PASSWORD123', // Kein Kleinbuchstabe
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload([
+            'password' => 'PASSWORD123',
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['password']);
@@ -116,11 +104,9 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_cannot_register_with_password_without_number()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'Password', // Keine Zahl
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload([
+            'password' => 'Password',
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['password']);
@@ -129,11 +115,7 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_can_register_with_strong_password()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
-            'role' => 'patient',
-            'password' => 'Password123', // Erfüllt alle Anforderungen
-        ]);
+        $response = $this->postJson('/api/register', $this->registerPayload());
 
         $response->assertStatus(201)
             ->assertJsonStructure([
@@ -145,14 +127,34 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function user_cannot_register_with_invalid_role()
     {
-        $response = $this->postJson('/api/register', [
-            'email' => 'test@example.com',
+        $response = $this->postJson('/api/register', $this->registerPayload([
             'role' => 'invalid_role',
-            'password' => 'Password123',
-        ]);
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['role']);
+    }
+
+    /** @test */
+    public function user_cannot_register_without_privacy_consent()
+    {
+        $response = $this->postJson('/api/register', $this->registerPayload([
+            'privacy_accepted' => false,
+        ]));
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['privacy_accepted']);
+    }
+
+    /** @test */
+    public function user_cannot_register_without_health_data_consent()
+    {
+        $response = $this->postJson('/api/register', $this->registerPayload([
+            'health_data_consent' => false,
+        ]));
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['health_data_consent']);
     }
 
     /** @test */
@@ -280,12 +282,10 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function strict_mode_blocks_name_in_registration()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson('/api/register', $this->registerPayload([
             'name' => 'Klara Name',
             'email' => 'strict-register@example.com',
-            'role' => 'patient',
-            'password' => 'Password123',
-        ]);
+        ]));
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name']);

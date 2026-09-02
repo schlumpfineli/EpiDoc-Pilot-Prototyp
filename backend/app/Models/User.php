@@ -31,6 +31,8 @@ class User extends Authenticatable
         'clinics',
         'pharmacies',
         'emergency_contact',
+        'privacy_accepted_at',
+        'health_data_consent_at',
     ];
 
     /**
@@ -58,6 +60,8 @@ class User extends Authenticatable
             'clinics' => 'array',
             'pharmacies' => 'array',
             'emergency_contact' => 'array',
+            'privacy_accepted_at' => 'datetime',
+            'health_data_consent_at' => 'datetime',
         ];
     }
 
@@ -78,11 +82,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's own after-effect/trigger options for the seizure diary.
+     */
+    public function seizureCustomOptions()
+    {
+        return $this->hasMany(SeizureCustomOption::class);
+    }
+
+    /**
      * Get the medications for the user.
      */
     public function medications()
     {
         return $this->hasMany(Medication::class);
+    }
+
+    /**
+     * Get the free-form journal entries for the user.
+     */
+    public function journalEntries()
+    {
+        return $this->hasMany(JournalEntry::class);
     }
 
     /**
