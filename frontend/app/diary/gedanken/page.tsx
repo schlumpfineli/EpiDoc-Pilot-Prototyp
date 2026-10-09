@@ -120,10 +120,14 @@ export default function GedankenTagebuchPage() {
   return (
     <ProtectedRoute>
       <div
-        className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] text-foreground-900"
+        className="min-h-screen pb-20 xl:pb-0 text-foreground-900"
         style={{ background: "#F2F6F4" }}
       >
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)]">
+        <div
+          className="content-shell mx-auto w-full max-w-4xl px-4 py-[var(--spacing-s)] sm:px-6 sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:px-8"
+          style={{ width: "100%", maxWidth: "56rem" }}
+        >
+        <div className="flex flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)]">
           <h1
             className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]"
             style={{ color: "#1E3F34" }}
@@ -144,10 +148,10 @@ export default function GedankenTagebuchPage() {
               onChange={(e) => setDraft(e.target.value.slice(0, MAX_BODY))}
               rows={8}
               placeholder={t("Schreib einfach, was dir durch den Kopf geht.")}
-              className="w-full resize-y rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+              className="w-full resize-y rounded-xl border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
             />
             <div className="mt-3 flex items-center justify-between gap-3">
-              <span className="text-body-small text-[#7A9088]">
+              <span className="text-[13px] text-[#7A9088]">
                 {draft.length}/{MAX_BODY}
               </span>
               <button
@@ -155,8 +159,7 @@ export default function GedankenTagebuchPage() {
                 data-testid="journal-save"
                 onClick={handleCreate}
                 disabled={isSaving || !draft.trim()}
-                className="rounded-2xl px-5 py-3 text-body font-medium text-white transition disabled:opacity-50"
-                style={{ background: "linear-gradient(180deg, #3F7A63 0%, #356B58 100%)" }}
+                className="rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-[#346B59] disabled:opacity-50"
               >
                 {isSaving ? "Speichert…" : "Speichern"}
               </button>
@@ -189,16 +192,16 @@ export default function GedankenTagebuchPage() {
                           value={editDraft}
                           onChange={(e) => setEditDraft(e.target.value.slice(0, MAX_BODY))}
                           rows={6}
-                          className="w-full resize-y rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                          className="w-full resize-y rounded-xl border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                         />
-                        <div className="mt-3 flex gap-2">
+                        <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => {
                               setEditingId(null);
                               setEditDraft("");
                             }}
-                            className="flex-1 rounded-2xl border border-[#9FB8AE] px-4 py-2.5 text-body font-medium text-[#1E3F34]"
+                            className="rounded-full border border-[#DDE7E2] bg-white px-4 py-1.5 text-[13px] font-medium text-[#1E3F34] hover:bg-[#EEF4F1]"
                           >
                             Abbrechen
                           </button>
@@ -206,8 +209,7 @@ export default function GedankenTagebuchPage() {
                             type="button"
                             onClick={handleUpdate}
                             disabled={isUpdating || !editDraft.trim()}
-                            className="flex-1 rounded-2xl px-4 py-2.5 text-body font-medium text-white disabled:opacity-50"
-                            style={{ background: "linear-gradient(180deg, #3F7A63 0%, #356B58 100%)" }}
+                            className="rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white hover:bg-[#346B59] disabled:opacity-50"
                           >
                             {isUpdating ? "Speichert…" : "Speichern"}
                           </button>
@@ -220,7 +222,7 @@ export default function GedankenTagebuchPage() {
                           <button
                             type="button"
                             onClick={() => startEdit(entry)}
-                            className="rounded-xl px-3 py-1.5 text-body-small font-medium text-[#3F5F53] hover:bg-[#EEF4F1]"
+                            className="rounded-full px-3 py-1.5 text-[13px] font-medium text-[#3F5F53] hover:bg-[#EEF4F1]"
                           >
                             Bearbeiten
                           </button>
@@ -228,7 +230,7 @@ export default function GedankenTagebuchPage() {
                             type="button"
                             onClick={() => handleDelete(entry.id)}
                             disabled={deletingId === entry.id}
-                            className="rounded-xl px-3 py-1.5 text-body-small font-medium text-[#C94B4B] hover:bg-[#F8EEEE] disabled:opacity-50"
+                            className="rounded-full px-3 py-1.5 text-[13px] font-medium text-[#C94B4B] hover:bg-[#F8EEEE] disabled:opacity-50"
                           >
                             {deletingId === entry.id ? "Löscht…" : "Löschen"}
                           </button>
@@ -240,6 +242,7 @@ export default function GedankenTagebuchPage() {
               })}
             </ul>
           )}
+        </div>
         </div>
       </div>
     </ProtectedRoute>

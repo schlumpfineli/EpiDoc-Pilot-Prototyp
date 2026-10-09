@@ -194,6 +194,14 @@
     --spacing-3xl: 4rem;      /* 64px */
 
     /*
+     * Ohne eigene --max-width-* würde Tailwind max-w-xl/2xl auf --spacing-xl/2xl
+     * mappen (32px/48px) — dann wird das Tagebuch zu einer Wort-Spalte.
+     */
+    --max-width-xl: 36rem;
+    --max-width-2xl: 42rem;
+    --max-width-3xl: 48rem;
+
+    /*
      * Border Radius Scale
      */
     --radius-sm:   0.5rem;    /*  8px */
@@ -267,6 +275,7 @@
     --motion-normal:   200ms;
     --motion-slow:     300ms;
     --ease-standard:   cubic-bezier(0.4, 0.0, 0.2, 1);
+
 }
 
 /*
@@ -634,6 +643,9 @@ div.react-datepicker__year-option {
 
 .modal-container {
     @apply w-full max-h-[90vh] rounded-2xl bg-white flex flex-col;
+    max-width: 56rem;
+    margin-left: auto;
+    margin-right: auto;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     animation: modal-slide-up var(--motion-slow) var(--ease-standard) both;
 }
@@ -647,3 +659,29 @@ div.react-datepicker__year-option {
     from { opacity: 0; transform: translateY(12px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Gleiche Inhaltsbreite wie Heute/Analyse — auch wenn ältere Bundles noch .content-shell nutzen */
+.content-shell {
+    width: 100%;
+    max-width: 56rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.max-w-xl {
+    max-width: 36rem !important;
+}
+
+.max-w-2xl,
+.sm\:max-w-2xl,
+.md\:max-w-2xl,
+.lg\:max-w-2xl {
+    max-width: 42rem !important;
+}
+
+@media (min-width: 640px) {
+    .sm\:max-w-2xl {
+        max-width: 42rem !important;
+    }
+}
+

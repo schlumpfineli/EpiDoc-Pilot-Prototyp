@@ -13,8 +13,7 @@ export function DiarySwitcher() {
 
   return (
     <div
-      className="flex rounded-2xl p-1"
-      style={{ background: '#FFFFFF' }}
+      className="flex w-fit rounded-full bg-[#E7EEEB] p-[3px]"
       role="tablist"
       aria-label="Tagebuch-Bereich"
     >
@@ -26,11 +25,9 @@ export function DiarySwitcher() {
             href={item.href}
             role="tab"
             aria-selected={active}
-            className="flex-1 rounded-xl py-2 text-center text-body-small font-medium transition"
-            style={{
-              background: active ? '#3F7A63' : 'transparent',
-              color: active ? '#FFFFFF' : '#3F5F53',
-            }}
+            className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition ${
+              active ? "bg-[#3F7A63] text-white" : "bg-transparent text-[#3F5F53] hover:text-[#1E3F34]"
+            }`}
           >
             {item.label}
           </Link>

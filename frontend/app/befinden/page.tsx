@@ -694,7 +694,7 @@ export default function BefindenPage() {
           return (
             <div className="mt-5 space-y-3 border-t border-background-200/40 pt-5">
               <div>
-                <label className="mb-1 block text-body-small text-[#4F6B63]">
+                <label className="mb-1 block text-[15px] font-medium text-[#1E3F34]">
                   Name des Medikaments
                 </label>
                 <input
@@ -704,11 +704,11 @@ export default function BefindenPage() {
                     setMedicationName((prev) => ({ ...prev, [medicationKey]: e.target.value }));
                   }}
                   placeholder="z.B. Lamotrigin"
-                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                  className="w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-body-small text-[#4F6B63]">
+                <label className="mb-1 block text-[15px] font-medium text-[#1E3F34]">
                   Warum? (wenn du möchtest)
                 </label>
                 <input
@@ -718,7 +718,7 @@ export default function BefindenPage() {
                     setMedicationReason((prev) => ({ ...prev, [medicationKey]: e.target.value }));
                   }}
                   placeholder="z.B. Vergessen, Nebenwirkungen"
-                  className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                  className="w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                 />
               </div>
             </div>
@@ -741,7 +741,7 @@ export default function BefindenPage() {
           if (!hasUnsavedChanges) return null;
           
           return (
-            <div className="mt-5 flex flex-col items-center gap-3 border-t border-background-200/40 pt-5">
+            <div className="mt-5 flex flex-col items-end gap-2 border-t border-background-200/40 pt-5">
               <button
                 type="button"
                 onClick={(e) => {
@@ -750,7 +750,7 @@ export default function BefindenPage() {
                   saveChanges(itemId, selectedTimeSlot);
                 }}
                 disabled={isSaving}
-                className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition-colors hover:bg-[#346B59] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-[#346B59] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Speichern
               </button>
@@ -1039,13 +1039,13 @@ export default function BefindenPage() {
                 {/* Eigenes Symptom hinzufügen – Inline-Zeile */}
                 <div className="px-5 py-3.5">
                   {showAddCustomSymptom ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex max-w-sm items-center gap-2">
                       <input ref={newSymptomInputRef} type="text" value={newCustomSymptomName} onChange={(e) => setNewCustomSymptomName(e.target.value)}
                         placeholder="Name eingeben…" autoComplete="off"
-                        className="min-w-0 flex-1 rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+                        className="min-w-0 flex-1 rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddCustomSymptom(); if (e.key === 'Escape') { setNewCustomSymptomName(''); setShowAddCustomSymptom(false); } }}
                       />
-                      <button type="button" onClick={handleAddCustomSymptom} className="rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white hover:bg-[#346B59] transition">Speichern</button>
+                      <button type="button" onClick={handleAddCustomSymptom} className="shrink-0 rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white hover:bg-[#346B59] transition">Speichern</button>
                       <button type="button" onClick={() => { setNewCustomSymptomName(''); setShowAddCustomSymptom(false); }} className="text-[12px] text-[#7A9088] hover:text-[#4F6B63] transition">Abbrechen</button>
                     </div>
                   ) : (

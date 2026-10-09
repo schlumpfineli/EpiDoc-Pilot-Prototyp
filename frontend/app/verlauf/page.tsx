@@ -1165,7 +1165,7 @@ export default function VerlaufPage() {
 
           {/* Zeitbereich-Auswahl */}
           <div className="mb-6">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex w-fit flex-wrap rounded-full bg-[#E7EEEB] p-[3px]">
               {[
                 { id: "7d" as TimeRange, label: "7 Tage" },
                 { id: "30d" as TimeRange, label: "30 Tage" },
@@ -1181,10 +1181,10 @@ export default function VerlaufPage() {
                     key={range.id}
                     type="button"
                     onClick={() => setTimeRange(range.id)}
-                    className={`rounded-full border px-4 py-2 text-body-small font-medium transition-colors ${
+                    className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                       isActive
-                        ? "border-[#3E7C67]/50 bg-[#D6EAE2] text-[#1E3F34]"
-                        : "border-[#DDE7E2] bg-white text-foreground-700 hover:bg-background-25"
+                        ? "bg-[#3F7A63] text-white"
+                        : "bg-transparent text-[#3F5F53] hover:text-[#1E3F34]"
                     }`}
                   >
                     {range.label}
@@ -1195,26 +1195,26 @@ export default function VerlaufPage() {
           </div>
 
           {/* Signal-Auswahl */}
-          <div className="relative z-20 mb-8" ref={signalDropdownRef}>
-            <label className="mb-2 block text-[13px] text-foreground-400">
+          <div className="relative z-20 mb-8 max-w-sm" ref={signalDropdownRef}>
+            <label className="mb-1.5 block text-[15px] font-medium text-[#1E3F34]">
               Was möchtest du mit deinen Anfällen vergleichen?
             </label>
             <button
               type="button"
               onClick={() => setSignalDropdownOpen((prev) => !prev)}
-              className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all duration-150 ${
+              className={`flex w-full items-center justify-between rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-left transition ${
                 signalDropdownOpen
-                  ? "border-[#C9D8D1] bg-[#FFFFFF] shadow-sm ring-1 ring-[#C9D8D1]"
-                  : "border-[#C9D8D1] bg-[#FFFFFF] hover:border-[#B0C4B8]"
+                  ? "border-[#3E7C67] ring-1 ring-[#3E7C67]/20"
+                  : "hover:bg-[#F2F6F4]"
               }`}
             >
-              <span className={selectedSignal ? "text-body text-[#1F3A33]" : "text-body text-[#4E6A60]"}>
+              <span className={`truncate text-[13px] ${selectedSignal ? "text-[#1F352D]" : "text-[#9AADA5]"}`}>
                 {selectedSignal
                   ? availableSignalsInRange.find((s) => s.id === selectedSignal)?.label || "Bitte auswählen"
                   : "Bitte auswählen"}
               </span>
               <svg
-                className={`h-4 w-4 flex-shrink-0 text-[#4E6A60] transition-transform duration-200 ${signalDropdownOpen ? "rotate-180" : ""}`}
+                className={`h-3.5 w-3.5 flex-shrink-0 text-[#7A9088] transition-transform duration-200 ${signalDropdownOpen ? "rotate-180" : ""}`}
                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
@@ -1222,12 +1222,12 @@ export default function VerlaufPage() {
             </button>
 
             {signalDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[#C9D8D1] bg-[#FFFFFF] py-1.5 shadow-md shadow-foreground-900/[0.04] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto rounded-xl border border-[#DDE7E2] bg-white py-1 shadow-md shadow-foreground-900/[0.04] animate-in fade-in slide-in-from-top-1 duration-150">
                 <button
                   type="button"
                   onClick={() => { setSelectedSignal(""); setSignalDropdownOpen(false); }}
-                  className={`flex w-full items-center px-4 py-2.5 text-left text-body transition-colors ${
-                    !selectedSignal ? "bg-[#F3F7F5] text-foreground-700 font-medium" : "text-foreground-500 hover:bg-[#F7FBF9]"
+                  className={`flex w-full items-center px-3 py-1.5 text-left text-[13px] transition-colors ${
+                    !selectedSignal ? "bg-[#F3F7F5] text-[#1E3F34] font-medium" : "text-[#7A9088] hover:bg-[#F7FBF9]"
                   }`}
                 >
                   Auswahl zurücksetzen
@@ -1239,8 +1239,8 @@ export default function VerlaufPage() {
                       key={signal.id}
                       type="button"
                       onClick={() => { setSelectedSignal(signal.id); setSignalDropdownOpen(false); }}
-                      className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-body transition-colors ${
-                        isActive ? "bg-[#D6EAE2]/60 text-[#1E3F34] font-medium" : "text-foreground-800 hover:bg-[#E4F2EC]"
+                      className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-[13px] transition-colors ${
+                        isActive ? "bg-[#D6EAE2]/60 text-[#1E3F34] font-medium" : "text-[#1F352D] hover:bg-[#E4F2EC]"
                       }`}
                     >
                       <span>{signal.label}</span>
@@ -1331,7 +1331,7 @@ export default function VerlaufPage() {
               type="button"
               onClick={handleExportSeizureSummaryPdf}
               disabled={isExportingSeizurePdf}
-              className="rounded-lg border border-[#3F7A63] px-3 py-1.5 text-[12px] font-medium text-[#3F7A63] transition-colors hover:bg-[#E7F1EC] disabled:opacity-50"
+              className="rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] font-medium text-[#4F6B63] transition-colors hover:bg-[#EEF4F1] disabled:opacity-50"
             >
               {isExportingSeizurePdf ? "Exportiere…" : "Anfälle (PDF)"}
             </button>
@@ -1340,7 +1340,7 @@ export default function VerlaufPage() {
                 type="button"
                 onClick={handleExportPdf}
                 disabled={isExportingPdf}
-                className="rounded-lg border border-[#3F7A63] px-3 py-1.5 text-[12px] font-medium text-[#3F7A63] transition-colors hover:bg-[#E7F1EC] disabled:opacity-50"
+                className="rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] font-medium text-[#4F6B63] transition-colors hover:bg-[#EEF4F1] disabled:opacity-50"
               >
                 {isExportingPdf ? "Exportiere…" : "Verlaufskurven (PDF)"}
               </button>

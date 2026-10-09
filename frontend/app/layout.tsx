@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "./page-width.css";
 import { Navbar } from "@/components/Navbar";
 import { ToastContainer } from "@/components/ui";
 import { ErrorBoundaryWrapper } from "@/components/ErrorBoundaryWrapper";

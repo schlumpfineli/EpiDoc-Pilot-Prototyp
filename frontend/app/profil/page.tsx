@@ -34,11 +34,11 @@ const pilotEnableProfilePage = process.env.NEXT_PUBLIC_PILOT_ENABLE_PROFILE_PAGE
 
 const CSS = {
   input:
-    "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 transition",
+    "w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 transition",
   btnCancel:
-    "rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
+    "rounded-full border border-[#DDE7E2] bg-white px-4 py-1.5 text-[13px] font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
   btnSave:
-    "flex-1 rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed",
+    "rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed",
   btnEdit:
     "px-[var(--spacing-s)] py-[var(--spacing-2xs)] text-body-small font-medium text-foreground-500 hover:text-foreground-700 hover:bg-background-100 rounded-xl transition",
   btnAddDashed:
@@ -297,12 +297,12 @@ function InlineModal({ title, onClose, children }: { title: string; onClose: () 
       <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-lg border border-background-200/60 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
           <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-s)] py-[var(--spacing-s)] z-10">
-            <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
+            <h2 className="text-h4 font-semibold text-[#1E3F34] truncate">{title}</h2>
             <button type="button" onClick={onClose} className={CSS.btnClose} aria-label="Schließen">
               <CloseIcon />
             </button>
           </div>
-          <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">{children}</div>
+          <div className="p-[var(--spacing-s)] space-y-[var(--spacing-xl)]">{children}</div>
         </div>
       </div>
     </div>
@@ -318,9 +318,9 @@ function FormField({ label, type = "text", value, onChange, placeholder, optiona
   optional?: boolean;
 }) {
   return (
-    <div className="space-y-1">
-      <label className="text-[12px] font-medium text-[#2E4A3F]">
-        {label}{optional ? <span className="text-foreground-300 font-normal ml-1">(optional)</span> : <span className="text-foreground-300 ml-0.5">*</span>}
+    <div className="space-y-[var(--spacing-xs)]">
+      <label className="text-[15px] font-medium text-[#1E3F34]">
+        {label}{optional ? <span className="text-[12px] font-normal text-[#9AADA5] ml-1">optional</span> : <span className="text-[12px] font-normal text-[#9AADA5] ml-1">Pflicht</span>}
       </label>
       <input
         type={type}
@@ -335,11 +335,11 @@ function FormField({ label, type = "text", value, onChange, placeholder, optiona
 
 function ModalActions({ onCancel, onSave, isSaving }: { onCancel: () => void; onSave: () => void; isSaving: boolean }) {
   return (
-    <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-s)]">
-      <button type="button" onClick={onSave} disabled={isSaving} className={`${CSS.btnSave} w-full`}>
+    <div className="flex flex-wrap items-center justify-end gap-2 pt-[var(--spacing-s)]">
+      <button type="button" onClick={onCancel} className={CSS.btnCancel}>Abbrechen</button>
+      <button type="button" onClick={onSave} disabled={isSaving} className={CSS.btnSave}>
         {isSaving ? "Speichert..." : "Speichern"}
       </button>
-      <button type="button" onClick={onCancel} className={`${CSS.btnCancel} w-full text-center`}>Abbrechen</button>
     </div>
   );
 }
@@ -504,7 +504,7 @@ export default function ProfilPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F2F6F4" }}>
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-xs)]">
             <div className="relative py-[var(--spacing-s)] sm:py-[var(--spacing-m)]">

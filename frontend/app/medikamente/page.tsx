@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { medicationApi, Medication } from "@/lib/api";
 import { toastService } from "@/components/ui";
+import { FORM_REVISION } from "@/lib/form-revision";
+import "./form-ui.css";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -40,22 +42,23 @@ const S = {
   cardShadow: "0 4px 12px rgba(38, 70, 60, 0.06)",
   title: "#1E3F34",
   input:
-    "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20",
-  label: "block text-body-small font-medium text-[#2E4A3F] mb-[var(--spacing-2xs)]",
+    "rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20",
+  textarea:
+    "w-full max-w-sm rounded-xl border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none",
+  label: "block text-[15px] font-medium text-[#1E3F34]",
   btnPrimary:
-    "flex-1 rounded-2xl px-5 py-3.5 text-body font-medium text-white transition disabled:opacity-50",
-  btnPrimaryGradient: "linear-gradient(180deg, #3F7A63 0%, #356B58 100%)",
+    "rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-[#346B59] disabled:opacity-50",
   btnSecondary:
-    "flex-1 rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
+    "rounded-full border border-[#DDE7E2] bg-white px-4 py-1.5 text-[13px] font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
   iconBtn:
     "flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition",
   closeBtn:
     "flex h-8 w-8 items-center justify-center rounded-lg text-foreground-400 transition hover:bg-background-100 hover:text-foreground-700",
   tabActive: "bg-[#3F7A63] text-white",
   tabInactive: "bg-transparent text-[#3F5F53] hover:text-[#1E3F34]",
-  chipActive: "bg-[#B7D9C8] border border-[#9FC5B2] text-[#1E3F34] font-semibold",
+  chipActive: "bg-[#3E7C67] text-white",
   chipInactive:
-    "bg-[#EEF4F1] border border-transparent text-[#7A9088] font-medium hover:bg-[#E4F2EC] hover:text-[#4F6B63]",
+    "border border-[#DDE7E2] bg-white text-[#4F6B63] hover:bg-[#F2F6F4]",
 } as const;
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -94,9 +97,9 @@ const ReactivateIcon = () => (
 
 function ModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
-    <div className="flex items-center justify-between mb-[var(--spacing-m)]">
-      <h2 className="text-body font-medium" style={{ color: S.title }}>{title}</h2>
-      <button onClick={onClose} className={S.closeBtn} aria-label="Schliessen"><CloseIcon /></button>
+    <div className="sticky top-0 z-10 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
+      <h2 className="text-h4 font-semibold text-[#1E3F34] flex-1 min-w-0">{title}</h2>
+      <button type="button" onClick={onClose} className={S.closeBtn} aria-label="Schliessen"><CloseIcon /></button>
     </div>
   );
 }
@@ -112,20 +115,19 @@ function ModalActions({ onCancel, onConfirm, confirmLabel, confirmingLabel, isSa
 }) {
   const variantClass =
     variant === "danger"
-      ? "flex-1 rounded-2xl bg-warning-500 px-5 py-3.5 text-body font-medium text-white transition hover:bg-warning-600 disabled:opacity-50"
+      ? "rounded-full bg-warning-500 px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-warning-600 disabled:opacity-50"
       : variant === "info"
-        ? "flex-1 rounded-2xl bg-info-500 px-5 py-3.5 text-body font-medium text-white transition hover:bg-info-600 disabled:opacity-50"
+        ? "rounded-full bg-info-500 px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-info-600 disabled:opacity-50"
         : S.btnPrimary;
 
   return (
-    <div className="flex gap-[var(--spacing-m)] pt-[var(--spacing-s)]">
-      <button type="button" onClick={onCancel} className={S.btnSecondary}>Abbrechen</button>
+    <div className="flex flex-wrap items-center justify-end gap-2 pt-[var(--spacing-s)] border-t border-background-200/40">
+      <button type="button" onClick={onCancel} className={`med-form-btn med-form-btn-cancel ${S.btnSecondary}`}>Abbrechen</button>
       <button
         type="button"
         onClick={onConfirm}
         disabled={isSaving || disabled}
-        className={variantClass}
-        style={variant === "primary" ? { background: S.btnPrimaryGradient } : undefined}
+        className={`med-form-btn med-form-btn-save ${variantClass}`}
       >
         {isSaving ? confirmingLabel : confirmLabel}
       </button>
@@ -138,7 +140,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-xl py-[var(--spacing-2xs)] text-body-small font-medium transition ${active ? S.tabActive : S.tabInactive}`}
+      className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition ${active ? S.tabActive : S.tabInactive}`}
     >
       {children}
     </button>
@@ -147,9 +149,9 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div>
+    <div className="space-y-[var(--spacing-xs)]">
       <label className={S.label}>
-        {label}{required && <span className="text-[#4F6B63]"> *</span>}
+        {label}{required && <span className="text-[12px] font-normal text-[#9AADA5]"> Pflicht</span>}
       </label>
       {children}
     </div>
@@ -355,11 +357,12 @@ export default function MedikamentePage() {
 
   return (
     <ProtectedRoute>
+      <div data-form-revision={FORM_REVISION} className="contents">
       <div
         className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900"
         style={{ background: S.page }}
       >
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-[var(--spacing-s)] sm:gap-[var(--spacing-m)] md:gap-[var(--spacing-l)] lg:gap-[var(--spacing-xl)]">
 
           {/* Header */}
           <div className="space-y-[var(--spacing-s)]">
@@ -370,7 +373,7 @@ export default function MedikamentePage() {
               Medikamente
             </h1>
 
-            <div className="flex rounded-2xl bg-[#E7EEEB] p-[3px]">
+            <div className="flex w-fit rounded-full bg-[#E7EEEB] p-[3px]">
               <TabButton active={tab === "active"} onClick={() => setTab("active")}>Aktuell</TabButton>
               <TabButton active={tab === "inactive"} onClick={() => setTab("inactive")}>Abgesetzt</TabButton>
             </div>
@@ -396,17 +399,17 @@ export default function MedikamentePage() {
                     <div key={med.id} className="px-[var(--spacing-m)] py-[var(--spacing-s)] first:rounded-t-2xl last:rounded-b-2xl transition hover:bg-background-50/50">
                       <div className="flex items-start justify-between gap-[var(--spacing-s)]">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-body font-medium text-foreground-900">
+                          <h3 className="text-[15px] font-medium text-[#1E3F34]">
                             {med.name}
-                            {med.dose && <span className="font-normal text-foreground-500 ml-[var(--spacing-2xs)]">{med.dose}</span>}
+                            {med.dose && <span className="ml-1.5 font-normal text-[#7A9088]">{med.dose}</span>}
                           </h3>
-                          <div className="mt-[var(--spacing-3xs)] flex flex-wrap items-center gap-x-[var(--spacing-s)] gap-y-[var(--spacing-3xs)]">
-                            <span className="text-body-small text-foreground-500">{formatTimeOfDay(med.time_of_day)}</span>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <span className="text-[12px] text-[#9AADA5]">{formatTimeOfDay(med.time_of_day)}</span>
                             {med.prescribed_since && (
-                              <span className="text-body-small text-foreground-400">seit {new Date(med.prescribed_since).toLocaleDateString("de-CH")}</span>
+                              <span className="text-[12px] text-[#9AADA5]">seit {new Date(med.prescribed_since).toLocaleDateString("de-CH")}</span>
                             )}
                           </div>
-                          {med.notes && <p className="text-body-small text-foreground-400 mt-[var(--spacing-3xs)]">{med.notes}</p>}
+                          {med.notes && <p className="mt-0.5 text-[12px] text-[#9AADA5]">{med.notes}</p>}
                         </div>
                         <div className="flex items-center gap-[var(--spacing-2xs)] shrink-0">
                           <button type="button" onClick={() => openEditForm(med)} className={`${S.iconBtn} hover:text-[#346B59] hover:bg-[#D6EAE2]`} aria-label="Bearbeiten" title="Bearbeiten">
@@ -437,20 +440,20 @@ export default function MedikamentePage() {
                     <div key={med.id} className="px-[var(--spacing-m)] py-[var(--spacing-s)] first:rounded-t-2xl last:rounded-b-2xl">
                       <div className="flex items-start justify-between gap-[var(--spacing-s)]">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-body font-medium text-foreground-700">
+                          <h3 className="text-[15px] font-medium text-[#1E3F34]">
                             {med.name}
-                            {med.dose && <span className="font-normal text-foreground-400 ml-[var(--spacing-2xs)]">{med.dose}</span>}
+                            {med.dose && <span className="ml-1.5 font-normal text-[#7A9088]">{med.dose}</span>}
                           </h3>
-                          <div className="mt-[var(--spacing-3xs)] flex flex-wrap items-center gap-x-[var(--spacing-s)] gap-y-[var(--spacing-3xs)]">
-                            {formatDateRange(med) && <span className="text-body-small text-foreground-500">{formatDateRange(med)}</span>}
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                            {formatDateRange(med) && <span className="text-[12px] text-[#9AADA5]">{formatDateRange(med)}</span>}
                             {med.time_of_day && med.time_of_day.length > 0 && (
-                              <span className="text-body-small text-foreground-400">{formatTimeOfDay(med.time_of_day)}</span>
+                              <span className="text-[12px] text-[#9AADA5]">{formatTimeOfDay(med.time_of_day)}</span>
                             )}
                           </div>
                           {med.discontinuation_reason && (
-                            <p className="text-body-small text-foreground-400 mt-[var(--spacing-3xs)]">Grund: {med.discontinuation_reason}</p>
+                            <p className="mt-0.5 text-[12px] text-[#9AADA5]">Grund: {med.discontinuation_reason}</p>
                           )}
-                          {med.notes && <p className="text-body-small text-foreground-400 mt-[var(--spacing-3xs)]">{med.notes}</p>}
+                          {med.notes && <p className="mt-0.5 text-[12px] text-[#9AADA5]">{med.notes}</p>}
                         </div>
                         <div className="flex items-center gap-[var(--spacing-2xs)] shrink-0">
                           <button type="button" onClick={() => handleReactivate(med.id)} disabled={isSaving} className={`${S.iconBtn} hover:text-[#346B59] hover:bg-[#D6EAE2] disabled:opacity-50`} aria-label="Reaktivieren" title="Reaktivieren">
@@ -472,48 +475,45 @@ export default function MedikamentePage() {
         {/* ── Form Modal ── */}
         {showForm && (
           <div className="modal-overlay">
-            <div className="modal-container max-w-md px-[var(--spacing-l)] py-[var(--spacing-m)] overflow-y-auto">
+            <div className="modal-container overflow-hidden" style={{ width: "100%", maxWidth: "56rem" }}>
+              <div className="overflow-y-auto flex-1">
               <ModalHeader
                 title={editingId ? "Medikament bearbeiten" : "Neues Medikament"}
                 onClose={closeForm}
               />
 
-              <div className="space-y-[var(--spacing-m)]">
-                <div className="flex gap-[var(--spacing-s)]">
-                  <div className="flex-[2]">
-                    <FormField label="Medikament" required>
-                      <input
-                        type="text"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        placeholder="z.B. Levetiracetam"
-                        className={S.input}
-                      />
-                      {!form.name.trim() && <p className="mt-1 text-[12px] text-[#4E6A60]">Dieses Feld ist erforderlich.</p>}
-                    </FormField>
-                  </div>
-                  <div className="flex-1">
-                    <FormField label="Dosierung">
-                      <input
-                        type="text"
-                        value={form.dose}
-                        onChange={(e) => setForm({ ...form, dose: e.target.value })}
-                        placeholder="500mg"
-                        className={S.input}
-                      />
-                    </FormField>
-                  </div>
+              <div className="px-[var(--spacing-m)] py-[var(--spacing-m)] space-y-[var(--spacing-xl)]">
+                <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
+                  <FormField label="Medikament" required>
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="z.B. Levetiracetam"
+                      className={`med-form-input ${S.input} w-[16rem] max-w-full`}
+                    />
+                    {!form.name.trim() && <p className="mt-1 text-[12px] text-[#9AADA5]">Dieses Feld ist erforderlich.</p>}
+                  </FormField>
+                  <FormField label="Dosierung">
+                    <input
+                      type="text"
+                      value={form.dose}
+                      onChange={(e) => setForm({ ...form, dose: e.target.value })}
+                      placeholder="500mg"
+                      className={`med-form-input ${S.input} w-[6.5rem]`}
+                    />
+                  </FormField>
                 </div>
 
                 <FormField label="Einnahmezeit">
-                  <div className="flex flex-wrap gap-[var(--spacing-2xs)]">
+                  <div className="flex flex-wrap gap-2">
                     {TIME_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => toggleTimeOfDay(opt.value)}
-                        className={`rounded-full px-[var(--spacing-xs)] py-[var(--spacing-3xs)] text-body-small transition ${
-                          form.time_of_day.includes(opt.value) ? S.chipActive : S.chipInactive
+                        className={`med-form-chip ${
+                          form.time_of_day.includes(opt.value) ? "is-on" : ""
                         }`}
                       >
                         {opt.label}
@@ -527,7 +527,7 @@ export default function MedikamentePage() {
                     type="date"
                     value={form.prescribed_since}
                     onChange={(e) => setForm({ ...form, prescribed_since: e.target.value })}
-                    className={S.input}
+                    className={`med-form-input ${S.input} w-[11rem]`}
                   />
                 </FormField>
 
@@ -537,7 +537,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={3}
                     placeholder="Optionale Notizen..."
-                    className={`${S.input} resize-none`}
+                    className={`med-form-textarea ${S.textarea}`}
                   />
                 </FormField>
 
@@ -549,6 +549,7 @@ export default function MedikamentePage() {
                   isSaving={isSaving}
                 />
               </div>
+              </div>
             </div>
           </div>
         )}
@@ -556,13 +557,14 @@ export default function MedikamentePage() {
         {/* ── Discontinue Modal ── */}
         {showDiscontinueModal !== null && (
           <div className="modal-overlay">
-            <div className="modal-container max-w-md p-[var(--spacing-m)]">
+            <div className="modal-container overflow-hidden" style={{ width: "100%", maxWidth: "56rem" }}>
+              <div className="overflow-y-auto flex-1">
               <ModalHeader
                 title="Medikament absetzen"
                 onClose={() => { setShowDiscontinueModal(null); setDiscontinuationReason(""); }}
               />
-              <div className="space-y-[var(--spacing-m)]">
-                <p className="text-body text-foreground-700">
+              <div className="px-[var(--spacing-m)] py-[var(--spacing-m)] space-y-[var(--spacing-xl)]">
+                <p className="text-[15px] text-[#1F352D]">
                   Möchten Sie dieses Medikament als abgesetzt markieren?
                 </p>
                 <FormField label="Grund für die Absetzung (optional)">
@@ -571,7 +573,7 @@ export default function MedikamentePage() {
                     onChange={(e) => setDiscontinuationReason(e.target.value)}
                     rows={3}
                     placeholder="z.B. Nebenwirkungen, Umstellung..."
-                    className={`${S.input} resize-none`}
+                    className={`med-form-textarea ${S.textarea}`}
                   />
                 </FormField>
                 <ModalActions
@@ -583,6 +585,7 @@ export default function MedikamentePage() {
                   variant="info"
                 />
               </div>
+              </div>
             </div>
           </div>
         )}
@@ -590,13 +593,14 @@ export default function MedikamentePage() {
         {/* ── Delete Confirmation Modal ── */}
         {showDeleteConfirm !== null && (
           <div className="modal-overlay">
-            <div className="modal-container max-w-md p-[var(--spacing-m)]">
+            <div className="modal-container overflow-hidden" style={{ width: "100%", maxWidth: "56rem" }}>
+              <div className="overflow-y-auto flex-1">
               <ModalHeader
                 title="Medikament löschen"
                 onClose={() => setShowDeleteConfirm(null)}
               />
-              <div className="space-y-[var(--spacing-m)]">
-                <p className="text-body text-foreground-700">
+              <div className="px-[var(--spacing-m)] py-[var(--spacing-m)] space-y-[var(--spacing-xl)]">
+                <p className="text-[15px] text-[#1F352D]">
                   Möchten Sie dieses Medikament endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.
                 </p>
                 <ModalActions
@@ -608,9 +612,11 @@ export default function MedikamentePage() {
                   variant="danger"
                 />
               </div>
+              </div>
             </div>
           </div>
         )}
+      </div>
       </div>
     </ProtectedRoute>
   );

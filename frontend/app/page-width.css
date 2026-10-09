@@ -1,0 +1,36 @@
+/* Eigene Datei, damit der Browser nicht die alte, gecachte globals.css behält.
+   max-w-2xl wurde sonst auf --spacing-2xl (48px) gemappt. */
+.max-w-xl {
+  max-width: 36rem !important;
+}
+
+.max-w-2xl,
+.sm\:max-w-2xl,
+.md\:max-w-2xl,
+.lg\:max-w-2xl {
+  max-width: 56rem !important;
+}
+
+@media (min-width: 640px) {
+  .sm\:max-w-2xl {
+    max-width: 56rem !important;
+  }
+}
+
+.content-shell {
+  width: 100%;
+  max-width: 56rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 56rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-container.max-w-md {
+  max-width: 28rem;
+}

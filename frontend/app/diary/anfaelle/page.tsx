@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -18,12 +18,14 @@ import { DiarySwitcher } from "@/components/DiarySwitcher";
 import {
   seizureApi,
   seizureOptionApi,
+  journalApi,
   SeizureCustomOption,
   SeizureCustomOptionKind,
   SeizureCustomOptions,
 } from "@/lib/api";
 import { toastService } from "@/components/ui";
 import { useRoleText } from "@/lib/hooks/useRoleText";
+import { FORM_REVISION } from "@/lib/form-revision";
 
 type DiaryEntry = {
   hasSeizure: boolean;
@@ -191,9 +193,10 @@ function roundMinuteToFive(min: string): string {
   return String(clamped).padStart(2, "0");
 }
 
-const SCROLL_ITEM_HEIGHT = 2; // rem, feste Höhe pro Eintrag für Scroll-Berechnung
+const SCROLL_ITEM_HEIGHT = 2.25; // rem, feste Höhe pro Eintrag für Scroll-Berechnung
+const VISIBLE_TIME_OPTIONS = 5;
 
-/** Scroll-Dropdown: zeigt nur 3 Einträge, Rest beim Scrollen sichtbar. Mittlere Zeile volle Deckkraft, Nachbarn heller. */
+/** Scroll-Dropdown: mindestens 4 Zahlen sichtbar, Rest beim Scrollen. */
 function ScrollTimeSelect({
   options,
   value,
@@ -251,17 +254,17 @@ function ScrollTimeSelect({
   };
 
   return (
-    <div ref={containerRef} className={`relative flex-1 min-w-0 ${className}`}>
+    <div ref={containerRef} className={`relative min-w-0 ${className}`}>
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
-        className={`w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] text-left focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 cursor-pointer flex items-center justify-between ${isOpen ? "border-[#3E7C67] ring-1 ring-[#3E7C67]/20" : ""}`}
+        className={`w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] text-left focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 cursor-pointer flex items-center justify-between ${isOpen ? "border-[#3E7C67] ring-1 ring-[#3E7C67]/20 text-[#1E3F34]" : ""}`}
       >
         <span>{value}</span>
-        <svg className={`h-4 w-4 text-foreground-500 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className={`h-3.5 w-3.5 text-[#9AADA5] shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -271,18 +274,19 @@ function ScrollTimeSelect({
           role="listbox"
           aria-label={ariaLabel}
           onScroll={handleScroll}
-          className="absolute left-0 right-0 top-full z-10 mt-1 overflow-y-auto rounded-lg border border-background-200 bg-white shadow-lg [scrollbar-width:thin]"
-          style={{ maxHeight: "4.5rem" }}
+          className="relative z-20 mt-1 overflow-y-auto rounded-lg border border-background-200 bg-white shadow-lg [scrollbar-width:thin]"
+          style={{ height: `${VISIBLE_TIME_OPTIONS * SCROLL_ITEM_HEIGHT}rem` }}
         >
           {options.map((opt, i) => {
             const distanceFromCenter = Math.abs(i - centerIndex);
-            const opacity = distanceFromCenter === 0 ? 1 : distanceFromCenter === 1 ? 0.7 : 0.45;
+            const opacity =
+              distanceFromCenter === 0 ? 1 : distanceFromCenter === 1 ? 0.82 : distanceFromCenter === 2 ? 0.62 : 0.42;
             return (
               <li
                 key={opt}
                 role="option"
                 aria-selected={opt === value}
-                className="h-8 flex items-center"
+                className="h-9 flex items-center"
                 style={{ opacity }}
               >
                 <button
@@ -291,7 +295,7 @@ function ScrollTimeSelect({
                     onChange(opt);
                     setIsOpen(false);
                   }}
-                  className={`w-full h-full px-[var(--spacing-s)] text-body text-left hover:bg-primary-50 focus:bg-primary-50 focus:outline-none transition-opacity ${opt === value ? "bg-primary-100 font-medium text-primary-800" : "text-foreground-800"}`}
+                  className={`w-full h-full px-3 text-[13px] text-left hover:bg-primary-50 focus:bg-primary-50 focus:outline-none transition-opacity ${opt === value ? "bg-primary-100 font-medium text-primary-800" : "text-[#4F6B63]"}`}
                 >
                   {opt}
                 </button>
@@ -304,10 +308,150 @@ function ScrollTimeSelect({
   );
 }
 
+function FormSection({
+  title,
+  children,
+}: {
+  title?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-[var(--spacing-m)]">
+      {title ? (
+        <h3 className="text-[13px] font-medium tracking-wide text-[#7A9088]">{title}</h3>
+      ) : null}
+      <div className="space-y-[var(--spacing-xl)]">{children}</div>
+    </section>
+  );
+}
+
+function FormFieldLabel({
+  children,
+  hint,
+}: {
+  children: ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+      <span className="text-[15px] font-medium text-[#1E3F34]">{children}</span>
+      {hint ? <span className="text-[12px] font-normal text-[#9AADA5]">{hint}</span> : null}
+    </div>
+  );
+}
+
+function CustomOptionAdder({
+  onAdd,
+  placeholder,
+}: {
+  onAdd: (raw: string) => Promise<void>;
+  placeholder: string;
+}) {
+  const [value, setValue] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    const raw = value.trim();
+    if (!raw || busy) return;
+    setBusy(true);
+    try {
+      await onAdd(raw);
+      setValue("");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex max-w-sm items-center gap-2">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            void submit();
+          }
+        }}
+        placeholder={placeholder}
+        className="min-w-0 flex-1 rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
+      />
+      <button
+        type="button"
+        onClick={() => void submit()}
+        disabled={busy || value.trim() === ""}
+        className="shrink-0 rounded-full border border-[#DDE7E2] px-3 py-1.5 text-[13px] font-medium text-[#4F6B63] transition hover:bg-[#EEF4F1] disabled:opacity-40"
+      >
+        Hinzufügen
+      </button>
+    </div>
+  );
+}
+
+function ChoiceChips({
+  options,
+  selected,
+  onToggle,
+  customLabels = [],
+  onRemoveCustom,
+}: {
+  options: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+  customLabels?: string[];
+  onRemoveCustom?: (value: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2" role="group">
+      {options.map((option) => {
+        const isOn = selected.includes(option);
+        const isCustom = customLabels.includes(option);
+        return (
+          <div
+            key={option}
+            className={`inline-flex max-w-full items-center rounded-full ${
+              isOn
+                ? "bg-[#3E7C67] text-white"
+                : "border border-[#DDE7E2] bg-white text-[#1F352D]"
+            }`}
+          >
+            <button
+              type="button"
+              aria-pressed={isOn}
+              onClick={() => onToggle(option)}
+              className={`max-w-full truncate px-3 py-1.5 text-left text-[13px] leading-snug transition ${
+                isOn ? "text-white" : "text-[#4F6B63] hover:bg-[#F2F6F4]"
+              } ${isCustom ? "pr-1" : ""}`}
+            >
+              {option}
+            </button>
+            {isCustom && onRemoveCustom ? (
+              <button
+                type="button"
+                onClick={() => onRemoveCustom(option)}
+                className={`mr-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                  isOn ? "text-white/80 hover:bg-white/15" : "text-[#6B7C74] hover:bg-[#EEF4F1]"
+                }`}
+                aria-label={`${option} entfernen`}
+              >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DiaryPage() {
   const { t } = useRoleText();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [entries, setEntries] = useState<Record<string, DiaryEntry>>({});
+  const [journalDays, setJournalDays] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -348,18 +492,19 @@ export default function DiaryPage() {
       return next;
     };
 
-    seizureOptionApi
-      .getAll()
-      .then(async (response) => {
+    void (async () => {
+      try {
+        if (typeof seizureOptionApi?.getAll !== "function") return;
+        const response = await seizureOptionApi.getAll();
         if (cancelled) return;
         const merged = await migrateLegacyOptions(response.data);
         if (cancelled) return;
         setCustomOptions(merged);
         cacheCustomOptions(merged);
-      })
-      .catch(() => {
+      } catch {
         // Ohne Verbindung bleibt der Cache sichtbar
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
@@ -417,6 +562,43 @@ export default function DiaryPage() {
     }
   };
 
+  const addCustomOptionToList = async (kind: SeizureCustomOptionKind, raw: string) => {
+    const existing = kind === "after_effect" ? customOptions.after_effects : customOptions.triggers;
+    const builtIn = kind === "after_effect" ? afterEffectsOptions : triggerOptions;
+    const labels = newCustomLabels(raw, existing, builtIn);
+    const toSelect = labels.length > 0 ? labels : splitCustomEntries(raw);
+
+    if (labels.length > 0) {
+      try {
+        const response = await seizureOptionApi.add({ kind, labels });
+        applyCustomOptions(response.data);
+      } catch (error: any) {
+        toastService.show(
+          error?.message || "Angabe konnte nicht zur Liste hinzugefügt werden",
+          "error"
+        );
+        return;
+      }
+    }
+
+    setFormData((prev) => {
+      const current = kind === "after_effect" ? prev.afterEffects : prev.triggers;
+      const merged = [...current];
+      for (const label of toSelect) {
+        const match =
+          [...existing.map((option) => option.label), ...builtIn].find(
+            (item) => item.toLowerCase() === label.toLowerCase()
+          ) ?? label;
+        if (!merged.some((item) => item.toLowerCase() === match.toLowerCase())) {
+          merged.push(match);
+        }
+      }
+      return kind === "after_effect"
+        ? { ...prev, afterEffects: merged }
+        : { ...prev, triggers: merged };
+    });
+  };
+
   const handleRemoveCustomOption = async (kind: SeizureCustomOptionKind, label: string) => {
     const list = kind === "after_effect" ? customOptions.after_effects : customOptions.triggers;
     const option = list.find((entry) => entry.label === label);
@@ -443,7 +625,20 @@ export default function DiaryPage() {
   const loadSeizureData = async () => {
     try {
       setIsLoading(true);
-      const response = await seizureApi.getAll();
+      if (typeof seizureApi?.getAll !== "function") {
+        setIsLoading(false);
+        return;
+      }
+      const [response, journalResponse] = await Promise.all([
+        seizureApi.getAll(),
+        journalApi.getAll().catch(() => ({ data: [] as { created_at: string }[] })),
+      ]);
+      const journalDates = new Set<string>();
+      for (const item of journalResponse.data ?? []) {
+        if (!item?.created_at) continue;
+        journalDates.add(format(parseISO(item.created_at), "yyyy-MM-dd"));
+      }
+      setJournalDays(journalDates);
       
       // Konvertiere Backend-Daten in das lokale Format
       const loadedEntries: Record<string, DiaryEntry> = {};
@@ -580,9 +775,6 @@ export default function DiaryPage() {
   }, [entries]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
-  const [isAfterEffectsModalOpen, setIsAfterEffectsModalOpen] = useState(false);
-  const [isTriggersModalOpen, setIsTriggersModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [viewingDate, setViewingDate] = useState<Date | null>(null); // Datum, dessen Details angezeigt werden
   const [editingSeizureIndex, setEditingSeizureIndex] = useState<number | null>(null); // Index des zu bearbeitenden Anfalls
@@ -997,8 +1189,8 @@ export default function DiaryPage() {
       setTypeError(t("Bitte wähle einen Anfallstyp aus der Liste oder gib einen eigenen Typ ein."));
       setTimeout(() => {
         typeFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-        const firstInput = typeFieldRef.current?.querySelector("input");
-        firstInput?.focus();
+        const firstChoice = typeFieldRef.current?.querySelector("button");
+        firstChoice?.focus();
       }, 100);
       return;
     }
@@ -1157,6 +1349,7 @@ export default function DiaryPage() {
   };
 
   const handleTypeChange = (value: string) => {
+    setTypeError("");
     setFormData((prev) => ({
       ...prev,
       type: prev.type.includes(value)
@@ -1179,8 +1372,12 @@ export default function DiaryPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-s)] sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:py-[var(--spacing-xl)] text-foreground-900" style={{ background: "#F2F6F4" }}>
-      <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-4xl flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
+      <div data-form-revision={FORM_REVISION} className="min-h-screen pb-20 xl:pb-0 text-foreground-900" style={{ background: "#F2F6F4" }}>
+      <div
+        className="content-shell mx-auto w-full max-w-4xl px-4 py-[var(--spacing-s)] sm:px-6 sm:py-[var(--spacing-m)] md:py-[var(--spacing-l)] lg:px-8 lg:py-[var(--spacing-xl)]"
+        style={{ width: "100%", maxWidth: "56rem" }}
+      >
+      <div className="flex flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
         <div>
           <h1 className="text-h4 sm:text-h3 font-semibold leading-tight tracking-tight text-center pt-[var(--spacing-s)] pb-[var(--spacing-2xs)]" style={{ color: "#1E3F34" }}>
             Anfallstagebuch
@@ -1196,15 +1393,15 @@ export default function DiaryPage() {
             ref={monthNavRef}
             type="button"
             onClick={handleMonthNavClick}
-            className="flex w-full items-center justify-between rounded-full bg-white border border-background-200/60 px-[var(--spacing-xs)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-xs)] transition-all duration-200 hover:border-primary-300 hover:shadow-[0_1px_3px_rgba(0,0,0,0.04)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary-200"
+            className="flex w-fit max-w-full items-center gap-1 rounded-full bg-[#E7EEEB] px-1 py-[3px] transition hover:bg-[#DDE7E2] focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary-200"
             aria-label="Monat wechseln: links vorheriger, Mitte aktueller Monat, rechts nächster"
           >
             <span
               aria-hidden
-              className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full text-foreground-400 hover:text-foreground-700 transition-colors"
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[#7A9088] hover:text-[#1E3F34] transition-colors"
             >
               <svg
-                className="h-4 w-4 sm:h-5 sm:w-5"
+                className="h-3.5 w-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1213,17 +1410,17 @@ export default function DiaryPage() {
               </svg>
             </span>
             <span
-              className="min-w-0 flex-1 text-center text-body sm:text-h5 font-medium text-foreground-900"
+              className="min-w-[9rem] px-2 text-center text-[13px] font-medium text-[#1E3F34]"
               aria-hidden
             >
               {format(currentDate, "MMMM yyyy", { locale: de })}
             </span>
             <span
-              className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full text-foreground-400 hover:text-foreground-700 transition-colors"
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[#7A9088] hover:text-[#1E3F34] transition-colors"
               aria-hidden
             >
               <svg
-                className="h-4 w-4 sm:h-5 sm:w-5"
+                className="h-3.5 w-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1262,6 +1459,7 @@ export default function DiaryPage() {
               const isCurrentDay = isToday(day);
               const hasSeizure = entry?.hasSeizure;
               const hasEmergency = entry?.hasEmergencyMed;
+              const hasJournal = journalDays.has(dayKey);
 
               let cellClass = "bg-transparent text-foreground-700 hover:bg-[#D6EAE2]/50";
 
@@ -1277,15 +1475,16 @@ export default function DiaryPage() {
                     relative aspect-square rounded-xl transition-all duration-200
                     ${cellClass}
                     hover:ring-1 hover:ring-[#3E7C67]/40
-                    ${entry ? "font-medium" : "font-normal"}
+                    ${entry || hasJournal ? "font-medium" : "font-normal"}
                   `}
                 >
                   <div className="flex flex-col items-center justify-center h-full">
                     <span className="text-body sm:text-h5">{format(day, "d")}</span>
-                    {(hasSeizure || hasEmergency) && (
+                    {(hasSeizure || hasEmergency || hasJournal) && (
                       <div className="flex items-center justify-center gap-[3px] mt-[1px]">
-                        {hasSeizure && <span className="block w-[5px] h-[5px] rounded-full bg-[#3E7C67]" />}
-                        {hasEmergency && <span className="block w-[5px] h-[5px] rounded-full bg-[#4C7A8A]" />}
+                        {hasSeizure && <span className="block h-[5px] w-[5px] rounded-full bg-[#C45C4A]" />}
+                        {hasEmergency && <span className="block h-[5px] w-[5px] rounded-full bg-[#D4893A]" />}
+                        {hasJournal && <span className="block h-[5px] w-[5px] rounded-full bg-[#7A6A9A]" />}
                       </div>
                     )}
                   </div>
@@ -1293,6 +1492,21 @@ export default function DiaryPage() {
               );
             })}
           </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-[var(--spacing-m)] text-[12px] text-[#7A9088]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-[6px] w-[6px] rounded-full bg-[#C45C4A]" />
+            Anfall
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-[6px] w-[6px] rounded-full bg-[#D4893A]" />
+            Notfallmedi
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-[6px] w-[6px] rounded-full bg-[#7A6A9A]" />
+            Tagebucheintrag
+          </span>
         </div>
 
         <p className="text-body-small text-foreground-600 text-center px-[var(--spacing-m)] mt-[var(--spacing-s)]">
@@ -1551,43 +1765,29 @@ export default function DiaryPage() {
           );
         })()}
 
-        {/* Monthly Summary — KPI Style */}
-        <div className="mt-[var(--spacing-s)] rounded-2xl bg-white p-[var(--spacing-m)]">
-          <h3 className="section-label mb-[var(--spacing-m)]">
-            {format(currentDate, "MMMM yyyy", { locale: de })} — Zusammenfassung
+        <div className="mx-auto mt-4 w-fit max-w-full rounded-2xl bg-white px-4 py-3">
+          <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-[#9AADA5]">
+            {format(currentDate, "MMMM yyyy", { locale: de })}
           </h3>
-
-          <div className="grid grid-cols-2 gap-[var(--spacing-s)]">
-            <div className="flex flex-col items-center rounded-xl bg-primary-50/40 py-[var(--spacing-s)] px-[var(--spacing-xs)]">
-              <span className="text-h2 font-semibold text-primary-700 leading-none">{monthlyStats.totalSeizures}</span>
-              <span className="text-body-small text-foreground-500 mt-[var(--spacing-2xs)]">Anfälle</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[15px] font-semibold text-[#C45C4A]">{monthlyStats.totalSeizures}</span>
+              <span className="text-[12px] text-[#7A9088]">Anfälle</span>
             </div>
-            <div className="flex flex-col items-center rounded-xl bg-secondary-50/40 py-[var(--spacing-s)] px-[var(--spacing-xs)]">
-              <span className="text-h2 font-semibold text-secondary-700 leading-none">{monthlyStats.totalEmergencyMeds}</span>
-              <span className="text-body-small text-foreground-500 mt-[var(--spacing-2xs)]">Notfallmedis</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[15px] font-semibold text-[#D4893A]">{monthlyStats.totalEmergencyMeds}</span>
+              <span className="text-[12px] text-[#7A9088]">Notfallmedis</span>
             </div>
           </div>
-
           {monthlyStats.emergencyDates.length > 0 && (
-            <div className="mt-[var(--spacing-m)] pt-[var(--spacing-s)] border-t border-background-200/40">
-              <span className="text-body-small text-foreground-400">Verabreicht am</span>
-              <div className="flex flex-wrap gap-[var(--spacing-2xs)] mt-[var(--spacing-2xs)]">
-                {monthlyStats.emergencyDates.map((date) => (
-                  <span
-                    key={date}
-                    className="rounded-full bg-secondary-50/60 px-2.5 py-0.5 text-body-small font-medium text-secondary-700"
-                  >
-                    {format(new Date(date), "dd.MM.")}
-                  </span>
-                ))}
-              </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              <span className="text-[11px] text-[#9AADA5]">Verabreicht am</span>
+              {monthlyStats.emergencyDates.map((date) => (
+                <span key={date} className="text-[11px] text-[#7A9088]">
+                  {format(new Date(date), "dd.MM.")}
+                </span>
+              ))}
             </div>
-          )}
-
-          {monthlyStats.totalSeizures === 0 && monthlyStats.totalEmergencyMeds === 0 && (
-            <p className="mt-[var(--spacing-s)] text-body-small text-foreground-400 text-center">
-              Noch keine Einträge für diesen Monat.
-            </p>
           )}
         </div>
       </div>
@@ -1595,10 +1795,10 @@ export default function DiaryPage() {
       {/* Modal */}
       {isModalOpen && selectedDate && (
         <div className="modal-overlay">
-          <div className="modal-container overflow-hidden">
+          <div className="modal-container overflow-hidden" style={{ width: "100%", maxWidth: "56rem" }}>
             <div className="overflow-y-auto flex-1">
             <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
-              <h2 className="text-body font-medium text-foreground-900 flex-1 min-w-0">
+              <h2 className="text-h4 font-semibold text-[#1E3F34] flex-1 min-w-0">
                 Neuer Anfall eintragen
               </h2>
               <button
@@ -1626,57 +1826,17 @@ export default function DiaryPage() {
             <form
               id="seizure-entry-form"
               onSubmit={handleSubmit}
-              className="px-[var(--spacing-m)] py-[var(--spacing-m)] space-y-[var(--spacing-m)]"
+              className="px-[var(--spacing-m)] py-[var(--spacing-m)] space-y-[var(--spacing-xl)]"
             >
+              <FormSection>
               {/* Anfallstyp aus Liste */}
               <div ref={typeFieldRef} className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  Anfallstyp <span className="text-foreground-300 text-body-small font-normal ml-1">Pflicht</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    onClick={() => setIsTypeModalOpen(true)}
-                    value={
-                      Array.isArray(formData.type) && formData.type.length > 0
-                        ? formData.type.join(", ")
-                        : "Bitte auswählen"
-                    }
-                    className={`w-full cursor-pointer rounded-xl border bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:outline-none transition ${
-                      typeError 
-                        ? "border-warning-400 focus:border-warning-400 focus:ring-1 focus:ring-warning-200" 
-                        : "border-[#DDE7E2] focus:border-[#3E7C67] focus:ring-1 focus:ring-[#3E7C67]/20"
-                    }`}
-                    placeholder="Bitte auswählen"
-                  />
-                  {Array.isArray(formData.type) && formData.type.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFormData((prev) => ({ ...prev, type: [] }));
-                        setTypeError("");
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                      aria-label="Typ löschen"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
+                <FormFieldLabel hint="Pflicht">Anfallstyp</FormFieldLabel>
+                <ChoiceChips
+                  options={seizureTypes}
+                  selected={Array.isArray(formData.type) ? formData.type : []}
+                  onToggle={handleTypeChange}
+                />
                 {typeError && (
                   <p className="text-body text-warning-600">{typeError}</p>
                 )}
@@ -1684,9 +1844,7 @@ export default function DiaryPage() {
 
               {/* Mehr als ein Anfall? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  Mehr als ein Anfall?
-                </label>
+                <FormFieldLabel>Mehr als ein Anfall?</FormFieldLabel>
                 <div className="flex gap-[var(--spacing-s)]">
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1702,7 +1860,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body text-foreground-700">Nein</span>
+                    <span className="text-[13px] text-[#1F352D]">Nein</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1725,18 +1883,17 @@ export default function DiaryPage() {
                       }}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body text-foreground-700">Ja</span>
+                    <span className="text-[13px] text-[#1F352D]">Ja</span>
                   </label>
                 </div>
+              </div>
 
                 {/* Wenn Nein: Uhrzeit und Dauer */}
                 {formData.multipleSeizures === "nein" && (
-                  <>
-                    <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-xs)]">
-                      <span className="text-body-small font-medium text-foreground-500 block">
-                        Uhrzeit
-                      </span>
-                      <div className="flex items-center gap-[var(--spacing-2xs)]">
+                  <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <FormFieldLabel>Uhrzeit</FormFieldLabel>
+                      <div className="flex items-center gap-2">
                         <ScrollTimeSelect
                           options={hourOptions}
                           value={(formData.time || "00:00").split(":")[0]}
@@ -1745,9 +1902,9 @@ export default function DiaryPage() {
                             setFormData((prev) => ({ ...prev, time: `${h}:${m}` }));
                           }}
                           aria-label="Stunde"
-                          className="flex-1 min-w-0"
+                          className="w-[4.75rem] shrink-0"
                         />
-                        <span className="text-body font-medium text-foreground-600 shrink-0" aria-hidden="true">
+                        <span className="text-[13px] font-medium text-[#7A9088] shrink-0" aria-hidden="true">
                           :
                         </span>
                         <ScrollTimeSelect
@@ -1758,16 +1915,14 @@ export default function DiaryPage() {
                             setFormData((prev) => ({ ...prev, time: `${h}:${m}` }));
                           }}
                           aria-label="Minute"
-                          className="flex-1 min-w-0"
+                          className="w-[4.75rem] shrink-0"
                         />
                       </div>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
-                      <label className="text-body-small font-medium text-foreground-500">
-                        Dauer
-                      </label>
-                      <div className="flex gap-[var(--spacing-m)]">
-                        <div className="flex-1 relative">
+                      <FormFieldLabel>Dauer</FormFieldLabel>
+                      <div className="flex gap-2">
+                        <div className="relative w-[5.5rem] shrink-0">
                           <input
                             type="number"
                             min="0"
@@ -1781,7 +1936,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Min"
-                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationMinutes && (
                             <button
@@ -1808,7 +1963,7 @@ export default function DiaryPage() {
                             </button>
                           )}
                         </div>
-                        <div className="flex-1 relative">
+                        <div className="relative w-[5.5rem] shrink-0">
                           <input
                             type="number"
                             min="0"
@@ -1823,7 +1978,7 @@ export default function DiaryPage() {
                               }))
                             }
                             placeholder="Sek"
-                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {formData.durationSeconds && (
                             <button
@@ -1852,47 +2007,43 @@ export default function DiaryPage() {
                         </div>
                       </div>
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {/* Wenn Ja: Zeitraum von/bis (nur Stunden) und Anzahl – Anfälle werden zwischen den Uhrzeiten verteilt */}
                 {formData.multipleSeizures === "ja" && (
                   <>
-                    <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-xs)]">
-                      <span className="text-body-small font-medium text-foreground-500 block">
-                        Zeitraum: von / bis (nur Stunden)
-                      </span>
-                      <div className="flex flex-wrap items-center gap-[var(--spacing-s)]">
-                        <div className="flex items-center gap-[var(--spacing-2xs)] flex-1 min-w-0">
-                          <span className="text-body text-foreground-600 shrink-0">Von</span>
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <FormFieldLabel>Zeitraum: von / bis</FormFieldLabel>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] text-[#7A9088] shrink-0">Von</span>
                           <ScrollTimeSelect
                             options={hourOptions}
                             value={(formData.timeFrom || "00:00").split(":")[0]}
                             onChange={(h) => setFormData((prev) => ({ ...prev, timeFrom: `${h}:00` }))}
                             aria-label="Von Stunde"
-                            className="flex-1 min-w-0"
+                            className="w-[4.75rem] shrink-0"
                           />
-                          <span className="text-body text-foreground-500 shrink-0">Uhr</span>
+                          <span className="text-[13px] text-[#9AADA5] shrink-0">Uhr</span>
                         </div>
-                        <div className="flex items-center gap-[var(--spacing-2xs)] flex-1 min-w-0">
-                          <span className="text-body text-foreground-600 shrink-0">Bis</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] text-[#7A9088] shrink-0">Bis</span>
                           <ScrollTimeSelect
                             options={hourOptions}
                             value={(formData.timeTo || "00:00").split(":")[0]}
                             onChange={(h) => setFormData((prev) => ({ ...prev, timeTo: `${h}:00` }))}
                             aria-label="Bis Stunde"
-                            className="flex-1 min-w-0"
+                            className="w-[4.75rem] shrink-0"
                           />
-                          <span className="text-body text-foreground-500 shrink-0">Uhr</span>
+                          <span className="text-[13px] text-[#9AADA5] shrink-0">Uhr</span>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-[var(--spacing-xs)]">
-                      <label className="text-body-small font-medium text-foreground-500">
-                        Anzahl der Anfälle
-                      </label>
-                      <div className="flex items-center gap-[var(--spacing-xs)]">
-                        <div className="relative flex-1">
+                      <FormFieldLabel>Anzahl der Anfälle</FormFieldLabel>
+                      <div className="flex items-center gap-2">
+                        <div className="relative w-[5.5rem] shrink-0">
                           <input
                             type="number"
                             min="1"
@@ -1906,7 +2057,7 @@ export default function DiaryPage() {
                                 seizureCount: e.target.value,
                               }))
                             }
-                            className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="Anzahl"
                           />
                           {formData.seizureCount && formData.seizureCount !== "1" && (
@@ -1948,13 +2099,12 @@ export default function DiaryPage() {
                     </div>
                   </>
                 )}
-              </div>
+              </FormSection>
 
+              <FormSection title="Wie hast du den Anfall wahrgenommen?">
               {/* Hast du es vorher gespürt? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  {t("Hast du es vorher gespürt?")}
-                </label>
+                <FormFieldLabel>{t("Hast du es vorher gespürt?")}</FormFieldLabel>
                 <div className="flex gap-[var(--spacing-s)]">
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1970,7 +2120,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body text-foreground-700">Ja</span>
+                    <span className="text-[13px] text-[#1F352D]">Ja</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -1986,204 +2136,48 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body text-foreground-700">Nein</span>
+                    <span className="text-[13px] text-[#1F352D]">Nein</span>
                   </label>
                 </div>
               </div>
 
               {/* Wie ging es dir danach? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  {t("Wie ging es dir danach?")}
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    onClick={() => setIsAfterEffectsModalOpen(true)}
-                    value={
-                      Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0
-                        ? formData.afterEffects.join(", ")
-                        : "Bitte auswählen"
-                    }
-                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
-                    placeholder="Bitte auswählen"
-                  />
-                  {Array.isArray(formData.afterEffects) && formData.afterEffects.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFormData((prev) => ({ ...prev, afterEffects: [] }));
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                      aria-label="Nachwirkungen löschen"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Weitere Auffälligkeiten */}
-              <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  Weitere Auffälligkeiten
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formData.customAfterEffects}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        customAfterEffects: e.target.value,
-                      }))
-                    }
-                    placeholder="Weitere Auffälligkeiten eintragen"
-                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
-                  />
-                  {formData.customAfterEffects && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, customAfterEffects: "" }))
-                      }
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                      aria-label="Löschen"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <p className="text-body-small text-[#4F6A5F]">
-                  Wird gespeichert und steht künftig oben in der Auswahl. Mehrere Angaben mit Komma trennen.
-                </p>
+                <FormFieldLabel>{t("Wie ging es dir danach?")}</FormFieldLabel>
+                <ChoiceChips
+                  options={afterEffectsChoices}
+                  selected={Array.isArray(formData.afterEffects) ? formData.afterEffects : []}
+                  onToggle={handleAfterEffectChange}
+                  customLabels={customAfterEffectLabels}
+                  onRemoveCustom={(option) => handleRemoveCustomOption("after_effect", option)}
+                />
+                <CustomOptionAdder
+                  placeholder="Optional: eigene Angabe"
+                  onAdd={(raw) => addCustomOptionToList("after_effect", raw)}
+                />
               </div>
 
               {/* Mögliche Auslöser */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  Mögliche Auslöser
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    onClick={() => setIsTriggersModalOpen(true)}
-                    value={
-                      Array.isArray(formData.triggers) && formData.triggers.length > 0
-                        ? formData.triggers.join(", ")
-                        : "Bitte auswählen"
-                    }
-                    className="w-full cursor-pointer rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
-                    placeholder="Bitte auswählen"
-                  />
-                  {Array.isArray(formData.triggers) && formData.triggers.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFormData((prev) => ({ ...prev, triggers: [] }));
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                      aria-label="Auslöser löschen"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
+                <FormFieldLabel>Mögliche Auslöser</FormFieldLabel>
+                <ChoiceChips
+                  options={triggerChoices}
+                  selected={Array.isArray(formData.triggers) ? formData.triggers : []}
+                  onToggle={handleTriggerChange}
+                  customLabels={customTriggerLabels}
+                  onRemoveCustom={(option) => handleRemoveCustomOption("trigger", option)}
+                />
+                <CustomOptionAdder
+                  placeholder="Optional: eigene Angabe"
+                  onAdd={(raw) => addCustomOptionToList("trigger", raw)}
+                />
               </div>
+              </FormSection>
 
-              {/* Andere Auslöser */}
-              <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  Andere Auslöser
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formData.customTriggers}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        customTriggers: e.target.value,
-                      }))
-                    }
-                    placeholder="Andere Auslöser eintragen"
-                    className="w-full rounded-xl border border-[#DDE7E2] bg-white px-4 pr-10 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20"
-                  />
-                  {formData.customTriggers && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, customTriggers: "" }))
-                      }
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-foreground-400 hover:text-foreground-600"
-                      aria-label="Löschen"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <p className="text-body-small text-[#4F6A5F]">
-                  Wird gespeichert und steht künftig oben in der Auswahl. Mehrere Angaben mit Komma trennen.
-                </p>
-              </div>
-
+              <FormSection title="Behandlung">
               {/* Notfallmedikament eingenommen? */}
               <div className="space-y-[var(--spacing-xs)]">
-                <label className="text-body-small font-medium text-foreground-500">
-                  Notfallmedikament eingenommen?
-                </label>
+                <FormFieldLabel>Notfallmedikament eingenommen?</FormFieldLabel>
                 <div className="flex gap-[var(--spacing-s)]">
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -2199,7 +2193,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body text-foreground-700">Ja</span>
+                    <span className="text-[13px] text-[#1F352D]">Ja</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]">
                     <input
@@ -2215,7 +2209,7 @@ export default function DiaryPage() {
                       }
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-body text-foreground-700">Nein</span>
+                    <span className="text-[13px] text-[#1F352D]">Nein</span>
                   </label>
                 </div>
                 {formData.emergencyMed === "ja" && (
@@ -2261,25 +2255,25 @@ export default function DiaryPage() {
               </div>
 
               <div className="space-y-[var(--spacing-xs)]" data-testid="video-unavailable">
-                <p className="text-body-small font-medium text-foreground-500">Video</p>
-                <p className="rounded-xl border border-[#DDE7E2] bg-[#F7FAF8] px-4 py-3 text-body-small text-[#5A7368]">
+                <FormFieldLabel>Video</FormFieldLabel>
+                <p className="rounded-xl border border-[#DDE7E2] bg-[#F7FAF8] px-4 py-3 text-[13px] text-[#7A9088]">
                   Video-Upload ist im Pilot noch nicht verfügbar.
                 </p>
               </div>
+              </FormSection>
 
-              {/* Buttons – Abbrechen und Speichern (groß für bessere Erkennbarkeit) */}
-              <div className="flex gap-[var(--spacing-s)] pt-[var(--spacing-s)] border-t border-background-200/40 mt-[var(--spacing-xs)]">
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-[var(--spacing-s)] border-t border-background-200/40 mt-[var(--spacing-xs)]">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="flex-1 rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]"
+                  className="rounded-full border border-[#DDE7E2] bg-white px-4 py-1.5 text-[13px] font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]"
                 >
                   Abbrechen
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex-1 rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSaving ? "Wird gespeichert…" : "Speichern"}
                 </button>
@@ -2289,202 +2283,7 @@ export default function DiaryPage() {
           </div>
         </div>
       )}
-
-      {/* Typ-Auswahl Modal */}
-      {isTypeModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-          <div className="modal-container max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 flex items-center justify-between border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
-              <h3 className="text-body font-medium text-foreground-900">
-                Typ auswählen
-              </h3>
-              <button
-                onClick={() => setIsTypeModalOpen(false)}
-                className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
-                aria-label="Schließen"
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-[var(--spacing-s)] space-y-3">
-              {seizureTypes.map((type) => (
-                <label
-                  key={type}
-                  className="flex cursor-pointer items-center gap-[var(--spacing-2xs)]"
-                >
-                  <input
-                    type="checkbox"
-                    checked={Array.isArray(formData.type) && formData.type.includes(type)}
-                    onChange={() => handleTypeChange(type)}
-                    className="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="text-body text-foreground-700">{type}</span>
-                </label>
-              ))}
-            </div>
-
-            <div className="sticky bottom-0 border-t border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <button
-                onClick={() => setIsTypeModalOpen(false)}
-                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
-              >
-                Fertig
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* After Effects Modal */}
-      {isAfterEffectsModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-          <div className="modal-container max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 flex items-center justify-between border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
-              <h3 className="text-body font-medium text-foreground-900">
-                {t("Wie ging es dir danach?")}
-              </h3>
-              <button
-                onClick={() => setIsAfterEffectsModalOpen(false)}
-                className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
-                aria-label="Schließen"
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-[var(--spacing-s)] space-y-3">
-              {afterEffectsChoices.map((option) => (
-                <div key={option} className="flex items-center gap-[var(--spacing-2xs)]">
-                  <label className="flex flex-1 cursor-pointer items-center gap-[var(--spacing-2xs)]">
-                    <input
-                      type="checkbox"
-                      checked={Array.isArray(formData.afterEffects) && formData.afterEffects.includes(option)}
-                      onChange={() => handleAfterEffectChange(option)}
-                      className="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    <span className="text-body text-foreground-700">{option}</span>
-                  </label>
-                  {customAfterEffectLabels.includes(option) && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCustomOption("after_effect", option)}
-                      className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-foreground-400 transition hover:text-foreground-600"
-                      aria-label={`${option} aus der Liste entfernen`}
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="sticky bottom-0 border-t border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <button
-                onClick={() => setIsAfterEffectsModalOpen(false)}
-                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
-              >
-                Fertig
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Triggers Modal */}
-      {isTriggersModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground-900/25 backdrop-blur-[2px] p-[var(--spacing-s)]">
-          <div className="modal-container max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 flex items-center justify-between border-b border-background-200/40 bg-white px-[var(--spacing-m)] py-[var(--spacing-s)]">
-              <h3 className="text-body font-medium text-foreground-900">
-                Mögliche Auslöser?
-              </h3>
-              <button
-                onClick={() => setIsTriggersModalOpen(false)}
-                className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-foreground-600 transition hover:bg-background-100"
-                aria-label="Schließen"
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-[var(--spacing-s)] space-y-3">
-              {triggerChoices.map((trigger) => (
-                <div key={trigger} className="flex items-center gap-[var(--spacing-2xs)]">
-                  <label className="flex flex-1 cursor-pointer items-center gap-[var(--spacing-2xs)]">
-                    <input
-                      type="checkbox"
-                      checked={Array.isArray(formData.triggers) && formData.triggers.includes(trigger)}
-                      onChange={() => handleTriggerChange(trigger)}
-                      className="h-4 w-4 rounded border-background-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    <span className="text-body text-foreground-700">{trigger}</span>
-                  </label>
-                  {customTriggerLabels.includes(trigger) && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCustomOption("trigger", trigger)}
-                      className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-foreground-400 transition hover:text-foreground-600"
-                      aria-label={`${trigger} aus der Liste entfernen`}
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="sticky bottom-0 border-t border-background-200 bg-white px-[var(--spacing-s)] py-[var(--spacing-m)]">
-              <button
-                onClick={() => setIsTriggersModalOpen(false)}
-                className="w-full rounded-lg bg-primary-600 px-[var(--spacing-s)] py-[var(--spacing-xs)] text-body font-semibold text-white shadow-sm transition hover:bg-primary-700"
-              >
-                Fertig
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
       </div>
     </ProtectedRoute>
   );

@@ -14,18 +14,19 @@ import { de } from "date-fns/locale";
 // ─── Shared CSS Classes ──────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full rounded-xl border border-[#DDE7E2] bg-white px-4 py-2.5 text-body text-[#1F352D] placeholder:text-[#6B7C74] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20";
+  "w-full rounded-full border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20";
 
 const CSS = {
   input: `${inputBase} transition`,
   select: `${inputBase} transition`,
-  textarea: `${inputBase} resize-none transition`,
+  textarea:
+    "w-full rounded-xl border border-[#DDE7E2] bg-white px-3 py-1.5 text-[13px] text-[#4F6B63] placeholder:text-[#9AADA5] focus:border-[#3E7C67] focus:outline-none focus:ring-1 focus:ring-[#3E7C67]/20 resize-none transition",
   btnCancel:
-    "rounded-2xl border border-[#9FB8AE] bg-transparent px-5 py-3.5 text-body font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
+    "rounded-full border border-[#DDE7E2] bg-white px-4 py-1.5 text-[13px] font-medium text-[#1E3F34] transition hover:bg-[#EEF4F1]",
   btnPrimary:
-    "flex-1 rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed",
+    "rounded-full bg-[#3E7C67] px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed",
   btnDanger:
-    "flex-1 rounded-xl bg-[#C94B4B] px-[var(--spacing-m)] py-[var(--spacing-s)] text-body font-medium text-white transition hover:bg-[#A83D3D] disabled:opacity-60 disabled:cursor-not-allowed",
+    "rounded-full bg-[#C94B4B] px-4 py-1.5 text-[13px] font-medium text-white transition hover:bg-[#A83D3D] disabled:opacity-60 disabled:cursor-not-allowed",
   btnClose:
     "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl text-foreground-600 transition hover:bg-background-100",
 } as const;
@@ -176,12 +177,12 @@ function InlineModal({ title, onClose, children }: { title: string; onClose: () 
       <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-lg border border-background-200/60 overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1">
           <div className="sticky top-0 flex items-center justify-between gap-[var(--spacing-s)] border-b border-background-200/40 bg-white px-[var(--spacing-s)] py-[var(--spacing-s)] z-10">
-            <h2 className="text-body font-medium text-foreground-900 truncate">{title}</h2>
+            <h2 className="text-h4 font-semibold text-[#1E3F34] truncate">{title}</h2>
             <button type="button" onClick={onClose} className={CSS.btnClose} aria-label="Schließen">
               <CloseIcon />
             </button>
           </div>
-          <div className="p-[var(--spacing-s)] space-y-[var(--spacing-s)]">{children}</div>
+          <div className="p-[var(--spacing-s)] space-y-[var(--spacing-xl)]">{children}</div>
         </div>
       </div>
     </div>
@@ -198,9 +199,9 @@ function FormField({ label, type = "text", value, onChange, required, optional, 
   hint?: string;
 }) {
   return (
-    <div className="space-y-1">
-      <label className="text-[12px] font-medium text-foreground-600">
-        {label}{optional ? <span className="text-foreground-300 font-normal ml-1">(optional)</span> : <span className="text-foreground-300 ml-0.5">*</span>}
+    <div className="space-y-[var(--spacing-xs)]">
+      <label className="text-[15px] font-medium text-[#1E3F34]">
+        {label}{optional ? <span className="text-[12px] font-normal text-[#9AADA5] ml-1">optional</span> : <span className="text-[12px] font-normal text-[#9AADA5] ml-1">Pflicht</span>}
       </label>
       <input
         type={type}
@@ -224,16 +225,16 @@ function ModalActions({ onCancel, onSave, isSaving, saveLabel = "Speichern", sav
   disabled?: boolean;
 }) {
   return (
-    <div className="space-y-[var(--spacing-xs)] pt-[var(--spacing-s)]">
+    <div className="flex flex-wrap items-center justify-end gap-2 pt-[var(--spacing-s)]">
+      <button type="button" onClick={onCancel} className={CSS.btnCancel}>Abbrechen</button>
       <button
         type="button"
         onClick={onSave}
         disabled={isSaving || disabled}
-        className={`${variant === "danger" ? CSS.btnDanger : CSS.btnPrimary} w-full`}
+        className={variant === "danger" ? CSS.btnDanger : CSS.btnPrimary}
       >
         {isSaving ? savingLabel : saveLabel}
       </button>
-      <button type="button" onClick={onCancel} className={`${CSS.btnCancel} w-full text-center`}>Abbrechen</button>
     </div>
   );
 }
@@ -790,7 +791,7 @@ export default function EinstellungenPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen pb-20 xl:pb-0 px-[var(--spacing-s)] sm:px-[var(--spacing-m)] md:px-[var(--spacing-l)] lg:px-[var(--spacing-xl)] xl:px-[var(--spacing-2xl)] 2xl:px-[var(--spacing-3xl)] py-[var(--spacing-2xs)] sm:py-[var(--spacing-s)] md:py-[var(--spacing-m)] lg:py-[var(--spacing-l)] xl:py-[var(--spacing-xl)] 2xl:py-[var(--spacing-2xl)] text-foreground-900" style={{ background: "#F2F6F4" }}>
-        <div className="mx-auto flex w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-[90rem] xl:max-w-[100rem] 2xl:max-w-[120rem] flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-[var(--spacing-m)] sm:gap-[var(--spacing-l)] md:gap-[var(--spacing-xl)]">
 
           {/* ── Header ── */}
           <div className="space-y-[var(--spacing-xs)]">
@@ -835,8 +836,8 @@ export default function EinstellungenPage() {
                         Strikter Pilotmodus aktiv: Es sind nur minimal medizinisch notwendige Angaben erlaubt.
                       </p>
                     )}
-                    <div className="space-y-1">
-                      <label className="text-[12px] font-medium text-foreground-600">
+                    <div className="space-y-[var(--spacing-xs)]">
+                      <label className="text-[15px] font-medium text-[#1E3F34]">
                         Diagnose / medizinisch notwendige Information
                       </label>
                       <textarea
@@ -847,14 +848,16 @@ export default function EinstellungenPage() {
                         className={CSS.textarea}
                       />
                     </div>
+                    <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={saveMedicalProfile}
                       disabled={isSaving}
-                      className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed"
+                      className={CSS.btnPrimary}
                     >
                       {isSaving ? "Speichert..." : "Medizinische Angaben speichern"}
                     </button>
+                    </div>
                   </div>
                 </SectionCard>
               )}
@@ -896,11 +899,12 @@ export default function EinstellungenPage() {
                   <p className="text-body-small text-foreground-500">
                     Alle Daten (Profil, Anfallstagebuch, Gedankentagebuch, Befinden) als PDF exportieren – z. B. für Arztbesuche.
                   </p>
+                  <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={handleExport}
                     disabled={isExporting}
-                    className="w-full rounded-2xl bg-[#3E7C67] px-5 py-3.5 text-body font-medium text-white transition hover:bg-[#346B59] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-[var(--spacing-xs)]"
+                    className={`${CSS.btnPrimary} inline-flex items-center justify-center gap-[var(--spacing-xs)]`}
                   >
                     {isExporting ? (
                       <>
@@ -914,6 +918,7 @@ export default function EinstellungenPage() {
                       </>
                     )}
                   </button>
+                  </div>
                 </div>
               </SectionCard>
             </div>
@@ -1030,7 +1035,7 @@ export default function EinstellungenPage() {
             <div className="p-[var(--spacing-m)] space-y-[var(--spacing-s)]">
               <div className="flex items-center gap-[var(--spacing-xs)]">
                 <IconWarning className="w-5 h-5 text-[#C94B4B] shrink-0" />
-                <h2 className="text-body font-medium text-foreground-900">Konto wirklich löschen?</h2>
+                <h2 className="text-h4 font-semibold text-[#1E3F34]">Konto wirklich löschen?</h2>
               </div>
               <div className="space-y-1">
                 <p className="text-body-small text-foreground-700">
@@ -1040,12 +1045,12 @@ export default function EinstellungenPage() {
                   Alle Daten – Profil, Anfallstagebuch, Gedankentagebuch, Medikamente und Befinden – werden unwiderruflich gelöscht.
                 </p>
               </div>
-              <div className="space-y-[var(--spacing-xs)]">
-                <button type="button" onClick={confirmDelete} className={`${CSS.btnDanger} w-full`}>
-                  Konto dauerhaft löschen
-                </button>
-                <button type="button" onClick={cancelDelete} className={`${CSS.btnCancel} w-full text-center`}>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button type="button" onClick={cancelDelete} className={CSS.btnCancel}>
                   Abbrechen
+                </button>
+                <button type="button" onClick={confirmDelete} className={CSS.btnDanger}>
+                  Konto dauerhaft löschen
                 </button>
               </div>
             </div>
@@ -1067,9 +1072,9 @@ export default function EinstellungenPage() {
       {/* ── Feedback Modal ── */}
       {showFeedbackModal && (
         <InlineModal title="Feedback senden" onClose={closeFeedbackModal}>
-          <div className="space-y-1">
-            <label className="text-[12px] font-medium text-foreground-600">
-              Feedback-Typ <span className="text-foreground-300 ml-0.5">*</span>
+          <div className="space-y-[var(--spacing-xs)]">
+            <label className="text-[15px] font-medium text-[#1E3F34]">
+              Feedback-Typ <span className="text-[12px] font-normal text-[#9AADA5]">Pflicht</span>
             </label>
             <select
               value={feedbackForm.type}
@@ -1081,9 +1086,9 @@ export default function EinstellungenPage() {
               <option value="other">Sonstiges</option>
             </select>
           </div>
-          <div className="space-y-1">
-            <label className="text-[12px] font-medium text-foreground-600">
-              Nachricht <span className="text-foreground-300 ml-0.5">*</span>
+          <div className="space-y-[var(--spacing-xs)]">
+            <label className="text-[15px] font-medium text-[#1E3F34]">
+              Nachricht <span className="text-[12px] font-normal text-[#9AADA5]">Pflicht</span>
             </label>
             <textarea
               value={feedbackForm.message}
