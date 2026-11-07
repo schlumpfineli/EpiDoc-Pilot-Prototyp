@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User profile routes
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     Route::put('/user/password', [AuthController::class, 'changePassword']);
+    Route::put('/user/session-preference', [AuthController::class, 'updateSessionPreference']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::delete('/user', [AuthController::class, 'deleteAccount']);
 

@@ -81,6 +81,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', new StrongPassword()],
             'privacy_accepted' => ['required', 'accepted'],
             'health_data_consent' => ['required', 'accepted'],
+            'persist_session' => ['sometimes', 'boolean'],
         ];
 
         if ($this->strictAnonymityEnabled()) {
@@ -101,11 +102,13 @@ class AuthController extends Controller
         ]);
         $user->update(['name' => 'User-' . $user->id]);
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $persistSession = $request->boolean('persist_session');
+        $token = $this->issueAuthToken($user);
 
         return response()->json([
             'user' => $this->userToApiResponse($user),
             'token' => $token,
+            'persist_session' => $persistSession,
         ], 201);
     }
 
@@ -117,6 +120,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
+            'persist_session' => ['sometimes', 'boolean'],
         ]);
 
         $user = User::where('email', $data['email'])->first();
@@ -127,11 +131,36 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $persistSession = $request->boolean('persist_session');
+        $token = $this->issueAuthToken($user);
 
         return response()->json([
             'user' => $this->userToApiResponse($user),
             'token' => $token,
+            'persist_session' => $persistSession,
+        ]);
+    }
+
+    /**
+     * Sitzung unbegrenzt halten oder wieder auf 7 Tage begrenzen.
+     * Gibt ein neues Token zurück, das alte aktuelle Token wird ersetzt.
+     */
+    public function updateSessionPreference(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'persist_session' => ['required', 'boolean'],
+        ]);
+
+        $user = $request->user();
+        $request->user()->currentAccessToken()->delete();
+        $token = $this->issueAuthToken($user);
+
+        return response()->json([
+            'message' => $data['persist_session']
+                ? 'Sitzung bleibt angemeldet, bis du dich abmeldest.'
+                : 'Sitzung läuft nach 7 Tagen automatisch ab.',
+            'token' => $token,
+            'persist_session' => (bool) $data['persist_session'],
         ]);
     }
 
@@ -395,6 +424,11 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Passwort wurde erfolgreich zurückgesetzt.',
         ]);
+    }
+
+    private function issueAuthToken(User $user): string
+    {
+        return $user->createToken('auth-token', ['*'], null)->plainTextToken;
     }
 }
 

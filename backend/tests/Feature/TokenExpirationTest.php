@@ -23,15 +23,7 @@ class TokenExpirationTest extends \Tests\TestCase
         $tokenRecord = PersonalAccessToken::findToken($token);
         
         $this->assertNotNull($tokenRecord);
-        $this->assertNotNull($tokenRecord->expires_at);
-        
-        // Prüfe, dass die Ablaufzeit etwa 168 Stunden (7 Tage) in der Zukunft liegt
-        $expectedExpiration = now()->addHours(168);
-        $this->assertEqualsWithDelta(
-            $expectedExpiration->timestamp,
-            $tokenRecord->expires_at->timestamp,
-            60 // Toleranz von 1 Minute für Test-Ausführungszeit
-        );
+        $this->assertNull($tokenRecord->expires_at);
     }
 
     /** @test */
@@ -54,15 +46,7 @@ class TokenExpirationTest extends \Tests\TestCase
         $tokenRecord = PersonalAccessToken::findToken($token);
         
         $this->assertNotNull($tokenRecord);
-        $this->assertNotNull($tokenRecord->expires_at);
-        
-        // Prüfe, dass die Ablaufzeit etwa 168 Stunden (7 Tage) in der Zukunft liegt
-        $expectedExpiration = now()->addHours(168);
-        $this->assertEqualsWithDelta(
-            $expectedExpiration->timestamp,
-            $tokenRecord->expires_at->timestamp,
-            60 // Toleranz von 1 Minute
-        );
+        $this->assertNull($tokenRecord->expires_at);
     }
 
     /** @test */
@@ -96,7 +80,7 @@ class TokenExpirationTest extends \Tests\TestCase
             ->assertJsonStructure([
                 'user' => [
                     'id',
-                    'name',
+                    'display_name',
                     'email',
                     'role',
                 ],
@@ -112,25 +96,60 @@ class TokenExpirationTest extends \Tests\TestCase
     }
 
     /** @test */
-    public function token_expiration_can_be_configured_via_env()
+    public function persist_session_token_has_no_expiration()
     {
-        // Setze eine andere Ablaufzeit über Config (simuliert ENV)
-        config(['sanctum.expiration' => 60]); // 1 Stunde
+        $user = User::factory()->create([
+            'email' => 'persist@example.com',
+            'password' => Hash::make('Password123'),
+        ]);
 
-        $response = $this->postJson('/api/register', $this->registerPayload());
+        $response = $this->postJson('/api/login', [
+            'email' => 'persist@example.com',
+            'password' => 'Password123',
+            'persist_session' => true,
+        ]);
 
-        $response->assertStatus(201);
-        $token = $response->json('token');
+        $response->assertStatus(200)
+            ->assertJson(['persist_session' => true]);
 
-        // Finde den Token in der Datenbank
-        $tokenRecord = PersonalAccessToken::findToken($token);
-        
+        $tokenRecord = PersonalAccessToken::findToken($response->json('token'));
         $this->assertNotNull($tokenRecord);
-        
-        // Prüfe, dass die Ablaufzeit etwa 1 Stunde in der Zukunft liegt
-        // (Aber das explizite expires_at beim createToken überschreibt die Config)
-        // Daher prüfen wir nur, dass expires_at gesetzt ist
-        $this->assertNotNull($tokenRecord->expires_at);
+        $this->assertNull($tokenRecord->expires_at);
+
+        $this->withHeader('Authorization', 'Bearer '.$response->json('token'))
+            ->getJson('/api/user')
+            ->assertStatus(200);
+    }
+
+    /** @test */
+    public function session_preference_can_make_current_token_persistent()
+    {
+        $user = User::factory()->create([
+            'email' => 'settings@example.com',
+            'password' => Hash::make('Password123'),
+        ]);
+
+        $login = $this->postJson('/api/login', [
+            'email' => 'settings@example.com',
+            'password' => 'Password123',
+        ]);
+        $login->assertStatus(200);
+        $oldToken = $login->json('token');
+        $this->assertNotNull(PersonalAccessToken::findToken($oldToken));
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$oldToken)
+            ->putJson('/api/user/session-preference', [
+                'persist_session' => true,
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['persist_session' => true])
+            ->assertJsonStructure(['token']);
+
+        $this->assertNull(PersonalAccessToken::findToken($oldToken));
+        $newTokenRecord = PersonalAccessToken::findToken($response->json('token'));
+        $this->assertNotNull($newTokenRecord);
+        $this->assertNull($newTokenRecord->expires_at);
     }
 
     /** @test */

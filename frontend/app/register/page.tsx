@@ -46,9 +46,13 @@ export default function RegisterPage() {
         role: data.role as "patient" | "relative",
         privacy_accepted: true,
         health_data_consent: true,
+        persist_session: true,
       });
       
       // Token speichern
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token_data");
+      }
       apiClient.setToken(response.token);
       
       // Event dispatchen, damit andere Komponenten (z.B. Navbar) den Auth-Status aktualisieren
@@ -93,17 +97,17 @@ export default function RegisterPage() {
             label="E-Mail"
             type="email"
             placeholder="deine@email.de"
-            autoComplete="email"
+            autoComplete="off"
             {...register("email")}
             error={errors.email?.message}
           />
 
           <Input
             label="Passwort"
-            type="password"
             placeholder="Mindestens 8 Zeichen"
-            autoComplete="new-password"
+            autoComplete="off"
             {...register("password")}
+            type="password"
             error={errors.password?.message}
             helperText="Mindestens 8 Zeichen, 1 Grossbuchstabe, 1 Kleinbuchstabe, 1 Zahl"
           />

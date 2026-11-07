@@ -45,12 +45,12 @@ return [
     | considered expired. This will override any values set in the token's
     | "expires_at" attribute, but first-party sessions are not affected.
     |
-    | Standard: 10080 Minuten (168 Stunden = 7 Tage)
-    | Kann über .env Variable SANCTUM_EXPIRATION_MINUTES angepasst werden.
+    | Muss null bleiben, damit persist_session (kein automatisches Logout)
+    | über expires_at am einzelnen Token gesteuert werden kann.
     |
     */
 
-    'expiration' => env('SANCTUM_EXPIRATION_MINUTES', 10080), // 168 Stunden = 7 Tage
+    'expiration' => null,
 
     /*
     |--------------------------------------------------------------------------

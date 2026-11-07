@@ -213,6 +213,7 @@ export interface User {
 export interface AuthResponse {
   user: User;
   token: string;
+  persist_session?: boolean;
 }
 
 export interface ForgotPasswordResponse {
@@ -348,6 +349,7 @@ export const authApi = {
     password: string;
     privacy_accepted: true;
     health_data_consent: true;
+    persist_session?: boolean;
   }): Promise<AuthResponse> => {
     return apiClient.post<AuthResponse>('/register', data);
   },
@@ -355,8 +357,18 @@ export const authApi = {
   login: async (data: {
     email: string;
     password: string;
+    persist_session?: boolean;
   }): Promise<AuthResponse> => {
     return apiClient.post<AuthResponse>('/login', data);
+  },
+
+  updateSessionPreference: async (data: {
+    persist_session: boolean;
+  }): Promise<{ message: string; token: string; persist_session: boolean }> => {
+    return apiClient.put<{ message: string; token: string; persist_session: boolean }>(
+      '/user/session-preference',
+      data
+    );
   },
 
   getUser: async (): Promise<{ user: User }> => {

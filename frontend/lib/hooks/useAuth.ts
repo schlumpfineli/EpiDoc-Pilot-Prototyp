@@ -28,8 +28,14 @@ export function useAuth() {
       setUser(response.user);
     } catch (error) {
       console.warn('Auth check failed:', error);
-      clearToken();
-      setUser(null);
+      const message = error && typeof error === 'object' && 'message' in error
+        ? String((error as { message: unknown }).message)
+        : '';
+      const unauthorized = message.includes('401') || message.toLowerCase().includes('unauthenticated');
+      if (unauthorized) {
+        clearToken();
+        setUser(null);
+      }
     } finally {
       setIsLoading(false);
     }

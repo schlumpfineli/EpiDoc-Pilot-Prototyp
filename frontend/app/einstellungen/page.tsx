@@ -3,6 +3,14 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { profileApi, authApi, UserProfile, feedbackApi, FeedbackData, Seizure, Befinden } from "@/lib/api";
+import {
+  disableBiometricLogin,
+  enableBiometricLogin,
+  isBiometricAvailable,
+  isBiometricEnabled,
+  isNativeApp,
+  syncBiometricCredentials,
+} from "@/lib/biometric";
 import { toastService } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRoleText } from "@/lib/hooks/useRoleText";
@@ -138,14 +146,15 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Toggle({ label, description, checked, onChange }: {
+function Toggle({ label, description, checked, onChange, disabled = false }: {
   label: string;
   description: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-[var(--spacing-m)]">
+    <div className={`flex items-center justify-between gap-[var(--spacing-m)] ${disabled ? "opacity-60" : ""}`}>
       <div className="min-w-0">
         <p className="text-body font-medium text-foreground-800">{label}</p>
         <p className="text-body-small text-foreground-500">{description}</p>
@@ -154,10 +163,11 @@ function Toggle({ label, description, checked, onChange }: {
         type="button"
         role="switch"
         aria-checked={checked}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent focus-visible:outline focus-visible:ring-2 focus-visible:ring-[#3E7C67] focus-visible:ring-offset-2 ${
-          checked ? "bg-[#3E7C67]" : "bg-background-300"
-        }`}
+        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent focus-visible:outline focus-visible:ring-2 focus-visible:ring-[#3E7C67] focus-visible:ring-offset-2 ${
+          disabled ? "cursor-not-allowed" : "cursor-pointer"
+        } ${checked ? "bg-[#3E7C67]" : "bg-background-300"}`}
         style={{ transition: `background-color var(--motion-fast) var(--ease-standard)` }}
       >
         <span
@@ -378,6 +388,7 @@ export default function EinstellungenPage() {
 
   // ── Modal State ──
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -393,10 +404,17 @@ export default function EinstellungenPage() {
     message: "",
   });
   const [deletePassword, setDeletePassword] = useState("");
+  const [biometricOn, setBiometricOn] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricPassword, setBiometricPassword] = useState("");
 
   // ── Data Loading ──
   useEffect(() => {
     loadSettings();
+    setBiometricOn(isBiometricEnabled());
+    if (isNativeApp()) {
+      void isBiometricAvailable().then(setBiometricAvailable);
+    }
   }, [user]);
 
   const loadSettings = async () => {
@@ -691,6 +709,9 @@ export default function EinstellungenPage() {
     try {
       setIsSaving(true);
       await profileApi.changePassword(passwordForm);
+      if (isBiometricEnabled() && profileData?.email) {
+        await syncBiometricCredentials(profileData.email, passwordForm.new_password);
+      }
       toastService.show("Passwort erfolgreich geändert", "success");
       closePasswordModal();
     } catch (error: unknown) {
@@ -864,7 +885,36 @@ export default function EinstellungenPage() {
 
               <SectionCard icon={<IconCog className="w-5 h-5" />} title="Sicherheit & Konto">
                 <div className="space-y-[var(--spacing-s)]">
-                  <p className="text-[11px] text-foreground-400 leading-relaxed">Deine Angaben bleiben privat und sind nur mit deinem Login zugänglich.</p>
+                  <p className="text-[11px] text-foreground-400 leading-relaxed">Deine Angaben bleiben privat und sind nur mit deinem Login zugänglich. Die Sitzung bleibt aktiv, bis du dich abmeldest.</p>
+                  {isNativeApp() && (
+                    <Toggle
+                      label="Mit Fingerabdruck anmelden"
+                      description={
+                        biometricAvailable
+                          ? "Nach dem Abmelden kannst du dich per Fingerabdruck statt mit dem Passwort anmelden."
+                          : "Auf diesem Gerät ist kein Fingerabdruck eingerichtet."
+                      }
+                      checked={biometricOn}
+                      disabled={!biometricAvailable && !biometricOn}
+                      onChange={async (checked) => {
+                        if (checked) {
+                          setBiometricPassword("");
+                          setShowBiometricModal(true);
+                          return;
+                        }
+                        try {
+                          await disableBiometricLogin();
+                          setBiometricOn(false);
+                          toastService.show("Fingerabdruck-Login deaktiviert", "success");
+                        } catch (error: unknown) {
+                          const msg = error && typeof error === "object" && "message" in error
+                            ? (error as { message: string }).message
+                            : "Fingerabdruck-Login konnte nicht deaktiviert werden";
+                          toastService.show(msg, "error");
+                        }
+                      }}
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={openPasswordModal}
@@ -1131,6 +1181,62 @@ export default function EinstellungenPage() {
           <FormField label="Neues Passwort" type="password" value={passwordForm.new_password} onChange={(v) => setPasswordForm({ ...passwordForm, new_password: v })} required hint="Mindestens 8 Zeichen" />
           <FormField label="Neues Passwort bestätigen" type="password" value={passwordForm.new_password_confirmation} onChange={(v) => setPasswordForm({ ...passwordForm, new_password_confirmation: v })} required />
           <ModalActions onCancel={closePasswordModal} onSave={savePassword} isSaving={isSaving} saveLabel="Passwort ändern" savingLabel="Speichert..." />
+        </InlineModal>
+      )}
+
+      {showBiometricModal && (
+        <InlineModal
+          title="Fingerabdruck aktivieren"
+          onClose={() => {
+            setShowBiometricModal(false);
+            setBiometricPassword("");
+          }}
+        >
+          <p className="text-body-small text-foreground-500">
+            Bestätige dein Passwort. Danach kannst du dich mit dem Fingerabdruck anmelden.
+          </p>
+          <FormField
+            label="Passwort"
+            type="password"
+            value={biometricPassword}
+            onChange={setBiometricPassword}
+            required
+          />
+          <ModalActions
+            onCancel={() => {
+              setShowBiometricModal(false);
+              setBiometricPassword("");
+            }}
+            onSave={async () => {
+              if (!biometricPassword.trim() || !profileData?.email) {
+                toastService.show("Passwort ist erforderlich", "error");
+                return;
+              }
+              try {
+                setIsSaving(true);
+                await authApi.login({
+                  email: profileData.email,
+                  password: biometricPassword,
+                  persist_session: true,
+                });
+                await enableBiometricLogin(profileData.email, biometricPassword);
+                setBiometricOn(true);
+                setShowBiometricModal(false);
+                setBiometricPassword("");
+                toastService.show("Fingerabdruck-Login aktiviert", "success");
+              } catch (error: unknown) {
+                const msg = error && typeof error === "object" && "message" in error
+                  ? (error as { message: string }).message
+                  : "Fingerabdruck konnte nicht aktiviert werden";
+                toastService.show(msg, "error");
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            isSaving={isSaving}
+            saveLabel="Aktivieren"
+            savingLabel="Aktiviert..."
+          />
         </InlineModal>
       )}
     </ProtectedRoute>

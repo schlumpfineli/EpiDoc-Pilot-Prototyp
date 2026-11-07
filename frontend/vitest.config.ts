@@ -26,11 +26,13 @@ export default defineConfig({
     projects: [
       // Unit/Component Tests (jsdom Environment)
       {
-        name: 'unit',
+        extends: true,
         test: {
+          name: 'unit',
           include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
           exclude: ['**/node_modules/**', '**/.next/**', '**/storybook-static/**', '**/*.stories.*'],
           environment: 'jsdom',
+          setupFiles: ['./vitest.setup.ts'],
         },
       },
       // Storybook Tests (Browser Environment)

@@ -163,10 +163,10 @@ function ResetPasswordForm() {
             
             <Input
               label="Neues Passwort"
-              type="password"
               placeholder="Mindestens 8 Zeichen"
               error={errors.password?.message}
               {...register('password')}
+              type="password"
               disabled={isLoading}
               required
               helperText="Mindestens 8 Zeichen, 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl"
@@ -174,10 +174,10 @@ function ResetPasswordForm() {
 
             <Input
               label="Passwort bestätigen"
-              type="password"
               placeholder="Passwort wiederholen"
               error={errors.password_confirmation?.message}
               {...register('password_confirmation')}
+              type="password"
               disabled={isLoading}
               required
             />

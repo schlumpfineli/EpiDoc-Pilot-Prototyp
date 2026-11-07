@@ -4,11 +4,17 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input, Button } from "@/components/ui";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui";
 import { authApi, apiClient } from "@/lib/api";
 import { loginSchema, type LoginInput } from "@/lib/validations";
 import { EpiDocLogo } from "@/components/EpiDocLogo";
 import { AUTH_GRADIENT, AUTH_LINK_CLASS, AUTH_LINK_CLASS_SMALL, AUTH_BRAND_COLOR } from "@/lib/auth-constants";
+import {
+  isBiometricEnabled,
+  isNativeApp,
+  loginWithBiometrics,
+} from "@/lib/biometric";
 import { extractApiError } from "@/lib/errorUtils";
 
 function LoginForm() {
@@ -16,6 +22,12 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [biometricReady, setBiometricReady] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+
+  useEffect(() => {
+    setBiometricReady(isNativeApp() && isBiometricEnabled());
+  }, []);
 
   useEffect(() => {
     // Prüfe ob Passwort-Reset erfolgreich war
@@ -37,9 +49,15 @@ function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     try {
       setApiError(null);
-      const response = await authApi.login(data);
+      const response = await authApi.login({
+        ...data,
+        persist_session: true,
+      });
       
       // Token speichern
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token_data");
+      }
       apiClient.setToken(response.token);
       
       // Event dispatchen, damit andere Komponenten (z.B. Navbar) den Auth-Status aktualisieren
@@ -74,17 +92,17 @@ function LoginForm() {
             label="E-Mail"
             type="email"
             placeholder="deine@email.de"
-            autoComplete="email"
+            autoComplete="off"
             {...register("email")}
             error={errors.email?.message}
           />
 
           <Input
             label="Passwort"
-            type="password"
             placeholder="Passwort"
-            autoComplete="current-password"
+            autoComplete="off"
             {...register("password")}
+            type="password"
             error={errors.password?.message}
           />
 
@@ -100,10 +118,45 @@ function LoginForm() {
             </div>
           )}
 
-          <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
+          <Button type="submit" variant="primary" fullWidth disabled={isSubmitting || biometricLoading}>
             {isSubmitting ? "Lädt..." : "Login"}
           </Button>
         </form>
+
+        {biometricReady && (
+          <Button
+            type="button"
+            variant="secondary"
+            fullWidth
+            disabled={isSubmitting || biometricLoading}
+            onClick={async () => {
+              try {
+                setApiError(null);
+                setBiometricLoading(true);
+                const credentials = await loginWithBiometrics();
+                const response = await authApi.login({
+                  email: credentials.email,
+                  password: credentials.password,
+                  persist_session: true,
+                });
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("auth_token_data");
+                }
+                apiClient.setToken(response.token);
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new Event("auth-changed"));
+                }
+                router.push("/diary");
+              } catch (err) {
+                setApiError(extractApiError(err, "Fingerabdruck-Login fehlgeschlagen. Bitte mit Passwort anmelden."));
+              } finally {
+                setBiometricLoading(false);
+              }
+            }}
+          >
+            {biometricLoading ? "Prüft Fingerabdruck..." : "Mit Fingerabdruck anmelden"}
+          </Button>
+        )}
 
         <div className="flex flex-col gap-[var(--spacing-xs)] text-center">
           <a href="/forgot-password" className={AUTH_LINK_CLASS_SMALL}>
